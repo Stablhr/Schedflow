@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Eye, EyeOff, Trash2 } from 'lucide-react'
+import { X, Eye, EyeOff, Trash2, Archive } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
 import CardDescription from './CardDescription'
@@ -19,7 +19,7 @@ interface CardModalProps {
 }
 
 export default function CardModal({ cardId, onClose }: CardModalProps) {
-  const { data, updateCard, addActivity, deleteCard } = useStore()
+  const { data, updateCard, addActivity, deleteCard, archiveCard } = useStore()
   const [editingTitle, setEditingTitle] = useState(false)
   const [title, setTitle] = useState('')
 
@@ -50,6 +50,11 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
     }
   }
 
+  const handleArchive = () => {
+    archiveCard(card.id)
+    onClose()
+  }
+
   return (
     <Modal open onClose={onClose} className="max-w-2xl overflow-hidden rounded-2xl bg-surface shadow-lg">
       {card.cover && (
@@ -74,7 +79,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
         <X size={18} />
       </button>
 
-      <div className="scroll-slim max-h-[85vh] overflow-y-auto">
+      <div className="scroll-slim max-h-[85vh] overflow-y-auto overflow-x-hidden">
         <div className="p-6">
           <div className="flex items-start gap-3">
             <div className="min-w-0 flex-1">
@@ -100,7 +105,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                     setEditingTitle(true)
                   }}
                   title="Click to rename"
-                  className="cursor-text rounded-lg px-2 py-1 font-display text-[20px] font-bold text-ink transition hover:bg-surface-alt"
+                  className="cursor-text break-words rounded-lg px-2 py-1 font-display text-[20px] font-bold leading-snug text-ink transition hover:bg-surface-alt"
                 >
                   {card.title}
                 </h2>
@@ -126,13 +131,13 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
           </div>
 
           <div className="mt-5 grid grid-cols-1 gap-7 md:grid-cols-[1fr_220px]">
-            <div className="space-y-6">
+            <div className="min-w-0 space-y-6">
               <CardDescription card={card} />
               <CardAttachments card={card} />
               <CardComments card={card} />
             </div>
 
-            <aside className="space-y-5">
+            <aside className="min-w-0 space-y-5">
               <CardLabels card={card} />
               <CardMembers card={card} />
               <CardDueDate card={card} />
@@ -146,7 +151,15 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
             <CardActivity card={card} />
           </div>
 
-          <div className="mt-5 flex justify-end">
+          <div className="mt-5 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={handleArchive}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-ink-muted transition hover:bg-surface-alt active:scale-95"
+            >
+              <Archive size={14} />
+              Archive
+            </button>
             <button
               type="button"
               onClick={handleDelete}

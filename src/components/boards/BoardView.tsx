@@ -7,6 +7,10 @@ import BoardTopBar from './BoardTopBar'
 import ListColumn from './ListColumn'
 import AddListForm from './AddListForm'
 import CardModal from '../card-modal/CardModal'
+import BoardMenuDrawer from './BoardMenuDrawer'
+import type { BoardFilter } from './FilterPanel'
+
+const EMPTY_FILTER: BoardFilter = { labelIds: [], memberIds: [] }
 
 export default function BoardView() {
   const { boardId = '' } = useParams()
@@ -14,6 +18,10 @@ export default function BoardView() {
   const board = store.data.boards[boardId]
   const [search, setSearch] = useState('')
   const [openCardId, setOpenCardId] = useState<string | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [viewsOpen, setViewsOpen] = useState(false)
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [filter, setFilter] = useState<BoardFilter>(EMPTY_FILTER)
 
   if (!board) {
     return (
@@ -41,7 +49,18 @@ export default function BoardView() {
 
   return (
     <div className="flex h-full flex-col">
-      <BoardTopBar board={board} search={search} onSearch={setSearch} />
+      <BoardTopBar
+        board={board}
+        search={search}
+        onSearch={setSearch}
+        viewsOpen={viewsOpen}
+        filterOpen={filterOpen}
+        filter={filter}
+        onOpenViews={() => setViewsOpen((o) => !o)}
+        onOpenFilter={() => setFilterOpen((o) => !o)}
+        onFilterChange={setFilter}
+        onOpenMenu={() => setMenuOpen(true)}
+      />
 
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="board-lists" type="LIST" direction="horizontal">
@@ -60,6 +79,7 @@ export default function BoardView() {
                         list={list}
                         dragHandleProps={listProvided.dragHandleProps}
                         search={search}
+                        filter={filter}
                         onOpenCard={setOpenCardId}
                       />
                     </div>
@@ -74,6 +94,7 @@ export default function BoardView() {
       </DragDropContext>
 
       {openCardId && <CardModal cardId={openCardId} onClose={() => setOpenCardId(null)} />}
+      <BoardMenuDrawer board={board} open={menuOpen} onClose={() => setMenuOpen(false)} />
     </div>
   )
 }

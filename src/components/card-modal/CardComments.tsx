@@ -57,7 +57,7 @@ export default function CardComments({ card }: { card: Card }) {
                     {formatDateTime(comment.createdAt)}
                   </span>
                 </div>
-                <p className="mt-0.5 whitespace-pre-wrap text-sm leading-relaxed text-ink">
+                <p className="mt-0.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-ink">
                   {comment.text}
                 </p>
               </div>

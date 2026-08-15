@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { AppData, Board, Card, List, Label } from './schema'
+import type { AppData, Board, Card, List, Label, Share } from './schema'
 import { BOARD_TEMPLATES, emptyData } from './schema'
 import { clearData, loadData, saveData } from './storage'
 import { StoreContext } from './useStore'
 import type { Store } from './useStore'
 import { uid } from '../utils/id'
+import { formatDate } from '../utils/dates'
 
 function patchRecord<T extends { id: string }>(
   rec: Record<string, T>,
@@ -18,6 +19,42 @@ function patchRecord<T extends { id: string }>(
 }
 
 const now = () => new Date().toISOString()
+
+function makeCard(list: List, title: string, extra: Partial<Card> = {}): Card {
+  return {
+    id: uid(),
+    boardId: list.boardId,
+    listId: list.id,
+    title,
+    desc: '',
+    cover: null,
+    labelIds: [],
+    memberIds: [],
+    dueDate: null,
+    location: '',
+    watching: false,
+    archived: false,
+    files: [],
+    comments: [],
+    reactions: {},
+    activity: [],
+    createdAt: now(),
+    updatedAt: now(),
+    ...extra,
+  }
+}
+
+function withCardAdded(prev: AppData, card: Card): AppData {
+  const list = prev.lists[card.listId]
+  if (!list) return prev
+  const board = prev.boards[card.boardId]
+  return {
+    ...prev,
+    cards: { ...prev.cards, [card.id]: card },
+    lists: { ...prev.lists, [card.listId]: { ...list, cardOrder: [...list.cardOrder, card.id] } },
+    boards: board ? { ...prev.boards, [board.id]: { ...board, updatedAt: now() } } : prev.boards,
+  }
+}
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData>(() => loadData())
@@ -93,6 +130,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       updatedAt: now(),
       listOrder,
       labels,
+      shares: [],
     }
     mutate((prev) => ({
       ...prev,
@@ -216,30 +254,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     mutate((prev) => {
       const list = prev.lists[listId]
       if (!list) return prev
-      const card: Card = {
-        id,
-        boardId: list.boardId,
-        listId,
-        title,
-        desc: '',
-        cover: null,
-        labelIds: [],
-        memberIds: [],
-        dueDate: null,
-        location: '',
-        watching: false,
-        files: [],
-        comments: [],
-        reactions: {},
-        activity: [],
-        createdAt: now(),
-        updatedAt: now(),
-      }
-      return {
-        ...prev,
-        cards: { ...prev.cards, [id]: card },
-        lists: { ...prev.lists, [listId]: { ...list, cardOrder: [...list.cardOrder, id] } },
-      }
+      return withCardAdded(prev, makeCard(list, title, { id }))
     })
     return id
   }
@@ -263,8 +278,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const updateCard = (id: string, patch: Partial<Card>) =>
     mutate((prev) => ({ ...prev, cards: patchRecord(prev.cards, id, { ...patch, updatedAt: now() }) }))
 
-  const moveCard = (cardId: string, destListId: string, destIndex: number) => {
-    mutate((prev) => {
+  const moveCard = (cardId: string, destListId: string, destIndex: number) => {    mutate((prev) => {
       const card = prev.cards[cardId]
       if (!card) return prev
       const srcListId = card.listId
@@ -323,6 +337,181 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const dismissInboxItem = (id: string) =>
     mutate((prev) => ({ ...prev, inbox: prev.inbox.filter((i) => i.id !== id) }))
 
+  const archiveCard = (id: string) =>
+    mutate((prev) => {
+      const card = prev.cards[id]
+      if (!card || card.archived) return prev
+      return {
+        ...prev,
+        cards: {
+          ...prev.cards,
+          [id]: {
+            ...card,
+            archived: true,
+            updatedAt: now(),
+            activity: [{ id: uid(), text: 'archived this card', createdAt: now() }, ...card.activity],
+          },
+        },
+      }
+    })
+
+  const restoreCard = (id: string) =>
+    mutate((prev) => {
+      const card = prev.cards[id]
+      if (!card || !card.archived) return prev
+      return {
+        ...prev,
+        cards: {
+          ...prev.cards,
+          [id]: {
+            ...card,
+            archived: false,
+            updatedAt: now(),
+            activity: [{ id: uid(), text: 'restored this card', createdAt: now() }, ...card.activity],
+          },
+        },
+      }
+    })
+
+  const setBoardVisibility = (id: string, visibility: Board['visibility']) =>
+    mutate((prev) => ({
+      ...prev,
+      boards: patchRecord(prev.boards, id, { visibility, updatedAt: now() }),
+    }))
+
+  const setBoardBackground = (id: string, background: string) =>
+    mutate((prev) => ({
+      ...prev,
+      boards: patchRecord(prev.boards, id, { background, updatedAt: now() }),
+    }))
+
+  const setBoardDescription = (id: string, description: string) =>
+    mutate((prev) => ({
+      ...prev,
+      boards: patchRecord(prev.boards, id, { description, updatedAt: now() }),
+    }))
+
+  const addLabel = (boardId: string, name: string, color: string): string => {
+    const id = uid()
+    mutate((prev) => {
+      const board = prev.boards[boardId]
+      if (!board) return prev
+      const label: Label = { id, name, color }
+      return {
+        ...prev,
+        boards: {
+          ...prev.boards,
+          [boardId]: { ...board, labels: { ...board.labels, [id]: label }, updatedAt: now() },
+        },
+      }
+    })
+    return id
+  }
+
+  const updateLabel = (boardId: string, labelId: string, patch: Partial<Label>) =>
+    mutate((prev) => {
+      const board = prev.boards[boardId]
+      const label = board?.labels[labelId]
+      if (!board || !label) return prev
+      return {
+        ...prev,
+        boards: {
+          ...prev.boards,
+          [boardId]: {
+            ...board,
+            labels: { ...board.labels, [labelId]: { ...label, ...patch } },
+            updatedAt: now(),
+          },
+        },
+      }
+    })
+
+  const deleteLabel = (boardId: string, labelId: string) =>
+    mutate((prev) => {
+      const board = prev.boards[boardId]
+      if (!board || !board.labels[labelId]) return prev
+      const labels = { ...board.labels }
+      delete labels[labelId]
+      const cards: Record<string, Card> = {}
+      for (const [k, v] of Object.entries(prev.cards)) {
+        cards[k] =
+          v.boardId === boardId && v.labelIds.includes(labelId)
+            ? { ...v, labelIds: v.labelIds.filter((l) => l !== labelId) }
+            : v
+      }
+      return {
+        ...prev,
+        boards: { ...prev.boards, [boardId]: { ...board, labels, updatedAt: now() } },
+        cards,
+      }
+    })
+
+  const addShare = (boardId: string, name: string, role: Share['role']) =>
+    mutate((prev) => {
+      const board = prev.boards[boardId]
+      if (!board) return prev
+      const share: Share = { id: uid(), name, role }
+      return {
+        ...prev,
+        boards: {
+          ...prev.boards,
+          [boardId]: { ...board, shares: [...(board.shares ?? []), share], updatedAt: now() },
+        },
+      }
+    })
+
+  const removeShare = (boardId: string, shareId: string) =>
+    mutate((prev) => {
+      const board = prev.boards[boardId]
+      if (!board) return prev
+      return {
+        ...prev,
+        boards: {
+          ...prev.boards,
+          [boardId]: {
+            ...board,
+            shares: (board.shares ?? []).filter((s) => s.id !== shareId),
+            updatedAt: now(),
+          },
+        },
+      }
+    })
+
+  const moveInboxToBoard = (itemId: string, boardId: string, listId: string) =>
+    mutate((prev) => {
+      const item = prev.inbox.find((i) => i.id === itemId)
+      const list = prev.lists[listId]
+      if (!item || !list || list.boardId !== boardId) return prev
+      const card = makeCard(list, item.text, {
+        activity: [{ id: uid(), text: 'created from inbox', createdAt: now() }],
+      })
+      return {
+        ...withCardAdded(prev, card),
+        inbox: prev.inbox.filter((i) => i.id !== itemId),
+      }
+    })
+
+  const scheduleInboxItem = (itemId: string, boardId: string, date: string) =>
+    mutate((prev) => {
+      const item = prev.inbox.find((i) => i.id === itemId)
+      const board = prev.boards[boardId]
+      if (!item || !board || board.listOrder.length === 0) return prev
+      const listId = board.listOrder[0]
+      const list = prev.lists[listId]
+      if (!list) return prev
+      const card = makeCard(list, item.text, {
+        dueDate: date,
+        activity: [
+          { id: uid(), text: `scheduled for ${formatDate(date)}`, createdAt: now() },
+          { id: uid(), text: 'created from inbox', createdAt: now() },
+        ],
+      })
+      return {
+        ...withCardAdded(prev, card),
+        inbox: prev.inbox.filter((i) => i.id !== itemId),
+      }
+    })
+
   const resetAll = () => {
     clearData()
     setData(emptyData())
@@ -361,6 +550,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addActivity,
     addInboxItem,
     dismissInboxItem,
+    moveInboxToBoard,
+    scheduleInboxItem,
+    archiveCard,
+    restoreCard,
+    setBoardVisibility,
+    setBoardBackground,
+    setBoardDescription,
+    addLabel,
+    updateLabel,
+    deleteLabel,
+    addShare,
+    removeShare,
     resetAll,
   }
 

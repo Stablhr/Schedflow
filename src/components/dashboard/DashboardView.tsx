@@ -1,6 +1,9 @@
 import { isDueThisWeek } from '../../utils/dates'
 import { useStore } from '../../store/useStore'
 import CaptureBox from '../shared/CaptureBox'
+import DueSoonList from './DueSoonList'
+import RecentBoardsList from './RecentBoardsList'
+import PlannerPreview from './PlannerPreview'
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
@@ -37,11 +40,14 @@ export default function DashboardView() {
         <CaptureBox variant="dash" />
       </div>
 
-      <div className="mt-8 rounded-2xl border-2 border-dashed border-border p-10 text-center">
-        <p className="text-sm font-medium text-ink-muted">
-          The full dashboard — due-soon list, recent boards, and the mini planner preview — lands in a
-          later phase.
-        </p>
+      <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
+        <div className="space-y-4">
+          <DueSoonList />
+          <RecentBoardsList />
+        </div>
+        <div className="h-max">
+          <PlannerPreview />
+        </div>
       </div>
     </div>
   )

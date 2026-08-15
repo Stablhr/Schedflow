@@ -24,7 +24,7 @@ export default function CardDescription({ card }: { card: Card }) {
 
       {card.desc && !editing ? (
         <div>
-          <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink">{card.desc}</p>
+          <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-ink">{card.desc}</p>
           <button
             type="button"
             onClick={() => {

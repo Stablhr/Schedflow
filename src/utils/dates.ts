@@ -33,3 +33,28 @@ export function isDueThisWeek(iso: string, now: Date = new Date()): boolean {
   end.setDate(today.getDate() + 6)
   return dueDate >= today && dueDate <= end
 }
+
+export function startOfWeek(now: Date = new Date()): Date {
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const day = d.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  d.setDate(d.getDate() + diff)
+  return d
+}
+
+export function addDays(date: Date, days: number): Date {
+  const d = new Date(date)
+  d.setDate(d.getDate() + days)
+  return d
+}
+
+export function toISODate(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+export function isSameDay(a: Date, b: Date): boolean {
+  return toISODate(a) === toISODate(b)
+}

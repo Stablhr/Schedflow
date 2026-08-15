@@ -13,7 +13,7 @@ interface CardFaceProps {
 }
 
 function CardCoverBand({ card }: { card: Card }) {
-  if (!card.cover) return null
+  const previewImage = card.files.find((f) => f.type === 'image')
   if (typeof card.cover === 'string') {
     return (
       <div
@@ -22,13 +22,16 @@ function CardCoverBand({ card }: { card: Card }) {
       />
     )
   }
-  return (
-    <img
-      src={card.cover.dataUrl}
-      alt=""
-      className="-mx-2.5 -mt-2.5 mb-2 h-20 w-[calc(100%+20px)] rounded-t-xl object-cover"
-    />
-  )
+  if (card.cover?.type === 'image' || previewImage) {
+    return (
+      <img
+        src={card.cover?.type === 'image' ? card.cover.dataUrl : previewImage?.dataUrl}
+        alt=""
+        className="-mx-2.5 -mt-2.5 mb-2 h-20 w-[calc(100%+20px)] rounded-t-xl object-cover"
+      />
+    )
+  }
+  return null
 }
 
 export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {

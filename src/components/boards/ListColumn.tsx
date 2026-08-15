@@ -7,29 +7,36 @@ import { useStore } from '../../store/useStore'
 import CardFace from './Card'
 import AddCardForm from './AddCardForm'
 import ListMenu from './ListMenu'
+import type { BoardFilter } from './FilterPanel'
 
 interface ListColumnProps {
   list: List
   dragHandleProps: DraggableProvidedDragHandleProps | null | undefined
   search: string
+  filter: BoardFilter
   onOpenCard: (cardId: string) => void
 }
 
-export default function ListColumn({ list, dragHandleProps, search, onOpenCard }: ListColumnProps) {
+export default function ListColumn({ list, dragHandleProps, search, filter, onOpenCard }: ListColumnProps) {
   const { data, renameList } = useStore()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(list.name)
 
-  const allCards = data.lists[list.id]?.cardOrder
+  const allCards = ((data.lists[list.id]?.cardOrder ?? [])
     .map((id) => data.cards[id])
-    .filter(Boolean) as Card[]
+    .filter(Boolean) as Card[]).filter((c) => !c.archived)
 
   const query = search.trim().toLowerCase()
-  const cards = query
-    ? allCards.filter(
-        (c) => c.title.toLowerCase().includes(query) || c.desc.toLowerCase().includes(query),
-      )
-    : allCards
+  const matchesQuery = (c: Card) =>
+    !query || c.title.toLowerCase().includes(query) || c.desc.toLowerCase().includes(query)
+  const matchesFilter = (c: Card) => {
+    const labelMatch =
+      filter.labelIds.length === 0 || c.labelIds.some((id) => filter.labelIds.includes(id))
+    const memberMatch =
+      filter.memberIds.length === 0 || c.memberIds.some((id) => filter.memberIds.includes(id))
+    return labelMatch && memberMatch
+  }
+  const cards = allCards.filter((c) => matchesQuery(c) && matchesFilter(c))
 
   const commitRename = () => {
     setEditing(false)

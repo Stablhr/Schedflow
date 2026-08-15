@@ -12,6 +12,14 @@ export interface Label {
   color: string
 }
 
+export type ShareRole = 'admin' | 'member' | 'observer'
+
+export interface Share {
+  id: string
+  name: string
+  role: ShareRole
+}
+
 export interface FileAttachment {
   id: string
   name: string
@@ -49,6 +57,7 @@ export interface Board {
   updatedAt: string
   listOrder: string[]
   labels: Record<string, Label>
+  shares: Share[]
 }
 
 export interface List {
@@ -73,6 +82,7 @@ export interface Card {
   dueDate: string | null
   location: string
   watching: boolean
+  archived: boolean
   files: FileAttachment[]
   comments: CommentItem[]
   reactions: Reactions

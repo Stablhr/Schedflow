@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { AppData, Board, Card, List, Member } from './schema'
+import type { AppData, Board, Card, Label, List, Member, Share } from './schema'
 
 export interface Store {
   data: AppData
@@ -28,6 +28,18 @@ export interface Store {
   addActivity: (cardId: string, text: string) => void
   addInboxItem: (text: string) => void
   dismissInboxItem: (id: string) => void
+  moveInboxToBoard: (itemId: string, boardId: string, listId: string) => void
+  scheduleInboxItem: (itemId: string, boardId: string, date: string) => void
+  archiveCard: (id: string) => void
+  restoreCard: (id: string) => void
+  setBoardVisibility: (id: string, visibility: Board['visibility']) => void
+  setBoardBackground: (id: string, background: string) => void
+  setBoardDescription: (id: string, description: string) => void
+  addLabel: (boardId: string, name: string, color: string) => string
+  updateLabel: (boardId: string, labelId: string, patch: Partial<Label>) => void
+  deleteLabel: (boardId: string, labelId: string) => void
+  addShare: (boardId: string, name: string, role: Share['role']) => void
+  removeShare: (boardId: string, shareId: string) => void
   resetAll: () => void
 }
 

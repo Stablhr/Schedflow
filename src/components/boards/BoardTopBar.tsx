@@ -4,14 +4,35 @@ import { ChevronLeft, Star, Search, SlidersHorizontal, LayoutGrid, MoreHorizonta
 import type { Board } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 import IconButton from '../shared/IconButton'
+import ViewsMenu from './ViewsMenu'
+import FilterPanel from './FilterPanel'
+import type { BoardFilter } from './FilterPanel'
 
 interface BoardTopBarProps {
   board: Board
   search: string
   onSearch: (value: string) => void
+  viewsOpen: boolean
+  filterOpen: boolean
+  filter: BoardFilter
+  onOpenViews: () => void
+  onOpenFilter: () => void
+  onFilterChange: (filter: BoardFilter) => void
+  onOpenMenu: () => void
 }
 
-export default function BoardTopBar({ board, search, onSearch }: BoardTopBarProps) {
+export default function BoardTopBar({
+  board,
+  search,
+  onSearch,
+  viewsOpen,
+  filterOpen,
+  filter,
+  onOpenViews,
+  onOpenFilter,
+  onFilterChange,
+  onOpenMenu,
+}: BoardTopBarProps) {
   const { renameBoard, toggleStar } = useStore()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(board.name)
@@ -22,6 +43,8 @@ export default function BoardTopBar({ board, search, onSearch }: BoardTopBarProp
     if (trimmed && trimmed !== board.name) renameBoard(board.id, trimmed)
     else setName(board.name)
   }
+
+  const filterActive = filter.labelIds.length > 0 || filter.memberIds.length > 0
 
   return (
     <div className="flex items-center gap-2 border-b border-border bg-surface px-4 py-3">
@@ -90,14 +113,31 @@ export default function BoardTopBar({ board, search, onSearch }: BoardTopBarProp
         />
       </div>
 
-      <div className="ml-auto flex items-center gap-1">
-        <IconButton title="Views">
-          <LayoutGrid size={17} />
-        </IconButton>
-        <IconButton title="Filter">
-          <SlidersHorizontal size={17} />
-        </IconButton>
-        <IconButton title="Menu">
+      <div className="relative ml-auto flex items-center gap-1">
+        <span className="relative">
+          <IconButton title="Views" active={viewsOpen} onClick={onOpenViews}>
+            <LayoutGrid size={17} />
+          </IconButton>
+          <ViewsMenu open={viewsOpen} onClose={onOpenViews} />
+        </span>
+
+        <span className="relative">
+          <IconButton title="Filter" active={filterOpen} onClick={onOpenFilter}>
+            <SlidersHorizontal size={17} />
+          </IconButton>
+          {filterActive && (
+            <span className="absolute right-0.5 top-0.5 h-2 w-2 rounded-full bg-brand ring-2 ring-surface" />
+          )}
+          <FilterPanel
+            board={board}
+            filter={filter}
+            onChange={onFilterChange}
+            open={filterOpen}
+            onClose={onOpenFilter}
+          />
+        </span>
+
+        <IconButton title="Menu" onClick={onOpenMenu}>
           <MoreHorizontal size={17} />
         </IconButton>
       </div>

@@ -7,6 +7,7 @@ interface IconButtonProps {
   className?: string
   disabled?: boolean
   ariaLabel?: string
+  active?: boolean
 }
 
 export default function IconButton({
@@ -16,6 +17,7 @@ export default function IconButton({
   className = '',
   disabled,
   ariaLabel,
+  active,
 }: IconButtonProps) {
   return (
     <button
@@ -24,7 +26,11 @@ export default function IconButton({
       aria-label={ariaLabel ?? title}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-muted transition hover:bg-brand-light hover:text-brand-dark active:scale-95 disabled:opacity-40 ${className}`}
+      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition active:scale-95 disabled:opacity-40 ${
+        active
+          ? 'bg-brand-light text-brand-dark'
+          : 'text-ink-muted hover:bg-brand-light hover:text-brand-dark'
+      } ${className}`}
     >
       {children}
     </button>
