@@ -1,0 +1,74 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, Star } from 'lucide-react'
+import { useStore } from '../../store/useStore'
+import { shade } from '../../utils/color'
+import CreateBoardModal from './CreateBoardModal'
+
+export default function BoardsHome() {
+  const { data, toggleStar } = useStore()
+  const navigate = useNavigate()
+  const [creating, setCreating] = useState(false)
+
+  const boards = Object.values(data.boards).sort(
+    (a, b) =>
+      Number(b.starred) - Number(a.starred) || b.updatedAt.localeCompare(a.updatedAt),
+  )
+
+  return (
+    <div className="scroll-slim h-full overflow-y-auto p-8">
+      <div className="flex items-center justify-between">
+        <h1 className="font-display text-2xl font-bold text-ink">Boards</h1>
+        <button
+          type="button"
+          onClick={() => setCreating(true)}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95"
+        >
+          <Plus size={16} />
+          Create board
+        </button>
+      </div>
+
+      {boards.length === 0 ? (
+        <div className="mt-10 rounded-2xl border-2 border-dashed border-border p-12 text-center">
+          <p className="text-sm font-medium text-ink-muted">
+            No boards yet — create one from a template to get started.
+          </p>
+        </div>
+      ) : (
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {boards.map((board) => (
+            <div
+              key={board.id}
+              onClick={() => navigate(`/boards/${board.id}`)}
+              className="group relative h-28 cursor-pointer overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5 transition hover:shadow-md"
+              style={{
+                background: `linear-gradient(135deg, ${board.background}, ${shade(board.background, -22)})`,
+              }}
+            >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  toggleStar(board.id)
+                }}
+                title={board.starred ? 'Unstar' : 'Star'}
+                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-lg bg-black/20 opacity-0 transition hover:bg-black/30 group-hover:opacity-100"
+              >
+                <Star
+                  size={15}
+                  className={board.starred ? 'fill-warn text-warn' : 'text-white'}
+                />
+              </button>
+              <span className="absolute bottom-3 left-3 right-3 truncate font-display text-sm font-semibold text-white">
+                {board.name}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <CreateBoardModal open={creating} onClose={() => setCreating(false)} />
+    </div>
+  )
+}

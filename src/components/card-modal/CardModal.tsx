@@ -1,0 +1,163 @@
+import { useState } from 'react'
+import { X, Eye, EyeOff, Trash2 } from 'lucide-react'
+import { useStore } from '../../store/useStore'
+import Modal from '../shared/Modal'
+import CardDescription from './CardDescription'
+import CardLabels from './CardLabels'
+import CardMembers from './CardMembers'
+import CardDueDate from './CardDueDate'
+import CardLocation from './CardLocation'
+import CardCover from './CardCover'
+import CardAttachments from './CardAttachments'
+import CardComments from './CardComments'
+import CardReactions from './CardReactions'
+import CardActivity from './CardActivity'
+
+interface CardModalProps {
+  cardId: string
+  onClose: () => void
+}
+
+export default function CardModal({ cardId, onClose }: CardModalProps) {
+  const { data, updateCard, addActivity, deleteCard } = useStore()
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [title, setTitle] = useState('')
+
+  const card = data.cards[cardId]
+  if (!card) return null
+  const board = data.boards[card.boardId]
+  const list = data.lists[card.listId]
+  if (!board || !list) return null
+
+  const commitTitle = () => {
+    setEditingTitle(false)
+    const t = title.trim()
+    if (t && t !== card.title) {
+      updateCard(card.id, { title: t })
+      addActivity(card.id, 'renamed this card')
+    }
+  }
+
+  const toggleWatch = () => {
+    updateCard(card.id, { watching: !card.watching })
+    addActivity(card.id, card.watching ? 'stopped watching this card' : 'started watching this card')
+  }
+
+  const handleDelete = () => {
+    if (window.confirm(`Delete "${card.title}"? This cannot be undone.`)) {
+      deleteCard(card.id)
+      onClose()
+    }
+  }
+
+  return (
+    <Modal open onClose={onClose} className="max-w-2xl overflow-hidden rounded-2xl bg-surface shadow-lg">
+      {card.cover && (
+        <div className="h-28 w-full">
+          {typeof card.cover === 'string' ? (
+            <div
+              className="h-full w-full"
+              style={{ background: `linear-gradient(135deg, ${card.cover}, #0A8981)` }}
+            />
+          ) : (
+            <img src={card.cover.dataUrl} alt="" className="h-full w-full object-cover" />
+          )}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={onClose}
+        title="Close"
+        className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-surface text-ink-muted shadow-md ring-1 ring-border transition hover:text-ink active:scale-95"
+      >
+        <X size={18} />
+      </button>
+
+      <div className="scroll-slim max-h-[85vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1">
+              {editingTitle ? (
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitTitle()
+                    if (e.key === 'Escape') {
+                      setTitle(card.title)
+                      setEditingTitle(false)
+                    }
+                  }}
+                  onBlur={commitTitle}
+                  autoFocus
+                  className="w-full rounded-lg px-2 py-1 font-display text-[20px] font-bold text-ink outline-none ring-2 ring-brand"
+                />
+              ) : (
+                <h2
+                  onClick={() => {
+                    setTitle(card.title)
+                    setEditingTitle(true)
+                  }}
+                  title="Click to rename"
+                  className="cursor-text rounded-lg px-2 py-1 font-display text-[20px] font-bold text-ink transition hover:bg-surface-alt"
+                >
+                  {card.title}
+                </h2>
+              )}
+              <p className="mt-0.5 px-2 text-xs text-ink-muted">
+                in list{' '}
+                <span className="font-semibold text-brand-dark">{list.name}</span>
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={toggleWatch}
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition active:scale-95 ${
+                card.watching
+                  ? 'bg-brand-light text-brand-dark'
+                  : 'bg-surface-alt text-ink-muted hover:bg-brand-light hover:text-brand-dark'
+              }`}
+            >
+              {card.watching ? <Eye size={14} /> : <EyeOff size={14} />}
+              {card.watching ? 'Watching' : 'Watch'}
+            </button>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 gap-7 md:grid-cols-[1fr_220px]">
+            <div className="space-y-6">
+              <CardDescription card={card} />
+              <CardAttachments card={card} />
+              <CardComments card={card} />
+            </div>
+
+            <aside className="space-y-5">
+              <CardLabels card={card} />
+              <CardMembers card={card} />
+              <CardDueDate card={card} />
+              <CardLocation card={card} />
+              <CardCover card={card} />
+              <CardReactions card={card} />
+            </aside>
+          </div>
+
+          <div className="mt-7 border-t border-border pt-4">
+            <CardActivity card={card} />
+          </div>
+
+          <div className="mt-5 flex justify-end">
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger-light active:scale-95"
+            >
+              <Trash2 size={14} />
+              Delete card
+            </button>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  )
+}
