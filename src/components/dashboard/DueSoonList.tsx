@@ -7,7 +7,7 @@ export default function DueSoonList({ limit = 8 }: { limit?: number }) {
   const { data } = useStore()
 
   const cards = Object.values(data.cards)
-    .filter((c) => !c.archived && c.dueDate)
+    .filter((c) => !c.archived && !c.done && c.dueDate)
     .sort((a, b) => a.dueDate!.localeCompare(b.dueDate!))
     .slice(0, limit)
 

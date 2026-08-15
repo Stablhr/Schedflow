@@ -32,6 +32,7 @@ export interface Store {
   scheduleInboxItem: (itemId: string, boardId: string, date: string) => void
   archiveCard: (id: string) => void
   restoreCard: (id: string) => void
+  toggleDone: (id: string) => void
   setBoardVisibility: (id: string, visibility: Board['visibility']) => void
   setBoardBackground: (id: string, background: string) => void
   setBoardDescription: (id: string, description: string) => void

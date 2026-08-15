@@ -34,6 +34,7 @@ function makeCard(list: List, title: string, extra: Partial<Card> = {}): Card {
     location: '',
     watching: false,
     archived: false,
+    done: false,
     files: [],
     comments: [],
     reactions: {},
@@ -373,6 +374,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     })
 
+  const toggleDone = (id: string) =>
+    mutate((prev) => {
+      const card = prev.cards[id]
+      if (!card) return prev
+      const done = !card.done
+      return {
+        ...prev,
+        cards: {
+          ...prev.cards,
+          [id]: {
+            ...card,
+            done,
+            updatedAt: now(),
+            activity: [
+              { id: uid(), text: done ? 'marked this card as done' : 'reopened this card', createdAt: now() },
+              ...card.activity,
+            ],
+          },
+        },
+      }
+    })
+
   const setBoardVisibility = (id: string, visibility: Board['visibility']) =>
     mutate((prev) => ({
       ...prev,
@@ -554,6 +577,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     scheduleInboxItem,
     archiveCard,
     restoreCard,
+    toggleDone,
     setBoardVisibility,
     setBoardBackground,
     setBoardDescription,

@@ -1,13 +1,16 @@
 import { useRef, useState } from 'react'
-import { ImageIcon, X } from 'lucide-react'
+import { ImageIcon, X, AlertTriangle } from 'lucide-react'
 import type { Card } from '../../store/schema'
 import { COVER_COLORS } from '../../store/schema'
 import { useStore } from '../../store/useStore'
+import { formatSize } from '../../utils/format'
 import SectionLabel from '../shared/SectionLabel'
+import { MAX_FILE_SIZE } from './CardAttachments'
 
 export default function CardCover({ card }: { card: Card }) {
   const { updateCard, addActivity } = useStore()
   const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const setColorCover = (color: string) => {
@@ -17,7 +20,12 @@ export default function CardCover({ card }: { card: Card }) {
 
   const setImageCover = (file: File | undefined) => {
     if (!file) return
+    if (file.size > MAX_FILE_SIZE) {
+      setError(`"${file.name}" is ${formatSize(file.size)} — keep cover images under 2 MB.`)
+      return
+    }
     setUploading(true)
+    setError(null)
     const reader = new FileReader()
     reader.onload = () => {
       updateCard(card.id, { cover: { type: 'image', dataUrl: reader.result as string } })
@@ -59,6 +67,13 @@ export default function CardCover({ card }: { card: Card }) {
             />
           ))}
         </div>
+
+        {error && (
+          <p className="animate-in mt-2 flex items-center gap-1.5 rounded-lg bg-danger-light px-3 py-2 text-xs font-medium text-danger">
+            <AlertTriangle size={14} className="shrink-0" />
+            {error}
+          </p>
+        )}
 
         <button
           type="button"

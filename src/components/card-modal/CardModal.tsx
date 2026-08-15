@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Eye, EyeOff, Trash2, Archive } from 'lucide-react'
+import { X, Eye, EyeOff, Trash2, Archive, Check, RotateCcw } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
 import CardDescription from './CardDescription'
@@ -19,7 +19,7 @@ interface CardModalProps {
 }
 
 export default function CardModal({ cardId, onClose }: CardModalProps) {
-  const { data, updateCard, addActivity, deleteCard, archiveCard } = useStore()
+  const { data, updateCard, addActivity, deleteCard, archiveCard, toggleDone } = useStore()
   const [editingTitle, setEditingTitle] = useState(false)
   const [title, setTitle] = useState('')
 
@@ -115,6 +115,20 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                 <span className="font-semibold text-brand-dark">{list.name}</span>
               </p>
             </div>
+
+            <button
+              type="button"
+              onClick={() => toggleDone(card.id)}
+              title={card.done ? 'Mark as not done' : 'Mark as done'}
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition active:scale-95 ${
+                card.done
+                  ? 'bg-success text-white'
+                  : 'bg-surface-alt text-ink-muted hover:bg-success-light hover:text-success'
+              }`}
+            >
+              {card.done ? <RotateCcw size={14} /> : <Check size={14} />}
+              {card.done ? 'Reopen' : 'Mark as done'}
+            </button>
 
             <button
               type="button"

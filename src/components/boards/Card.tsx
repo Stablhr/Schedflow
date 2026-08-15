@@ -1,5 +1,5 @@
 import { Draggable } from '@hello-pangea/dnd'
-import { Paperclip, MessageSquare, Eye } from 'lucide-react'
+import { Paperclip, MessageSquare, Eye, Check } from 'lucide-react'
 import type { Card } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 import DueBadge from '../shared/DueBadge'
@@ -13,7 +13,6 @@ interface CardFaceProps {
 }
 
 function CardCoverBand({ card }: { card: Card }) {
-  const previewImage = card.files.find((f) => f.type === 'image')
   if (typeof card.cover === 'string') {
     return (
       <div
@@ -22,16 +21,50 @@ function CardCoverBand({ card }: { card: Card }) {
       />
     )
   }
-  if (card.cover?.type === 'image' || previewImage) {
+  if (card.cover?.type === 'image') {
+    return (
+      <div className="-mx-2.5 -mt-2.5 mb-2 w-[calc(100%+20px)] overflow-hidden rounded-t-xl">
+        <img
+          src={card.cover.dataUrl}
+          alt=""
+          className="aspect-[4/5] w-full object-cover"
+        />
+      </div>
+    )
+  }
+  const previewImage = card.files.find((f) => f.type === 'image')
+  if (previewImage) {
     return (
       <img
-        src={card.cover?.type === 'image' ? card.cover.dataUrl : previewImage?.dataUrl}
+        src={previewImage.dataUrl}
         alt=""
         className="-mx-2.5 -mt-2.5 mb-2 h-20 w-[calc(100%+20px)] rounded-t-xl object-cover"
       />
     )
   }
   return null
+}
+
+function DoneToggle({ card }: { card: Card }) {
+  const toggleDone = useStore().toggleDone
+  return (
+    <button
+      type="button"
+      title={card.done ? 'Mark as not done' : 'Mark as done'}
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation()
+        toggleDone(card.id)
+      }}
+      className={`absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full shadow-sm ring-1 transition active:scale-90 ${
+        card.done
+          ? 'bg-success text-white ring-success'
+          : 'bg-white/85 text-ink-faint ring-ink-faint/40 hover:bg-brand-light hover:text-brand-dark hover:ring-brand'
+      }`}
+    >
+      {card.done && <Check size={14} strokeWidth={3} />}
+    </button>
+  )
 }
 
 export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
@@ -53,10 +86,11 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={() => onOpenCard(card.id)}
-          className={`cursor-pointer rounded-xl bg-white p-2.5 shadow-sm ring-1 ring-transparent transition hover:shadow-md hover:ring-border ${
+          className={`relative cursor-pointer rounded-xl bg-white p-2.5 shadow-sm ring-1 ring-transparent transition hover:shadow-md hover:ring-border ${
             snapshot.isDragging ? 'rotate-2 opacity-40' : ''
           }`}
         >
+          <DoneToggle card={card} />
           <CardCoverBand card={card} />
 
           {labels.length > 0 && (
@@ -72,7 +106,13 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
             </div>
           )}
 
-          <p className="mt-1 text-[14px] font-semibold leading-snug text-ink">{card.title}</p>
+          <p
+            className={`mt-1 text-[14px] font-semibold leading-snug ${
+              card.done ? 'text-ink-muted line-through decoration-ink-faint' : 'text-ink'
+            }`}
+          >
+            {card.title}
+          </p>
 
           {(card.dueDate ||
             card.files.length > 0 ||

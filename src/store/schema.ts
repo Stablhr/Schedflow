@@ -83,6 +83,7 @@ export interface Card {
   location: string
   watching: boolean
   archived: boolean
+  done: boolean
   files: FileAttachment[]
   comments: CommentItem[]
   reactions: Reactions

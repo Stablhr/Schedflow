@@ -19,7 +19,7 @@ export default function DashboardView() {
 
   const boardCount = Object.keys(data.boards).length
   const dueThisWeek = Object.values(data.cards).filter(
-    (c) => c.dueDate && isDueThisWeek(c.dueDate),
+    (c) => !c.done && c.dueDate && isDueThisWeek(c.dueDate),
   ).length
   const inboxCount = data.inbox.length
   const starredCount = Object.values(data.boards).filter((b) => b.starred).length
