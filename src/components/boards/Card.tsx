@@ -23,11 +23,11 @@ function CardCoverBand({ card }: { card: Card }) {
   }
   if (card.cover?.type === 'image') {
     return (
-      <div className="-mx-2.5 -mt-2.5 mb-2 w-[calc(100%+20px)] overflow-hidden rounded-t-xl">
+      <div className="relative -mx-2.5 -mt-2.5 mb-2 aspect-[4/5] w-[calc(100%+20px)] overflow-hidden rounded-t-xl">
         <img
           src={card.cover.dataUrl}
           alt=""
-          className="aspect-[4/5] w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
     )
@@ -35,11 +35,11 @@ function CardCoverBand({ card }: { card: Card }) {
   const previewImage = card.files.find((f) => f.type === 'image')
   if (previewImage) {
     return (
-      <div className="-mx-2.5 -mt-2.5 mb-2 w-[calc(100%+20px)] overflow-hidden rounded-t-xl">
+      <div className="relative -mx-2.5 -mt-2.5 mb-2 aspect-[4/5] w-[calc(100%+20px)] overflow-hidden rounded-t-xl">
         <img
           src={previewImage.dataUrl}
           alt=""
-          className="aspect-[4/5] w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
     )
