@@ -35,11 +35,13 @@ function CardCoverBand({ card }: { card: Card }) {
   const previewImage = card.files.find((f) => f.type === 'image')
   if (previewImage) {
     return (
-      <img
-        src={previewImage.dataUrl}
-        alt=""
-        className="-mx-2.5 -mt-2.5 mb-2 h-20 w-[calc(100%+20px)] rounded-t-xl object-cover"
-      />
+      <div className="-mx-2.5 -mt-2.5 mb-2 w-[calc(100%+20px)] overflow-hidden rounded-t-xl">
+        <img
+          src={previewImage.dataUrl}
+          alt=""
+          className="aspect-[4/5] w-full object-cover"
+        />
+      </div>
     )
   }
   return null
