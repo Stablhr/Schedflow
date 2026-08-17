@@ -61,7 +61,7 @@ export default function BoardMenuDrawer({
   return (
     <>
       <div className="fixed inset-0 z-40 bg-ink/30 backdrop-blur-md" onClick={onClose} />
-      <aside className="animate-in fixed right-0 top-0 z-40 flex h-full w-72 flex-col glass-heavy shadow-lg">
+      <aside className="animate-in fixed bottom-0 right-0 top-0 z-40 flex w-full flex-col glass-heavy shadow-lg sm:bottom-auto sm:w-72">
         <div className="flex items-center justify-between border-b border-border px-4 py-3.5">
           <h2 className="font-display text-lg font-bold text-ink">Menu</h2>
           <button

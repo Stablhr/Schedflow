@@ -55,10 +55,10 @@ export default function PlannerView() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-2 border-b border-border glass-subtle px-4 py-3">
-        <h1 className="font-display text-xl font-bold text-ink">Planner</h1>
+      <div className="flex flex-wrap items-center gap-2 border-b border-border glass-subtle px-3 py-2 sm:px-4 sm:py-3">
+        <h1 className="font-display text-lg font-bold text-ink sm:text-xl">Planner</h1>
 
-        <div className="ml-4 flex items-center gap-1">
+        <div className="ml-2 flex items-center gap-1 sm:ml-4">
           <button
             type="button"
             className={navButtonClass}
@@ -70,7 +70,7 @@ export default function PlannerView() {
           <button
             type="button"
             onClick={() => setWeekStart(startOfWeek())}
-            className="rounded-lg px-2.5 py-1 text-xs font-semibold text-brand transition hover:bg-brand-light active:scale-95"
+            className="rounded-lg px-2 py-1 text-xs font-semibold text-brand transition hover:bg-brand-light active:scale-95"
           >
             Today
           </button>
@@ -84,9 +84,9 @@ export default function PlannerView() {
           </button>
         </div>
 
-        <span className="ml-2 font-mono text-[11px] text-ink-muted">{weekLabel}</span>
+        <span className="ml-1 font-mono text-[11px] text-ink-muted sm:ml-2">{weekLabel}</span>
 
-        <p className="ml-auto text-xs text-ink-faint">
+        <p className="ml-auto hidden text-xs text-ink-faint sm:block">
           Drag cards onto a day to schedule them.
         </p>
       </div>

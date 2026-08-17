@@ -76,7 +76,7 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
           </span>
         </button>
 
-        <div className="mt-5 flex items-end gap-2">
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-end">
           <div className="flex-1">
             <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">
               Name or email
@@ -89,31 +89,33 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
               className={`w-full ${inputClass}`}
             />
           </div>
-          <div>
-            <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">
-              Role
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as ShareRole)}
-              className={inputClass}
+          <div className="flex gap-2 sm:block">
+            <div>
+              <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+                Role
+              </label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as ShareRole)}
+                className={inputClass}
+              >
+                {(Object.keys(ROLE_LABELS) as ShareRole[]).map((r) => (
+                  <option key={r} value={r}>
+                    {ROLE_LABELS[r]}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={add}
+              disabled={!name.trim()}
+              className="flex h-[38px] items-center gap-1.5 rounded-lg bg-brand px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95 disabled:opacity-40"
             >
-              {(Object.keys(ROLE_LABELS) as ShareRole[]).map((r) => (
-                <option key={r} value={r}>
-                  {ROLE_LABELS[r]}
-                </option>
-              ))}
-            </select>
+              <UserPlus size={15} />
+              Add
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={add}
-            disabled={!name.trim()}
-            className="flex h-[38px] items-center gap-1.5 rounded-lg bg-brand px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95 disabled:opacity-40"
-          >
-            <UserPlus size={15} />
-            Add
-          </button>
         </div>
 
         <div className="mt-5 space-y-1">

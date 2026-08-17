@@ -27,7 +27,7 @@ export default function CreateBoardModal({ open, onClose }: CreateBoardModalProp
   }
 
   return (
-    <Modal open={open} onClose={onClose} className="max-w-md rounded-2xl glass">
+    <Modal open={open} onClose={onClose} className="max-w-md rounded-2xl glass sm:rounded-2xl">
       <div className="flex items-center justify-between px-6 pt-5">
         <h2 className="font-display text-[20px] font-bold text-ink">Create board</h2>
         <button type="button" onClick={onClose} className="text-ink-muted transition hover:text-ink">
@@ -36,7 +36,7 @@ export default function CreateBoardModal({ open, onClose }: CreateBoardModalProp
       </div>
 
       <div className="scroll-slim max-h-[50vh] overflow-y-auto px-6 py-4">
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {BOARD_TEMPLATES.map((t) => (
             <button
               key={t.id}

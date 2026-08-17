@@ -7,8 +7,8 @@ import PlannerPreview from './PlannerPreview'
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl glass-subtle p-4 shadow-sm">
-      <p className="font-display text-3xl font-bold text-ink">{value}</p>
+    <div className="rounded-xl glass-subtle p-3 shadow-sm sm:p-4">
+      <p className="font-display text-2xl font-bold text-ink sm:text-3xl">{value}</p>
       <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-ink-muted">{label}</p>
     </div>
   )
@@ -25,22 +25,22 @@ export default function DashboardView() {
   const starredCount = Object.values(data.boards).filter((b) => b.starred).length
 
   return (
-    <div className="scroll-slim h-full overflow-y-auto p-8">
-      <h1 className="font-display text-2xl font-bold text-ink">Dashboard</h1>
+    <div className="scroll-slim h-full overflow-y-auto p-4 sm:p-6 md:p-8">
+      <h1 className="font-display text-xl font-bold text-ink sm:text-2xl">Dashboard</h1>
       <p className="mt-1 text-sm text-ink-muted">Welcome back — here's what needs attention.</p>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-4 md:grid-cols-4">
         <StatCard label="Boards" value={boardCount} />
         <StatCard label="Due this week" value={dueThisWeek} />
         <StatCard label="Inbox unread" value={inboxCount} />
         <StatCard label="Starred boards" value={starredCount} />
       </div>
 
-      <div className="mt-6 max-w-md">
+      <div className="mt-4 max-w-md sm:mt-6">
         <CaptureBox variant="dash" />
       </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:mt-8 lg:grid-cols-[1fr_320px]">
         <div className="space-y-4">
           <DueSoonList />
           <RecentBoardsList />

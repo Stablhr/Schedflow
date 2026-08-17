@@ -54,7 +54,7 @@ export default function FilterPanel({ board, filter, onChange, open, onClose }: 
   return (
     <div
       ref={ref}
-      className="animate-in absolute right-0 top-11 z-30 w-64 rounded-xl glass p-3 shadow-md"
+      className="animate-in absolute right-0 top-11 z-30 w-56 rounded-xl glass p-3 shadow-md sm:w-64"
     >
       <div className="flex items-center justify-between">
         <p className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">Filter</p>

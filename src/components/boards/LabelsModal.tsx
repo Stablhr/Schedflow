@@ -83,7 +83,7 @@ export default function LabelsModal({ board, onClose }: { board: Board; onClose:
           <p className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
             Add a label
           </p>
-          <div className="mt-2 flex items-end gap-2">
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
             <div className="flex-1">
               <input
                 value={newName}
@@ -93,7 +93,7 @@ export default function LabelsModal({ board, onClose }: { board: Board; onClose:
                 className={`w-full ${inputClass}`}
               />
             </div>
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1 sm:flex-nowrap sm:gap-1">
               {LABEL_SWATCHES.map((s) => (
                 <button
                   key={s.color}

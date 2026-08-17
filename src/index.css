@@ -45,6 +45,11 @@
   ::selection {
     background: var(--color-brand-light);
   }
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    nav.md\\:hidden {
+      padding-bottom: calc(0.375rem + env(safe-area-inset-bottom));
+    }
+  }
 }
 
 @utility glass {

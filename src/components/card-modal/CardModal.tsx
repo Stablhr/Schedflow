@@ -91,7 +91,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
   }
 
   return (
-    <Modal open onClose={onClose} className="max-w-2xl overflow-hidden rounded-2xl glass-heavy shadow-lg">
+    <Modal open onClose={onClose} className="h-full overflow-hidden rounded-none rounded-t-2xl sm:h-auto sm:max-w-2xl sm:rounded-2xl glass-heavy shadow-lg">
       {card.cover && (
         <div className={`w-full ${card.coverSize === 'large' ? 'h-48' : typeof card.cover === 'string' ? 'h-28' : 'h-16'}`}>
           {typeof card.cover === 'string' ? (
@@ -114,9 +114,9 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
         <X size={18} />
       </button>
 
-      <div className="scroll-slim max-h-[calc(100vh-8rem)] overflow-y-auto overflow-x-hidden">
-        <div className="p-6">
-          <div className="flex items-start gap-3">
+      <div className="scroll-slim max-h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden sm:max-h-[calc(100vh-8rem)]">
+        <div className="p-4 sm:p-6">
+          <div className="flex flex-wrap items-start gap-2 sm:gap-3">
             <div className="min-w-0 flex-1">
               {editingTitle ? (
                 <input
@@ -155,27 +155,27 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
               type="button"
               onClick={() => toggleDone(card.id)}
               title={card.done ? 'Mark as not done' : 'Mark as done'}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition active:scale-95 ${
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition active:scale-95 sm:px-2.5 ${
                 card.done
                   ? 'bg-success text-white'
                   : 'bg-surface-alt text-ink-muted hover:bg-success-light hover:text-success'
               }`}
             >
               {card.done ? <RotateCcw size={14} /> : <Check size={14} />}
-              {card.done ? 'Reopen' : 'Mark as done'}
+              <span className="hidden sm:inline">{card.done ? 'Reopen' : 'Mark as done'}</span>
             </button>
 
             <button
               type="button"
               onClick={toggleWatch}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition active:scale-95 ${
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition active:scale-95 sm:px-2.5 ${
                 card.watching
                   ? 'bg-brand-light text-brand-dark'
                   : 'bg-surface-alt text-ink-muted hover:bg-brand-light hover:text-brand-dark'
               }`}
             >
               {card.watching ? <Eye size={14} /> : <EyeOff size={14} />}
-              {card.watching ? 'Watching' : 'Watch'}
+              <span className="hidden sm:inline">{card.watching ? 'Watching' : 'Watch'}</span>
             </button>
 
             {/* Overflow menu */}
@@ -281,7 +281,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
             </div>
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-7 md:grid-cols-[1fr_220px]">
+          <div className="mt-4 grid grid-cols-1 gap-5 sm:mt-5 sm:gap-7 md:grid-cols-[1fr_220px]">
             <div className="min-w-0 space-y-6">
               <CardDescription card={card} />
               <CardAttachments card={card} />

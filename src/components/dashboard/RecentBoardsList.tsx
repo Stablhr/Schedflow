@@ -11,7 +11,7 @@ export default function RecentBoardsList({ limit = 4 }: { limit?: number }) {
     .slice(0, limit)
 
   return (
-    <div className="rounded-xl glass-subtle p-4 shadow-sm">
+    <div className="rounded-xl glass-subtle p-3 shadow-sm sm:p-4">
       <div className="flex items-center gap-1.5">
         <Clock3 size={14} className="text-brand" />
         <h2 className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
@@ -24,7 +24,7 @@ export default function RecentBoardsList({ limit = 4 }: { limit?: number }) {
           <Link
             key={board.id}
             to={`/boards/${board.id}`}
-            className="relative flex h-16 items-end overflow-hidden rounded-lg p-2.5 shadow-sm ring-1 ring-black/5 transition hover:shadow-md"
+            className="relative flex h-14 items-end overflow-hidden rounded-lg p-2.5 shadow-sm ring-1 ring-black/5 transition hover:shadow-md sm:h-16"
             style={{
               background: `linear-gradient(135deg, ${board.background}, ${shade(board.background, -22)})`,
             }}

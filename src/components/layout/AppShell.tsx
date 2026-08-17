@@ -8,7 +8,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden bg-bg text-ink">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
-      <main className="min-w-0 flex-1 overflow-hidden">{children}</main>
+      <main className="min-w-0 flex-1 overflow-hidden pb-16 md:pb-0">{children}</main>
     </div>
   )
 }

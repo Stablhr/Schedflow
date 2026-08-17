@@ -15,7 +15,7 @@ export default function CaptureBox({ autoFocus = false, variant = 'sidebar' }: {
 
   return (
     <div
-      className={`flex items-center gap-1.5 rounded-xl glass-subtle shadow-sm transition focus-within:ring-2 focus-within:ring-brand ${variant === 'sidebar' ? 'p-2' : 'p-2.5'}`}
+      className={`flex items-center gap-1.5 rounded-xl glass-subtle shadow-sm transition focus-within:ring-2 focus-within:ring-brand ${variant === 'sidebar' ? 'p-2' : 'p-2 sm:p-2.5'}`}
     >
       <button
         type="button"

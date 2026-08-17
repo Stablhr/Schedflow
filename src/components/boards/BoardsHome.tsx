@@ -16,32 +16,33 @@ export default function BoardsHome() {
   )
 
   return (
-    <div className="scroll-slim h-full overflow-y-auto p-8">
+    <div className="scroll-slim h-full overflow-y-auto p-4 sm:p-6 md:p-8">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-ink">Boards</h1>
+        <h1 className="font-display text-xl font-bold text-ink sm:text-2xl">Boards</h1>
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95 sm:px-3.5 sm:py-2"
         >
           <Plus size={16} />
-          Create board
+          <span className="hidden sm:inline">Create board</span>
+          <span className="sm:hidden">Create</span>
         </button>
       </div>
 
       {boards.length === 0 ? (
-        <div className="mt-10 rounded-2xl border-2 border-dashed border-border p-12 text-center">
+        <div className="mt-10 rounded-2xl border-2 border-dashed border-border p-8 text-center sm:p-12">
           <p className="text-sm font-medium text-ink-muted">
             No boards yet — create one from a template to get started.
           </p>
         </div>
       ) : (
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
           {boards.map((board) => (
             <div
               key={board.id}
               onClick={() => navigate(`/boards/${board.id}`)}
-              className="group relative h-28 cursor-pointer overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5 transition hover:shadow-md"
+              className="group relative h-24 cursor-pointer overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5 transition hover:shadow-md sm:h-28"
               style={{
                 background: `linear-gradient(135deg, ${board.background}, ${shade(board.background, -22)})`,
               }}
