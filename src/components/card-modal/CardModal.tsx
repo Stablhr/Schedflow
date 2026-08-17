@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { X, Eye, EyeOff, Trash2, Archive, Check, RotateCcw, MoreHorizontal, ArrowRight } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
@@ -28,6 +28,17 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
   const [moveDialogOpen, setMoveDialogOpen] = useState(false)
   const [coverPanelOpen, setCoverPanelOpen] = useState(false)
   const overflowRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!overflowOpen) return
+    const onDown = (e: MouseEvent) => {
+      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
+        setOverflowOpen(false)
+      }
+    }
+    window.addEventListener('mousedown', onDown)
+    return () => window.removeEventListener('mousedown', onDown)
+  }, [overflowOpen])
 
   const card = data.cards[cardId]
   if (!card) return null

@@ -19,10 +19,6 @@ function save(map: ReactionMap) {
   }
 }
 
-export function getUserCommentReactions(): ReactionMap {
-  return load()
-}
-
 export function hasUserCommentReaction(
   cardId: string,
   commentId: string,

@@ -31,6 +31,11 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
   const handleBoardMove = () => {
     if (!listId) return
     store.moveCard(card.id, listId, position)
+    // moveCard only updates listId — also update boardId when moving across boards
+    const targetBoardId = store.data.lists[listId]?.boardId
+    if (targetBoardId && targetBoardId !== card.boardId) {
+      store.updateCard(card.id, { boardId: targetBoardId })
+    }
     onClose()
   }
 
