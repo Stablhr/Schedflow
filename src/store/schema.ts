@@ -116,6 +116,14 @@ export const YOU_ID = 'member-you'
 
 export const MEMBER_COLORS = ['#0DABA3', '#4AA8FF', '#FF8B5E', '#8B7CF6', '#33B27A', '#F6C453', '#FF5E6C']
 
+export const COLOR_THEMES = [
+  { id: 'pistachio', name: 'Pistachio Blue', primary: '#04344c', secondary: '#b0edf9' },
+  { id: 'sunset', name: 'Sunset Purple', primary: '#faae62', secondary: '#3e0856' },
+  { id: 'ocean', name: 'Ocean Blue', primary: '#cae8e8', secondary: '#28469e' },
+  { id: 'milano', name: 'Milano Red', primary: '#a90e02', secondary: '#fffbd4' },
+  { id: 'contrast', name: 'High Contrast', primary: '#fffe15', secondary: '#0c1e29' },
+] as const
+
 export const LABEL_SWATCHES = [
   { name: 'Marketing', color: '#8B7CF6' },
   { name: 'Design', color: '#FF8B5E' },

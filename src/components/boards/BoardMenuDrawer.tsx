@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Share2, Eye, Tag, Archive, Palette, Trash2 } from 'lucide-react'
 import type { Board } from '../../store/schema'
-import { BOARD_BACKGROUNDS } from '../../store/schema'
+import { BOARD_BACKGROUNDS, COLOR_THEMES } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 import ShareModal from './ShareModal'
 import VisibilityModal from './VisibilityModal'
@@ -114,7 +114,37 @@ export default function BoardMenuDrawer({
           <section className="mt-5">
             <p className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
               <Palette size={12} />
-              Background
+              Color Themes
+            </p>
+            <div className="mt-2 space-y-2">
+              {COLOR_THEMES.map((theme) => {
+                const gradient = `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`
+                const isActive = board.background === gradient
+                return (
+                  <button
+                    key={theme.id}
+                    type="button"
+                    title={theme.name}
+                    onClick={() => setBoardBackground(board.id, gradient)}
+                    className={`flex w-full items-center gap-3 rounded-lg p-2 transition ${
+                      isActive ? 'ring-2 ring-brand' : 'ring-1 ring-black/10 hover:ring-black/20'
+                    }`}
+                  >
+                    <div
+                      className="h-8 w-8 shrink-0 rounded-lg"
+                      style={{ background: gradient }}
+                    />
+                    <span className="text-sm font-medium text-ink">{theme.name}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </section>
+
+          <section className="mt-5">
+            <p className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+              <Palette size={12} />
+              Solid Background
             </p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {BOARD_BACKGROUNDS.map((color) => (

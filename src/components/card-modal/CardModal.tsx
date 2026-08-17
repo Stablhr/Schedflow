@@ -114,7 +114,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
         <X size={18} />
       </button>
 
-      <div className="scroll-slim max-h-[calc(100vh-6rem)] overflow-y-auto overflow-x-hidden">
+      <div className="scroll-slim max-h-[calc(100vh-8rem)] overflow-y-auto overflow-x-hidden">
         <div className="p-6">
           <div className="flex items-start gap-3">
             <div className="min-w-0 flex-1">
