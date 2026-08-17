@@ -69,6 +69,7 @@ export interface List {
   collapsed: boolean
   order: number
   cardOrder: string[]
+  backgroundColor: string
 }
 
 export interface Card {
@@ -83,7 +84,6 @@ export interface Card {
   memberIds: string[]
   dueDate: string | null
   location: string
-  backgroundColor: string
   watching: boolean
   archived: boolean
   done: boolean

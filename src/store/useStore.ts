@@ -18,6 +18,7 @@ export interface Store {
   addList: (boardId: string, name: string) => void
   renameList: (id: string, name: string) => void
   setListAssignee: (id: string, name: string) => void
+  setListBackgroundColor: (id: string, color: string) => void
   toggleListCollapsed: (id: string) => void
   deleteList: (id: string) => void
   moveList: (boardId: string, startIndex: number, endIndex: number) => void

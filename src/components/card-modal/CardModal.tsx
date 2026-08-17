@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { X, Eye, EyeOff, Trash2, Archive, Check, RotateCcw, MoreHorizontal, ArrowRight, Palette, ImageIcon } from 'lucide-react'
 import { COVER_COLORS, BOARD_BACKGROUNDS } from '../../store/schema'
-
-const CARD_BG_COLORS = [
-  '', '#FFFFFF', '#F3FBFA', '#E1F5F3', '#FFE7DA', '#DFF5EB',
-  '#FEF3D9', '#FFE3E5', '#E8E0FF', '#DBEAFE',
-]
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
 import CardDescription from './CardDescription'
@@ -84,10 +79,6 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
   const setColorCover = (color: string) => {
     updateCard(card.id, { cover: color, coverSize: 'small' })
     addActivity(card.id, 'changed the cover')
-  }
-
-  const setCardBgColor = (color: string) => {
-    updateCard(card.id, { backgroundColor: color })
   }
 
   const uploadBgImage = (file: File | undefined) => {
@@ -238,30 +229,6 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                             activeCoverColor === color ? 'ring-2 ring-ink ring-offset-1' : ''
                           }`}
                           style={{ background: color }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="my-1 h-px bg-border" />
-                  <div className="px-3 py-2">
-                    <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
-                      <Palette size={12} />
-                      Card color
-                    </div>
-                    <div className="grid grid-cols-5 gap-1.5">
-                      {CARD_BG_COLORS.map((color) => (
-                        <button
-                          key={color || 'default'}
-                          type="button"
-                          title={color ? 'Set card color' : 'Reset to default'}
-                          onClick={() => {
-                            setCardBgColor(color)
-                            setOverflowOpen(false)
-                          }}
-                          className={`h-6 rounded-md ring-1 ring-black/10 transition hover:scale-110 active:scale-95 ${
-                            card.backgroundColor === color ? 'ring-2 ring-brand ring-offset-1' : ''
-                          }`}
-                          style={{ background: color || '#FFFFFF' }}
                         />
                       ))}
                     </div>

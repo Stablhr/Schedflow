@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { MoreHorizontal, ChevronsLeft, ChevronsRight, Trash2, UserPlus } from 'lucide-react'
+import { MoreHorizontal, ChevronsLeft, ChevronsRight, Trash2, UserPlus, Palette } from 'lucide-react'
 import type { List } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 
+const LIST_COLORS = [
+  '', '#FFFFFF', '#F3FBFA', '#E1F5F3', '#FFE7DA', '#DFF5EB',
+  '#FEF3D9', '#FFE3E5', '#E8E0FF', '#DBEAFE',
+]
+
 export default function ListMenu({ list }: { list: List }) {
-  const { toggleListCollapsed, deleteList, setListAssignee } = useStore()
+  const { toggleListCollapsed, deleteList, setListAssignee, setListBackgroundColor } = useStore()
   const [open, setOpen] = useState(false)
   const [assignee, setAssignee] = useState(list.assignee)
   const ref = useRef<HTMLDivElement>(null)
@@ -58,6 +63,31 @@ export default function ListMenu({ list }: { list: List }) {
               placeholder="Assignee"
               className="w-full rounded-md px-1 py-0.5 text-sm text-ink outline-none placeholder:text-ink-faint focus:bg-surface-alt"
             />
+          </div>
+
+          <div className="my-1 h-px bg-border" />
+
+          <div className="px-2.5 py-2">
+            <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+              <Palette size={12} />
+              List color
+            </div>
+            <div className="grid grid-cols-5 gap-1.5">
+              {LIST_COLORS.map((color) => (
+                <button
+                  key={color || 'default'}
+                  type="button"
+                  title={color ? 'Set list color' : 'Reset to default'}
+                  onClick={() => {
+                    setListBackgroundColor(list.id, color)
+                  }}
+                  className={`h-6 rounded-md ring-1 ring-black/10 transition hover:scale-110 active:scale-95 ${
+                    list.backgroundColor === color ? 'ring-2 ring-brand ring-offset-1' : ''
+                  }`}
+                  style={{ background: color || '#FFFFFF' }}
+                />
+              ))}
+            </div>
           </div>
 
           <div className="my-1 h-px bg-border" />

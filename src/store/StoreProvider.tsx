@@ -33,7 +33,6 @@ function makeCard(list: List, title: string, extra: Partial<Card> = {}): Card {
     memberIds: [],
     dueDate: null,
     location: '',
-    backgroundColor: '',
     watching: false,
     archived: false,
     done: false,
@@ -118,7 +117,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const listOrder: string[] = []
     template.lists.forEach((listName, order) => {
       const id = uid()
-      lists[id] = { id, boardId, name: listName, assignee: '', collapsed: false, order, cardOrder: [] }
+      lists[id] = { id, boardId, name: listName, assignee: '', collapsed: false, order, cardOrder: [], backgroundColor: '' }
       listOrder.push(id)
     })
     const board: Board = {
@@ -192,7 +191,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     mutate((prev) => {
       const board = prev.boards[boardId]
       if (!board) return prev
-      const list: List = { id, boardId, name, assignee: '', collapsed: false, order: board.listOrder.length, cardOrder: [] }
+      const list: List = { id, boardId, name, assignee: '', collapsed: false, order: board.listOrder.length, cardOrder: [], backgroundColor: '' }
       return {
         ...prev,
         lists: { ...prev.lists, [id]: list },
@@ -206,6 +205,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const setListAssignee = (id: string, name: string) =>
     mutate((prev) => ({ ...prev, lists: patchRecord(prev.lists, id, { assignee: name }) }))
+
+  const setListBackgroundColor = (id: string, color: string) =>
+    mutate((prev) => ({ ...prev, lists: patchRecord(prev.lists, id, { backgroundColor: color }) }))
 
   const toggleListCollapsed = (id: string) =>
     mutate((prev) => {
@@ -564,6 +566,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addList,
     renameList,
     setListAssignee,
+    setListBackgroundColor,
     toggleListCollapsed,
     deleteList,
     moveList,
