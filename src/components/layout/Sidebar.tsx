@@ -58,46 +58,57 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </button>
       </div>
 
-      {!collapsed && (
-        <>
-          <nav className="mt-2 flex-1 space-y-1 px-3">
-            {NAV.map((item) => {
-              const Icon = item.icon
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end}
-                  className={({ isActive }) =>
-                    `group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition ${
+      <nav className={`mt-2 flex-1 space-y-1 ${collapsed ? 'px-2' : 'px-3'}`}>
+        {NAV.map((item) => {
+          const Icon = item.icon
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              title={collapsed ? item.label : undefined}
+              className={({ isActive }) =>
+                collapsed
+                  ? `relative flex h-9 w-9 mx-auto items-center justify-center rounded-xl transition ${
                       isActive
                         ? 'bg-surface text-brand-dark shadow-sm'
                         : 'text-ink-muted hover:bg-brand/10 hover:text-ink'
                     }`
-                  }
+                  : `group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                      isActive
+                        ? 'bg-surface text-brand-dark shadow-sm'
+                        : 'text-ink-muted hover:bg-brand/10 hover:text-ink'
+                    }`
+              }
+            >
+              <Icon size={17} className="shrink-0" />
+              {!collapsed && <span className="flex-1">{item.label}</span>}
+              {item.to === '/inbox' && inboxCount > 0 && (
+                <span
+                  className={`font-mono text-[10px] font-medium text-white ${
+                    collapsed
+                      ? 'absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1'
+                      : 'rounded-full bg-brand px-1.5 py-0.5 text-[10.5px]'
+                  }`}
                 >
-                  <Icon size={17} className="shrink-0" />
-                  <span className="flex-1">{item.label}</span>
-                  {item.to === '/inbox' && inboxCount > 0 && (
-                    <span className="rounded-full bg-brand px-1.5 py-0.5 font-mono text-[10.5px] font-medium text-white">
-                      {inboxCount}
-                    </span>
-                  )}
-                </NavLink>
-              )
-            })}
-          </nav>
+                  {inboxCount}
+                </span>
+              )}
+            </NavLink>
+          )
+        })}
+      </nav>
 
-          <div className="space-y-3 p-3">
-            <CaptureBox />
-            {you && (
-              <div className="flex items-center gap-2 rounded-xl bg-surface/60 px-2.5 py-2">
-                <Avatar member={you} size={22} />
-                <span className="text-sm font-semibold text-ink">{you.name}</span>
-              </div>
-            )}
-          </div>
-        </>
+      {!collapsed && (
+        <div className="space-y-3 p-3">
+          <CaptureBox />
+          {you && (
+            <div className="flex items-center gap-2 rounded-xl bg-surface/60 px-2.5 py-2">
+              <Avatar member={you} size={22} />
+              <span className="text-sm font-semibold text-ink">{you.name}</span>
+            </div>
+          )}
+        </div>
       )}
     </aside>
   )
