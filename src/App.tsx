@@ -3,11 +3,17 @@ import { AlertTriangle, X } from 'lucide-react'
 import { StoreProvider } from './store/StoreProvider'
 import { useStore } from './store/useStore'
 import AppShell from './components/layout/AppShell'
+import { LazyLoad } from './components/shared/LazyLoad'
 import DashboardView from './components/dashboard/DashboardView'
+import DashboardSkeleton from './components/dashboard/DashboardSkeleton'
 import InboxView from './components/inbox/InboxView'
+import InboxViewSkeleton from './components/inbox/InboxViewSkeleton'
 import BoardsHome from './components/boards/BoardsHome'
+import BoardsHomeSkeleton from './components/boards/BoardsHomeSkeleton'
 import BoardView from './components/boards/BoardView'
+import BoardViewSkeleton from './components/boards/BoardViewSkeleton'
 import PlannerView from './components/planner/PlannerView'
+import PlannerViewSkeleton from './components/planner/PlannerViewSkeleton'
 import ContrastTestPage from './components/dev/ContrastTestPage'
 
 function ErrorToast() {
@@ -34,11 +40,46 @@ export default function App() {
       <StoreProvider>
         <AppShell>
           <Routes>
-            <Route path="/" element={<DashboardView />} />
-            <Route path="/inbox" element={<InboxView />} />
-            <Route path="/boards" element={<BoardsHome />} />
-            <Route path="/boards/:boardId" element={<BoardView />} />
-            <Route path="/planner" element={<PlannerView />} />
+            <Route
+              path="/"
+              element={
+                <LazyLoad skeleton={<DashboardSkeleton />}>
+                  <DashboardView />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/inbox"
+              element={
+                <LazyLoad skeleton={<InboxViewSkeleton />}>
+                  <InboxView />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/boards"
+              element={
+                <LazyLoad skeleton={<BoardsHomeSkeleton />}>
+                  <BoardsHome />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/boards/:boardId"
+              element={
+                <LazyLoad skeleton={<BoardViewSkeleton />}>
+                  <BoardView />
+                </LazyLoad>
+              }
+            />
+            <Route
+              path="/planner"
+              element={
+                <LazyLoad skeleton={<PlannerViewSkeleton />}>
+                  <PlannerView />
+                </LazyLoad>
+              }
+            />
             <Route path="/dev/contrast" element={<ContrastTestPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
