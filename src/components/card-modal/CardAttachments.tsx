@@ -101,14 +101,14 @@ export default function CardAttachments({ card }: { card: Card }) {
         })}
 
         {error && (
-          <p className="animate-in flex items-center gap-1.5 rounded-lg bg-danger-light px-3 py-2 text-xs font-medium text-danger">
+          <p className="animate-in flex items-center gap-1.5 break-words rounded-lg bg-danger-light px-3 py-2 text-xs font-medium text-danger">
             <AlertTriangle size={14} className="shrink-0" />
             {error}
           </p>
         )}
 
         {store.error && (
-          <p className="animate-in flex items-center gap-1.5 rounded-lg bg-warn-light px-3 py-2 text-xs font-medium text-warn">
+          <p className="animate-in flex items-center gap-1.5 break-words rounded-lg bg-warn-light px-3 py-2 text-xs font-medium text-warn">
             <AlertTriangle size={14} className="shrink-0" />
             {store.error}
           </p>

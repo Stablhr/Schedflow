@@ -128,7 +128,7 @@ export default function CardComments({ card }: { card: Card }) {
                   </button>
 
                   {pickerOpen && (
-                    <div className="absolute left-0 top-8 z-30 animate-in">
+                    <div className="absolute left-0 top-8 z-30 max-w-[min(320px,100%)] animate-in">
                       <EmojiPicker
                         onEmojiClick={(emojiData) => {
                           toggleCommentReaction(comment.id, emojiData.emoji)

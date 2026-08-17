@@ -13,7 +13,7 @@ export default function CardActivity({ card }: { card: Card }) {
         <ul className="mt-2 space-y-1">
           {card.activity.map((item) => (
             <li key={item.id} className="flex flex-wrap items-baseline gap-x-2">
-              <span className="text-sm text-ink">{item.text}</span>
+              <span className="min-w-0 break-words text-sm text-ink">{item.text}</span>
               <span className="font-mono text-[10.5px] text-ink-faint">
                 {formatDateTime(item.createdAt)}
               </span>

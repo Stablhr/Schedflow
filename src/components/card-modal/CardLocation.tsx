@@ -24,7 +24,7 @@ export default function CardLocation({ card }: { card: Card }) {
 
       {card.location && !editing ? (
         <div className="mt-2 flex items-center gap-1.5">
-          <span className="rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-medium text-ink-muted">
+          <span className="min-w-0 break-all rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-medium text-ink-muted">
             {card.location}
           </span>
           <button
