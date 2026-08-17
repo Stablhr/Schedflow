@@ -195,3 +195,120 @@ boxShadow: {
   lg: '0 20px 60px rgba(19,42,41,0.18)',
 }
 ```
+
+---
+
+## 10. Adaptive Contrast System
+
+All surfaces dynamically compute text/icon/foreground colors from their background using WCAG luminance math. This ensures accessible contrast ratios on any user-chosen theme color — no hardcoded text colors on themed surfaces.
+
+### How it works
+
+1. **Parse** — `parseColor()` converts hex/rgb/hsl strings to `{ r, g, b, a }`.
+2. **Luminance** — `relativeLuminance()` computes WCAG sRGB→linear luminance (0–1).
+3. **Contrast ratio** — `contrastRatio()` returns 1–21 against white or black.
+4. **Foreground selection** — `getAccessibleColors(bg)` picks black or white foreground based on bg luminance; primary text targets 4.5:1, muted targets 3:1, faint targets 2.5:1.
+5. **CSS variables** — `adaptiveVars(theme)` returns a style object setting `--surface-text`, `--surface-text-muted`, `--surface-text-faint`, `--surface-border`, `--surface-bg-subtle`.
+6. **Hook** — `useAdaptiveTheme(bg)` memoizes the computation and returns the theme object.
+
+### Surfaces that adapt
+
+| Surface | Background source | Adapts |
+|---------|-------------------|--------|
+| Sidebar | Board background | Nav text, icons, active states, user section |
+| BoardTopBar | Board background | Title, search, toolbar icons, borders |
+| ListColumn | `list.backgroundColor` | Header text, count badge, assignee chip |
+| ListMenu | `list.backgroundColor` | Dropdown text, icons |
+| Cards | White (`#FFFFFF`) | Always dark text (no adaptation needed) |
+| LabelChip | `label.color` | Pill foreground (dark or white) |
+
+### CSS Variables
+
+```
+--surface-text       → primary text (4.5:1 contrast)
+--surface-text-muted → secondary text (3:1 contrast)
+--surface-text-faint → tertiary/placeholder (2.5:1 contrast)
+--surface-border     → border/divider color
+--surface-bg-subtle  → subtle background fill
+```
+
+Components use these via inline `style={{ color: 'var(--surface-text)' }}` instead of Tailwind color classes, so they respond dynamically to theme changes.
+
+---
+
+## 11. Glassmorphism Theme
+
+All UI surfaces use frosted-glass layers: semi-transparent backgrounds + `backdrop-filter: blur()` + saturation boost. This creates depth through transparency rather than solid fills, reinforcing the calm/coastal aesthetic.
+
+### Glass utilities (defined in `index.css`)
+
+| Class | Blur | Saturation | Background | Border | Use |
+|-------|------|------------|------------|--------|-----|
+| `glass` | 24px | 180% | `rgba(255,255,255,0.72)` | `rgba(255,255,255,0.4)` | Dropdowns, menus, popovers |
+| `glass-subtle` | 16px | 160% | `rgba(255,255,255,0.50)` | `rgba(255,255,255,0.25)` | Cards, panels, subtle surfaces |
+| `glass-heavy` | 40px | 200% | `rgba(255,255,255,0.85)` | `rgba(255,255,255,0.5)` | Modals, drawers, primary surfaces |
+| `glass-dark` | 24px | 180% | `rgba(19,42,41,0.75)` | `rgba(255,255,255,0.08)` | Dark overlays |
+
+All utilities include `-webkit-backdrop-filter` for Safari compatibility.
+
+### Surface mapping
+
+| Surface | Glass level | Notes |
+|---------|-------------|-------|
+| CardModal | `glass-heavy` | Primary modal — heavy glass |
+| BoardMenuDrawer | `glass-heavy` | Right-side drawer |
+| CoverPanel | `glass-heavy` | Right-side drawer |
+| FilterPanel | `glass` | Dropdown under filter icon |
+| ViewsMenu | `glass` | Dropdown under views icon |
+| Overflow menus | `glass` | Card menu, list menu |
+| PlannerView | `glass-subtle` | Day columns, cards |
+| DashboardView | `glass-subtle` | Stat cards, lists |
+| InboxView | `glass-subtle` | Inbox items |
+| CaptureBox | `glass-subtle` | Capture input |
+| Sidebar | `backdrop-blur-2xl` | With adaptive background |
+| BoardTopBar | `backdrop-blur-2xl` | With adaptive background |
+| Board cards | `bg-white/50 backdrop-blur-md` | Lighter glass for card-on-list |
+| List columns | `backdrop-blur-xl` | Translucent column background |
+| Modal backdrops | `bg-ink/30 backdrop-blur-md` | Stronger blur, lighter overlay |
+
+### Interaction with adaptive contrast
+
+Glassmorphism + adaptive contrast work together:
+1. A surface has a glass background (semi-transparent + blur)
+2. The adaptive system computes foreground colors from the background color
+3. CSS variables drive text/icons → they remain accessible on any glass level + any theme color
+
+---
+
+## 12. Color Theme Presets
+
+Five gradient themes selectable from the board's three-dot menu. Each applies a diagonal gradient (`135deg`) as the board background, which flows through the adaptive contrast system to restyle the entire UI.
+
+### Theme palette
+
+| Theme | Primary | Secondary | Gradient direction | Mood |
+|-------|---------|-----------|--------------------|------|
+| Pistachio Blue | `#04344c` (dark navy) | `#b0edf9` (light sky) | Navy → sky | Calm, professional |
+| Sunset Purple | `#faae62` (warm orange) | `#3e0856` (deep purple) | Orange → purple | Warm, creative |
+| Ocean Blue | `#cae8e8` (pale teal) | `#28469e` (royal blue) | Teal → blue | Cool, focused |
+| Milano Red | `#a90e02` (bold red) | `#fffbd4` (soft cream) | Red → cream | Bold, energetic |
+| High Contrast | `#fffe15` (bright yellow) | `#0c1e29` (near black) | Yellow → black | Maximum visibility |
+
+### UX behavior
+
+- Themes appear in the BoardMenuDrawer under "Color Themes"
+- Each theme shows a gradient swatch + name
+- Active theme is highlighted with a ring
+- Clicking a theme calls `setBoardBackground(board.id, gradient)`
+- The board background updates instantly → adaptive contrast recalculates → all UI text/icons/borders adapt
+- Solid backgrounds remain available in a separate "Solid Background" section below
+
+### Gradient composition
+
+Gradients use `linear-gradient(135deg, primary, secondary)` — top-left to bottom-right diagonal. The blur from glassmorphism on top of the gradient creates a soft, diffused color effect across all glass surfaces.
+
+---
+
+## 13. Card Modal Spacing
+
+The card modal uses generous vertical margin (`py-16` on the Modal container) to float above the board content with clear visual separation. The scroll container uses `max-h-[calc(100vh-8rem)]` to prevent the modal from touching viewport edges while maximizing usable content area.

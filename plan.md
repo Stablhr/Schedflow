@@ -275,3 +275,125 @@ Expand `CardCover.tsx` into a right-side drawer (matching `BoardMenuDrawer` patt
 | `src/components/card-modal/CardComments.tsx` | Per-comment reaction UI |
 | `src/components/card-modal/MoveCardDialog.tsx` | **New** — Board/Inbox tabbed dialog |
 | `src/components/boards/Card.tsx` | CardCoverBand reads coverSize |
+
+---
+
+## 8. Adaptive Contrast System + Glassmorphism
+
+### Feature: WCAG-Based Adaptive Text Contrast
+
+All surfaces (sidebar, navbar, list columns, cards, labels) dynamically compute foreground text/icon colors from their background using WCAG luminance math. Ensures accessible contrast ratios on any user-chosen theme color.
+
+**Schema:** `list.backgroundColor: string` added to List interface.
+
+**`src/utils/contrast.ts`** (new):
+- `parseColor(hex | rgb | hsl)` → `{ r, g, b, a }`
+- `relativeLuminance({ r, g, b })` — WCAG sRGB→linear
+- `contrastRatio(color1, color2)` — returns ratio 1–21
+- `getAccessibleColors(bg)` → `{ text, textMuted, textFaint, border, bgSubtle }` — picks black or white foreground depending on bg luminance; caches results via Map
+
+**`src/hooks/useAdaptiveTheme.ts`** (new):
+- `useAdaptiveTheme(bg)` — memoized hook returning `getAccessibleColors(bg)`
+- `adaptiveVars(theme)` — returns CSS variable style object (`--surface-text`, `--surface-text-muted`, `--surface-text-faint`, `--surface-border`, `--surface-bg-subtle`)
+
+**`src/components/common/AdaptiveSurface.tsx`** (new):
+- Wrapper component that sets CSS variables on any DOM element from a background color
+
+**Updated components:**
+- `Sidebar.tsx` — uses `useAdaptiveTheme` on board background for nav text/icons
+- `BoardTopBar.tsx` — uses `useAdaptiveTheme` for toolbar text/icons
+- `ListColumn.tsx` — uses `useAdaptiveTheme` on list background for header/count/assignee
+- `ListMenu.tsx` — dropdown adapts to list background contrast
+- `AddCardForm.tsx` — uses CSS variables for text colors
+- `Chip.tsx` (LabelChip) — uses `getAccessibleColors(label.color)` for adaptive foreground
+
+**`src/components/dev/ContrastTestPage.tsx`** (new):
+- Dev-only route at `/dev/contrast` — color grid showing WCAG ratios + custom color input
+
+### Feature: Glassmorphism UI
+
+Frosted-glass surfaces across the entire app using `backdrop-filter` + semi-transparent layers.
+
+**CSS utilities in `index.css`:**
+| Utility | Blur | Opacity | Use case |
+|---------|------|---------|----------|
+| `glass` | 24px + saturate 180% | 72% white | Dropdowns, menus, popovers |
+| `glass-subtle` | 16px + saturate 160% | 50% white | Cards, panels, subtle surfaces |
+| `glass-heavy` | 40px + saturate 200% | 85% white | Modals, drawers, primary surfaces |
+| `glass-dark` | 24px + saturate 180% | 75% ink | Dark overlays |
+
+**Applied surfaces:**
+- Modals: `glass-heavy` (CardModal, BoardMenuDrawer, CoverPanel), `glass` (FilterPanel, ViewsMenu, overflow menus)
+- Planner: `glass-subtle` (PlannerView, PlannerCard, DayColumn, UnscheduledPool)
+- Dashboard: `glass-subtle` (DashboardView, DueSoonList, PlannerPreview, RecentBoardsList)
+- Inbox: `glass-subtle` (InboxView items, CaptureBox)
+- Sidebar: `backdrop-blur-2xl` with adaptive background
+- TopBar: `backdrop-blur-2xl` with adaptive background
+- Cards: `bg-white/50 backdrop-blur-md ring-white/20`
+- List columns: `backdrop-blur-xl`
+- Modal backdrops: `bg-ink/30 backdrop-blur-md`
+
+### Feature: Color Theme Presets
+
+Five gradient color themes selectable from the board menu's three-dot (MoreHorizontal) button.
+
+**Schema:** `COLOR_THEMES` array added to `src/store/schema.ts`:
+```ts
+{ id, name, primary, secondary }
+```
+
+| Theme | Primary | Secondary | Gradient |
+|-------|---------|-----------|----------|
+| Pistachio Blue | `#04344c` | `#b0edf9` | Dark navy → light sky |
+| Sunset Purple | `#faae62` | `#3e0856` | Warm orange → deep purple |
+| Ocean Blue | `#cae8e8` | `#28469e` | Pale teal → royal blue |
+| Milano Red | `#a90e02` | `#fffbd4` | Bold red → soft cream |
+| High Contrast | `#fffe15` | `#0c1e29` | Bright yellow → near black |
+
+**BoardMenuDrawer.tsx** changes:
+- New "Color Themes" section renders gradient swatches with names
+- Clicking a theme calls `setBoardBackground(board.id, gradient)`
+- Active theme highlighted with ring
+- Existing solid background section relabeled "Solid Background"
+- Adaptive contrast system recalculates foreground when background changes → all UI adapts instantly
+
+### Card Modal Spacing
+
+`Modal.tsx` padding increased to `py-16` for generous vertical breathing room. CardModal scroll container uses `max-h-[calc(100vh-8rem)]`.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/utils/contrast.ts` | **New** — WCAG contrast engine |
+| `src/utils/colorUtils.ts` | **New** — re-exports from contrast.ts |
+| `src/hooks/useAdaptiveTheme.ts` | **New** — adaptive theme hook |
+| `src/components/common/AdaptiveSurface.tsx` | **New** — CSS variable wrapper |
+| `src/components/dev/ContrastTestPage.tsx` | **New** — /dev/contrast test page |
+| `src/store/schema.ts` | Add `list.backgroundColor`, `COLOR_THEMES` array |
+| `src/store/useStore.ts` | Add `setBoardBackground` method |
+| `src/index.css` | Add glass, glass-subtle, glass-heavy, glass-dark utilities |
+| `src/components/shared/Modal.tsx` | Increased padding to py-16 |
+| `src/components/card-modal/CardModal.tsx` | glass-heavy, reduced max-h |
+| `src/components/boards/BoardTopBar.tsx` | Adaptive theme integration |
+| `src/components/boards/BoardMenuDrawer.tsx` | Color themes section, glass-heavy |
+| `src/components/boards/ListColumn.tsx` | Adaptive theme on list background |
+| `src/components/boards/ListMenu.tsx` | Solid swatches + adaptive dropdown |
+| `src/components/boards/Card.tsx` | Glass card surface |
+| `src/components/boards/AddCardForm.tsx` | CSS variable text colors |
+| `src/components/layout/Sidebar.tsx` | Adaptive theme + glassmorphism |
+| `src/components/shared/Chip.tsx` | Adaptive label contrast |
+| `src/components/shared/IconButton.tsx` | Accepts style prop |
+| `src/components/planner/PlannerView.tsx` | glass-subtle surfaces |
+| `src/components/planner/PlannerCard.tsx` | glass-subtle |
+| `src/components/planner/DayColumn.tsx` | glass-subtle |
+| `src/components/planner/UnscheduledPool.tsx` | glass-subtle |
+| `src/components/dashboard/DashboardView.tsx` | glass-subtle |
+| `src/components/dashboard/DueSoonList.tsx` | glass-subtle |
+| `src/components/dashboard/PlannerPreview.tsx` | glass-subtle |
+| `src/components/dashboard/RecentBoardsList.tsx` | glass-subtle |
+| `src/components/inbox/InboxView.tsx` | glass-subtle |
+| `src/components/shared/CaptureBox.tsx` | glass-subtle |
+| `src/components/boards/FilterPanel.tsx` | glass |
+| `src/components/boards/ViewsMenu.tsx` | glass |
+| `src/App.tsx` | /dev/contrast route |
