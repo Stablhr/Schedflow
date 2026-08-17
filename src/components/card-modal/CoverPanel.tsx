@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { X, ImageIcon, AlertTriangle } from 'lucide-react'
 import type { Card, FileAttachment } from '../../store/schema'
-import { COVER_COLORS } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 import { uid } from '../../utils/id'
 import { formatSize } from '../../utils/format'
@@ -42,11 +41,6 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
   const removeCover = () => {
     store.updateCard(card.id, { cover: null, coverSize: 'small' })
     store.addActivity(card.id, 'removed the cover')
-  }
-
-  const setColorCover = (color: string) => {
-    store.updateCard(card.id, { cover: color, coverSize: 'small' })
-    store.addActivity(card.id, 'changed the cover')
   }
 
   const setImageCover = (attachment: FileAttachment) => {
@@ -166,25 +160,6 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
               Remove cover
             </button>
           )}
-
-          {/* Colors */}
-          <section>
-            <p className={sectionTitle}>Colors</p>
-            <div className="mt-2 grid grid-cols-5 gap-1.5">
-              {COVER_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  title="Set cover color"
-                  onClick={() => setColorCover(color)}
-                  className={`h-7 rounded-md transition hover:scale-110 active:scale-95 ${
-                    activeColor === color ? 'ring-2 ring-ink ring-offset-1' : ''
-                  }`}
-                  style={{ background: color }}
-                />
-              ))}
-            </div>
-          </section>
 
           {/* Attachments */}
           <section>
