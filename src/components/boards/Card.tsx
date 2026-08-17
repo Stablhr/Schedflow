@@ -22,6 +22,17 @@ function CardCoverBand({ card }: { card: Card }) {
     )
   }
   if (card.cover?.type === 'image') {
+    if (card.coverSize === 'small') {
+      return (
+        <div className="-mx-2.5 -mt-2.5 mb-2 h-8 w-[calc(100%+20px)] overflow-hidden rounded-t-xl">
+          <img
+            src={card.cover.dataUrl}
+            alt=""
+            className="h-full w-full object-cover"
+          />
+        </div>
+      )
+    }
     return (
       <div className="relative -mx-2.5 -mt-2.5 mb-2 aspect-[4/5] w-[calc(100%+20px)] overflow-hidden rounded-t-xl">
         <img

@@ -52,7 +52,13 @@ export default function CardAttachments({ card }: { card: Card }) {
       <SectionLabel icon={<Paperclip size={14} />}>Attachments</SectionLabel>
 
       <div className="mt-2 space-y-2">
-        {card.files.map((attachment) => (
+        {card.files.map((attachment) => {
+          const isCover =
+            card.cover !== null &&
+            typeof card.cover !== 'string' &&
+            card.cover.type === 'image' &&
+            card.cover.dataUrl === attachment.dataUrl
+          return (
           <div key={attachment.id} className="flex items-center gap-3 rounded-xl bg-bg px-3 py-2">
             {attachment.type === 'image' ? (
               <img
@@ -66,9 +72,16 @@ export default function CardAttachments({ card }: { card: Card }) {
               </span>
             )}
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-ink" title={attachment.name}>
-                {attachment.name}
-              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="truncate text-sm font-medium text-ink" title={attachment.name}>
+                  {attachment.name}
+                </p>
+                {isCover && (
+                  <span className="shrink-0 rounded-full bg-brand-light px-1.5 py-0.5 text-[10px] font-bold text-brand-dark">
+                    Cover
+                  </span>
+                )}
+              </div>
               <p className="font-mono text-[11px] text-ink-faint">
                 {formatSize(attachment.size)}
               </p>
@@ -84,7 +97,8 @@ export default function CardAttachments({ card }: { card: Card }) {
               </svg>
             </button>
           </div>
-        ))}
+          )
+        })}
 
         {error && (
           <p className="animate-in flex items-center gap-1.5 rounded-lg bg-danger-light px-3 py-2 text-xs font-medium text-danger">

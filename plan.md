@@ -216,3 +216,62 @@ Each phase should be functional end-to-end (UI + state + persistence) before mov
 - Real multi-user collaboration (Share modal currently just simulates roles/invites locally)
 - Automation rules, Slack-style integrations (explicitly deferred per `Project-context.md`)
 - Table / Dashboard / Timeline / Map board views beyond the placeholder shells
+
+---
+
+## 7. Implementation Plan — Cover Panel, Comment Reactions, Move Card
+
+### Feature 1: Cover Source Panel (Attachments → Cover)
+
+Expand `CardCover.tsx` into a right-side drawer (matching `BoardMenuDrawer` pattern) with these sections:
+
+**Schema:** Add `coverSize: 'large' | 'small'` to Card interface. Default `'small'`.
+
+**CoverPanel.tsx** (new right-side drawer):
+- **Size** — two selectable visual previews: "Large" (tall aspect-[4/5] image) and "Small" (short color-band). Updates `card.coverSize`.
+- **Remove cover** — clears `card.cover` to null, resets `coverSize` to `'small'`.
+- **Colors** — grid of `COVER_COLORS` swatches. Selecting one sets `card.cover = <hex>`.
+- **Attachments** — thumbnails of image attachments. Clicking one sets it as cover. Active cover indicated with ring.
+- **Upload a cover image** — file input that adds file to `card.files` AND sets as cover in one action. Tag with "Cover" label in attachments list.
+
+**Rendering changes:**
+- `Card.tsx` CardCoverBand: image cover + `coverSize === 'large'` → `aspect-[4/5]`; image cover + `coverSize === 'small'` → `h-8` band; color covers always `h-8`.
+- `CardModal.tsx` modal band: image + large → `h-48`; image + small → `h-16`; color → `h-28` unchanged.
+
+**Unsplash/AI options:** Omitted entirely.
+
+### Feature 2: Comment Reactions
+
+**Schema:** Add `reactions: Reactions` field to `CommentItem` interface (same shape as `card.reactions`).
+
+**`src/utils/reactions.ts`** (new): localStorage helpers keyed by `schedflow_user_comment_reactions`. Shape: `{ [cardId]: { [commentId]: string[] } }`.
+
+**CardComments.tsx changes:**
+- Each comment gets an "add reaction" icon button → opens compact emoji picker (search + frequently-used row).
+- Reaction pills shown below comment text. Clicking toggles user's reaction on/off.
+- Activity logged: `Reacted {emoji} to a comment`.
+
+### Feature 3: Move Card Dialog
+
+**Overflow menu** in `CardModal.tsx` header: `MoreHorizontal` icon button → small dropdown with "Move" and "Archive" (archive moved from footer).
+
+**MoveCardDialog.tsx** (new centered modal):
+- **Board tab** — Board dropdown, List dropdown, Position dropdown, "Move" button. Uses existing `store.moveCard()`.
+- **Inbox tab** — "Move to Inbox" with confirm state. Strips all card data (labels, cover, files, comments, reactions). Uses `store.addInboxItem()` + `store.deleteCard()`. Logs activity before deletion.
+
+**Tradeoff note:** MVP discards card-specific data when demoting to Inbox. Preserving data for re-promotion is a future enhancement.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/store/schema.ts` | Add `coverSize` to Card, `reactions` to CommentItem |
+| `src/store/StoreProvider.tsx` | Add `coverSize: 'small'` default in `makeCard()` |
+| `src/utils/reactions.ts` | **New** — localStorage user-reaction helpers |
+| `src/components/card-modal/CoverPanel.tsx` | **New** — right-side drawer |
+| `src/components/card-modal/CardCover.tsx` | Simplify to button + inline remove |
+| `src/components/card-modal/CardModal.tsx` | Add overflow menu, CoverPanel, MoveCardDialog |
+| `src/components/card-modal/CardAttachments.tsx` | Add "Cover" badge on active cover |
+| `src/components/card-modal/CardComments.tsx` | Per-comment reaction UI |
+| `src/components/card-modal/MoveCardDialog.tsx` | **New** — Board/Inbox tabbed dialog |
+| `src/components/boards/Card.tsx` | CardCoverBand reads coverSize |

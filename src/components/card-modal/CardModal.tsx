@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { X, Eye, EyeOff, Trash2, Archive, Check, RotateCcw } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { X, Eye, EyeOff, Trash2, Archive, Check, RotateCcw, MoreHorizontal, ArrowRight } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
 import CardDescription from './CardDescription'
@@ -12,6 +12,8 @@ import CardAttachments from './CardAttachments'
 import CardComments from './CardComments'
 import CardReactions from './CardReactions'
 import CardActivity from './CardActivity'
+import CoverPanel from './CoverPanel'
+import MoveCardDialog from './MoveCardDialog'
 
 interface CardModalProps {
   cardId: string
@@ -22,6 +24,10 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
   const { data, updateCard, addActivity, deleteCard, archiveCard, toggleDone } = useStore()
   const [editingTitle, setEditingTitle] = useState(false)
   const [title, setTitle] = useState('')
+  const [overflowOpen, setOverflowOpen] = useState(false)
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false)
+  const [coverPanelOpen, setCoverPanelOpen] = useState(false)
+  const overflowRef = useRef<HTMLDivElement>(null)
 
   const card = data.cards[cardId]
   if (!card) return null
@@ -52,13 +58,14 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
 
   const handleArchive = () => {
     archiveCard(card.id)
+    setOverflowOpen(false)
     onClose()
   }
 
   return (
     <Modal open onClose={onClose} className="max-w-2xl overflow-hidden rounded-2xl bg-surface shadow-lg">
       {card.cover && (
-        <div className="h-28 w-full">
+        <div className={`w-full ${card.coverSize === 'large' ? 'h-48' : typeof card.cover === 'string' ? 'h-28' : 'h-16'}`}>
           {typeof card.cover === 'string' ? (
             <div
               className="h-full w-full"
@@ -142,6 +149,41 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
               {card.watching ? <Eye size={14} /> : <EyeOff size={14} />}
               {card.watching ? 'Watching' : 'Watch'}
             </button>
+
+            {/* Overflow menu */}
+            <div className="relative shrink-0" ref={overflowRef}>
+              <button
+                type="button"
+                onClick={() => setOverflowOpen((o) => !o)}
+                title="More actions"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-ink-muted transition hover:bg-surface-alt active:scale-95"
+              >
+                <MoreHorizontal size={16} />
+              </button>
+              {overflowOpen && (
+                <div className="absolute right-0 top-9 z-30 w-48 rounded-xl bg-surface py-1 shadow-md ring-1 ring-border animate-in">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOverflowOpen(false)
+                      setMoveDialogOpen(true)
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-alt"
+                  >
+                    <ArrowRight size={14} className="text-ink-muted" />
+                    Move
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleArchive}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-alt"
+                  >
+                    <Archive size={14} className="text-ink-muted" />
+                    Archive
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="mt-5 grid grid-cols-1 gap-7 md:grid-cols-[1fr_220px]">
@@ -156,7 +198,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
               <CardMembers card={card} />
               <CardDueDate card={card} />
               <CardLocation card={card} />
-              <CardCover card={card} />
+              <CardCover card={card} onOpenPanel={() => setCoverPanelOpen(true)} />
               <CardReactions card={card} />
             </aside>
           </div>
@@ -165,15 +207,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
             <CardActivity card={card} />
           </div>
 
-          <div className="mt-5 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={handleArchive}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-ink-muted transition hover:bg-surface-alt active:scale-95"
-            >
-              <Archive size={14} />
-              Archive
-            </button>
+          <div className="mt-5 flex justify-end">
             <button
               type="button"
               onClick={handleDelete}
@@ -185,6 +219,9 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
           </div>
         </div>
       </div>
+
+      <CoverPanel card={card} open={coverPanelOpen} onClose={() => setCoverPanelOpen(false)} />
+      {moveDialogOpen && <MoveCardDialog card={card} onClose={() => setMoveDialogOpen(false)} />}
     </Modal>
   )
 }

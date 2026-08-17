@@ -28,6 +28,7 @@ function makeCard(list: List, title: string, extra: Partial<Card> = {}): Card {
     title,
     desc: '',
     cover: null,
+    coverSize: 'small',
     labelIds: [],
     memberIds: [],
     dueDate: null,

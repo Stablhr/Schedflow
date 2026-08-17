@@ -33,6 +33,7 @@ export interface CommentItem {
   id: string
   authorId: string
   text: string
+  reactions: Reactions
   createdAt: string
 }
 
@@ -77,6 +78,7 @@ export interface Card {
   title: string
   desc: string
   cover: Cover
+  coverSize: 'large' | 'small'
   labelIds: string[]
   memberIds: string[]
   dueDate: string | null
