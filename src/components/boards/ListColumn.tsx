@@ -75,7 +75,7 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
   }
 
   return (
-    <div className="flex w-[272px] shrink-0 flex-col rounded-xl shadow-sm backdrop-blur-xl" style={{ ...vars, background: bg }}>
+    <div className="flex w-[272px] shrink-0 flex-col rounded-xl shadow-sm" style={{ ...vars, background: bg }}>
       <div
         {...dragHandleProps}
         className="group flex cursor-grab items-center gap-1 px-2 pb-1 pt-2.5 active:cursor-grabbing"
