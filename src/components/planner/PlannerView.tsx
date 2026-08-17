@@ -55,7 +55,7 @@ export default function PlannerView() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-2 border-b border-border bg-surface px-4 py-3">
+      <div className="flex items-center gap-2 border-b border-border glass-subtle px-4 py-3">
         <h1 className="font-display text-xl font-bold text-ink">Planner</h1>
 
         <div className="ml-4 flex items-center gap-1">

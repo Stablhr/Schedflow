@@ -24,7 +24,7 @@ export default function InboxView() {
         {data.inbox.map((item) => (
           <li
             key={item.id}
-            className="animate-in flex items-center gap-3 rounded-xl bg-surface px-4 py-3 shadow-sm"
+            className="animate-in flex items-center gap-3 rounded-xl glass-subtle px-4 py-3 shadow-sm"
           >
             <span className="min-w-0 flex-1 truncate text-sm text-ink" title={item.text}>
               {item.text}

@@ -33,7 +33,7 @@ export default function InboxActionModal({ itemId, mode, onClose }: InboxActionM
   }
 
   return (
-    <Modal open onClose={onClose} className="max-w-md rounded-2xl bg-surface shadow-lg">
+    <Modal open onClose={onClose} className="max-w-md rounded-2xl glass shadow-lg">
       <div className="p-6">
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-light text-brand">

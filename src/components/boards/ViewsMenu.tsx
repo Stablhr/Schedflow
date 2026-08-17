@@ -26,7 +26,7 @@ export default function ViewsMenu({ open, onClose }: { open: boolean; onClose: (
   if (!open) return null
 
   return (
-    <div ref={ref} className="animate-in absolute right-0 top-11 z-30 w-52 rounded-xl bg-surface p-1.5 shadow-md ring-1 ring-border">
+    <div ref={ref} className="animate-in absolute right-0 top-11 z-30 w-52 rounded-xl glass p-1.5 shadow-md">
       <p className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
         View
       </p>

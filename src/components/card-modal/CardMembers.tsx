@@ -44,7 +44,7 @@ export default function CardMembers({ card }: { card: Card }) {
       </button>
 
       {open && (
-        <div className="animate-in mt-2 space-y-0.5 rounded-xl bg-surface-alt/60 p-1.5 ring-1 ring-border">
+        <div className="animate-in mt-2 space-y-0.5 rounded-xl glass-subtle p-1.5">
           {store.members.map((member) => {
             const active = card.memberIds.includes(member.id)
             return (

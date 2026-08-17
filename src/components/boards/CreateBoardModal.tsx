@@ -27,7 +27,7 @@ export default function CreateBoardModal({ open, onClose }: CreateBoardModalProp
   }
 
   return (
-    <Modal open={open} onClose={onClose} className="max-w-md rounded-2xl bg-surface">
+    <Modal open={open} onClose={onClose} className="max-w-md rounded-2xl glass">
       <div className="flex items-center justify-between px-6 pt-5">
         <h2 className="font-display text-[20px] font-bold text-ink">Create board</h2>
         <button type="button" onClick={onClose} className="text-ink-muted transition hover:text-ink">

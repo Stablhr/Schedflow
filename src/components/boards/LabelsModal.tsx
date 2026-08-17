@@ -23,7 +23,7 @@ export default function LabelsModal({ board, onClose }: { board: Board; onClose:
     'w-full rounded-lg px-2 py-1 text-sm text-ink outline-none ring-1 ring-border transition focus:ring-2 focus:ring-brand'
 
   return (
-    <Modal open onClose={onClose} className="max-w-md rounded-2xl bg-surface shadow-lg">
+    <Modal open onClose={onClose} className="max-w-md rounded-2xl glass shadow-lg">
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div>

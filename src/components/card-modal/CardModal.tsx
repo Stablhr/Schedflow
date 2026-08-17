@@ -91,7 +91,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
   }
 
   return (
-    <Modal open onClose={onClose} className="max-w-2xl overflow-hidden rounded-2xl bg-surface shadow-lg">
+    <Modal open onClose={onClose} className="max-w-2xl overflow-hidden rounded-2xl glass-heavy shadow-lg">
       {card.cover && (
         <div className={`w-full ${card.coverSize === 'large' ? 'h-48' : typeof card.cover === 'string' ? 'h-28' : 'h-16'}`}>
           {typeof card.cover === 'string' ? (
@@ -109,7 +109,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
         type="button"
         onClick={onClose}
         title="Close"
-        className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-surface text-ink-muted shadow-md ring-1 ring-border transition hover:text-ink active:scale-95"
+        className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full glass-subtle text-ink-muted shadow-md transition hover:text-ink active:scale-95"
       >
         <X size={18} />
       </button>
@@ -189,7 +189,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                 <MoreHorizontal size={16} />
               </button>
               {overflowOpen && (
-                <div className="absolute right-0 top-9 z-30 w-52 rounded-xl bg-surface py-1 shadow-md ring-1 ring-border animate-in">
+                <div className="absolute right-0 top-9 z-30 w-52 rounded-xl glass py-1 shadow-md animate-in">
                   <button
                     type="button"
                     onClick={() => {

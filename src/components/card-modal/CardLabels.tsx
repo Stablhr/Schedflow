@@ -45,7 +45,7 @@ export default function CardLabels({ card }: { card: Card }) {
       </button>
 
       {open && (
-        <div className="animate-in mt-2 space-y-0.5 rounded-xl bg-surface-alt/60 p-1.5 ring-1 ring-border">
+        <div className="animate-in mt-2 space-y-0.5 rounded-xl glass-subtle p-1.5">
           {labels.length === 0 && (
             <p className="px-2 py-1 text-xs text-ink-faint">No labels on this board yet.</p>
           )}

@@ -12,7 +12,7 @@ export default function DueSoonList({ limit = 8 }: { limit?: number }) {
     .slice(0, limit)
 
   return (
-    <div className="rounded-xl bg-surface p-4 shadow-sm ring-1 ring-border/50">
+    <div className="rounded-xl glass-subtle p-4 shadow-sm">
       <div className="flex items-center gap-1.5">
         <AlarmClock size={14} className="text-accent" />
         <h2 className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">

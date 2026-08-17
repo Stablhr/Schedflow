@@ -86,8 +86,8 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-[2px]" onClick={onClose} />
-      <aside className="animate-in fixed right-0 top-0 z-40 flex h-full w-80 flex-col bg-surface shadow-lg">
+      <div className="fixed inset-0 z-40 bg-ink/30 backdrop-blur-md" onClick={onClose} />
+      <aside className="animate-in fixed right-0 top-0 z-40 flex h-full w-80 flex-col glass-heavy shadow-lg">
         <div className="flex items-center justify-between border-b border-border px-4 py-3.5">
           <h2 className="font-display text-lg font-bold text-ink">Cover</h2>
           <button

@@ -10,7 +10,7 @@ export default function UnscheduledPool({ cards }: { cards: Card[] }) {
         <div
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`flex w-[230px] shrink-0 flex-col rounded-xl bg-surface p-3 shadow-sm transition-colors ${
+          className={`flex w-[230px] shrink-0 flex-col rounded-xl glass-subtle p-3 shadow-sm transition-colors ${
             snapshot.isDraggingOver ? 'bg-brand-light/70' : ''
           }`}
         >

@@ -38,7 +38,7 @@ export default function DayColumn({ date, isToday, cards }: DayColumnProps) {
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={`scroll-slim min-h-[120px] flex-1 rounded-xl p-1.5 transition-colors ${
-              snapshot.isDraggingOver ? 'bg-brand-light/80' : 'bg-surface/70'
+              snapshot.isDraggingOver ? 'bg-brand-light/80' : 'glass-subtle'
             }`}
           >
             <div className="flex flex-col gap-1.5">

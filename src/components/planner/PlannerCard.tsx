@@ -14,7 +14,7 @@ export default function PlannerCard({ card, index }: { card: Card; index: number
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`cursor-grab rounded-lg bg-white p-2 shadow-sm ring-1 ring-transparent transition hover:shadow-md hover:ring-border active:cursor-grabbing ${
+          className={`cursor-grab rounded-lg glass-subtle p-2 shadow-sm ring-1 ring-transparent transition hover:shadow-md hover:ring-border active:cursor-grabbing ${
             snapshot.isDragging ? 'opacity-40' : ''
           }`}
         >

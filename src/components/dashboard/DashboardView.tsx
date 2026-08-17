@@ -7,7 +7,7 @@ import PlannerPreview from './PlannerPreview'
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl bg-surface p-4 shadow-sm ring-1 ring-border/50">
+    <div className="rounded-xl glass-subtle p-4 shadow-sm">
       <p className="font-display text-3xl font-bold text-ink">{value}</p>
       <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-ink-muted">{label}</p>
     </div>
