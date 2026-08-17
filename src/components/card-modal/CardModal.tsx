@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { X, Eye, EyeOff, Trash2, Archive, Check, RotateCcw, MoreHorizontal, ArrowRight, Palette } from 'lucide-react'
-import { COVER_COLORS } from '../../store/schema'
+import { X, Eye, EyeOff, Trash2, Archive, Check, RotateCcw, MoreHorizontal, ArrowRight, Palette, ImageIcon } from 'lucide-react'
+import { COVER_COLORS, BOARD_BACKGROUNDS } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
 import CardDescription from './CardDescription'
@@ -21,13 +21,14 @@ interface CardModalProps {
 }
 
 export default function CardModal({ cardId, onClose }: CardModalProps) {
-  const { data, updateCard, addActivity, deleteCard, archiveCard, toggleDone } = useStore()
+  const { data, updateCard, addActivity, deleteCard, archiveCard, toggleDone, setBoardBackground } = useStore()
   const [editingTitle, setEditingTitle] = useState(false)
   const [title, setTitle] = useState('')
   const [overflowOpen, setOverflowOpen] = useState(false)
   const [moveDialogOpen, setMoveDialogOpen] = useState(false)
   const [coverPanelOpen, setCoverPanelOpen] = useState(false)
   const overflowRef = useRef<HTMLDivElement>(null)
+  const bgFileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!overflowOpen) return
@@ -78,6 +79,15 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
   const setColorCover = (color: string) => {
     updateCard(card.id, { cover: color, coverSize: 'small' })
     addActivity(card.id, 'changed the cover')
+  }
+
+  const uploadBgImage = (file: File | undefined) => {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      setBoardBackground(board.id, reader.result as string)
+    }
+    reader.readAsDataURL(file)
   }
 
   return (
@@ -222,6 +232,49 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                         />
                       ))}
                     </div>
+                  </div>
+                  <div className="my-1 h-px bg-border" />
+                  <div className="px-3 py-2">
+                    <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+                      <Palette size={12} />
+                      Board background
+                    </div>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {BOARD_BACKGROUNDS.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          title="Set board background"
+                          onClick={() => {
+                            setBoardBackground(board.id, color)
+                            setOverflowOpen(false)
+                          }}
+                          className={`h-6 rounded-md transition hover:scale-110 active:scale-95 ${
+                            board.background === color ? 'ring-2 ring-ink ring-offset-1' : ''
+                          }`}
+                          style={{ background: color }}
+                        />
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => bgFileRef.current?.click()}
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-2.5 py-1.5 text-[11px] font-semibold text-ink-muted transition hover:bg-brand-light hover:text-brand-dark active:scale-95"
+                    >
+                      <ImageIcon size={12} />
+                      Upload image
+                    </button>
+                    <input
+                      ref={bgFileRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => {
+                        uploadBgImage(e.target.files?.[0])
+                        e.target.value = ''
+                        setOverflowOpen(false)
+                      }}
+                    />
                   </div>
                 </div>
               )}
