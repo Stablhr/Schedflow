@@ -69,7 +69,7 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
   }
 
   return (
-    <div className="flex w-[272px] shrink-0 flex-col rounded-xl bg-surface shadow-sm transition-all duration-200 ease-out">
+    <div className="flex w-[272px] shrink-0 flex-col rounded-xl bg-surface shadow-sm">
       <div
         {...dragHandleProps}
         className="group flex cursor-grab items-center gap-1 px-2 pb-1 pt-2.5 active:cursor-grabbing"
@@ -125,8 +125,8 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
           <div
             ref={droppableProvided.innerRef}
             {...droppableProvided.droppableProps}
-            className={`scroll-slim flex max-h-[calc(100vh-180px)] min-h-2 flex-1 flex-col gap-1.5 overflow-y-auto rounded-b-xl px-2 pb-2 transition-all duration-200 ease-out ${
-              snapshot.isDraggingOver ? 'bg-brand-light/70 ring-2 ring-brand/20 ring-inset' : ''
+            className={`scroll-slim flex max-h-[calc(100vh-180px)] min-h-2 flex-1 flex-col gap-1.5 overflow-y-auto rounded-b-xl px-2 pb-2 transition-colors duration-150 ${
+              snapshot.isDraggingOver ? 'bg-brand-light/70' : ''
             }`}
           >
             {cards.map((card, index) => (

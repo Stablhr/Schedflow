@@ -80,7 +80,7 @@ export default function BoardView() {
               {lists.map((list, index) => (
                 <Draggable key={list.id} draggableId={list.id} index={index}>
                   {(listProvided) => (
-                    <div ref={listProvided.innerRef} {...listProvided.draggableProps} style={{ ...listProvided.draggableProps.style, transition: 'transform 200ms ease-out' }}>
+                    <div ref={listProvided.innerRef} {...listProvided.draggableProps}>
                       <ListColumn
                         list={list}
                         dragHandleProps={listProvided.dragHandleProps}
