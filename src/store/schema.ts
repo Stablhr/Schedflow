@@ -83,6 +83,7 @@ export interface Card {
   memberIds: string[]
   dueDate: string | null
   location: string
+  backgroundColor: string
   watching: boolean
   archived: boolean
   done: boolean

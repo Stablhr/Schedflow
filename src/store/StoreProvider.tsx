@@ -33,6 +33,7 @@ function makeCard(list: List, title: string, extra: Partial<Card> = {}): Card {
     memberIds: [],
     dueDate: null,
     location: '',
+    backgroundColor: '',
     watching: false,
     archived: false,
     done: false,
