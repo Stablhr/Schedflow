@@ -4,8 +4,8 @@ import type { List } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 
 const LIST_COLORS = [
-  '', '#FFFFFF', '#F3FBFA', '#E1F5F3', '#FFE7DA', '#DFF5EB',
-  '#FEF3D9', '#FFE3E5', '#E8E0FF', '#DBEAFE',
+  '', '#FFFFFF', '#0DABA3', '#33B27A', '#FF8B5E', '#F6C453',
+  '#FF5E6C', '#7C5CFC', '#3B82F6', '#E879F9',
 ]
 
 export default function ListMenu({ list }: { list: List }) {
@@ -81,8 +81,8 @@ export default function ListMenu({ list }: { list: List }) {
                   onClick={() => {
                     setListBackgroundColor(list.id, color)
                   }}
-                  className={`h-6 rounded-md ring-1 ring-black/10 transition hover:scale-110 active:scale-95 ${
-                    list.backgroundColor === color ? 'ring-2 ring-brand ring-offset-1' : ''
+                  className={`h-6 rounded-md ring-2 ring-white transition hover:scale-110 active:scale-95 ${
+                    list.backgroundColor === color ? 'ring-brand ring-offset-1' : ''
                   }`}
                   style={{ background: color || '#FFFFFF' }}
                 />
