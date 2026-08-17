@@ -4,6 +4,7 @@ import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import { Check, GripVertical } from 'lucide-react'
 import type { Card, List } from '../../store/schema'
 import { useStore } from '../../store/useStore'
+import { isColorDark } from '../../utils/colorUtils'
 import CardFace from './Card'
 import AddCardForm from './AddCardForm'
 import ListMenu from './ListMenu'
@@ -21,6 +22,8 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
   const { data, renameList } = useStore()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(list.name)
+
+  const dark = isColorDark(list.backgroundColor)
 
   const allCards = ((data.lists[list.id]?.cardOrder ?? [])
     .map((id) => data.cards[id])
@@ -59,7 +62,7 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
           style={{ background: list.backgroundColor || '#FFFFFF' }}
         >
           <span
-            className="whitespace-nowrap font-display text-xs font-bold text-ink-muted"
+            className={`whitespace-nowrap font-display text-xs font-bold ${dark ? 'text-white/70' : 'text-ink-muted'}`}
             style={{ writingMode: 'vertical-rl' }}
           >
             {list.name}
@@ -75,7 +78,7 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
         {...dragHandleProps}
         className="group flex cursor-grab items-center gap-1 px-2 pb-1 pt-2.5 active:cursor-grabbing"
       >
-        <GripVertical size={14} className="text-ink-faint opacity-70" />
+        <GripVertical size={14} className={`opacity-70 ${dark ? 'text-white/50' : 'text-ink-faint'}`} />
         {editing ? (
           <div className="flex items-center gap-1">
             <input
@@ -90,7 +93,9 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
               }}
               onBlur={commitRename}
               autoFocus
-              className="w-32 rounded-md px-1 py-0.5 text-sm font-semibold text-ink outline-none ring-1 ring-brand"
+              className={`w-32 rounded-md px-1 py-0.5 text-sm font-semibold outline-none ring-1 ring-brand ${
+                dark ? 'bg-white/10 text-white placeholder:text-white/50' : 'bg-surface text-ink'
+              }`}
             />
             <button
               type="button"
@@ -108,17 +113,17 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
               setEditing(true)
             }}
             title="Click to rename"
-            className="flex-1 cursor-text truncate text-sm font-semibold text-ink"
+            className={`flex-1 cursor-text truncate text-sm font-semibold ${dark ? 'text-white' : 'text-ink'}`}
           >
             {list.name}
           </h3>
         )}
-        <span className="font-mono text-[10.5px] text-ink-faint">{allCards.length}</span>
+        <span className={`font-mono text-[10.5px] ${dark ? 'text-white/50' : 'text-ink-faint'}`}>{allCards.length}</span>
         <ListMenu list={list} />
       </div>
 
       {list.assignee && (
-        <p className="px-3 pb-1.5 text-[11px] text-ink-muted">by {list.assignee}</p>
+        <p className={`px-3 pb-1.5 text-[11px] ${dark ? 'text-white/60' : 'text-ink-muted'}`}>by {list.assignee}</p>
       )}
 
       <Droppable droppableId={list.id} type="CARD">
@@ -134,7 +139,7 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
               <CardFace key={card.id} card={card} index={index} onOpenCard={onOpenCard} />
             ))}
             {droppableProvided.placeholder}
-            <AddCardForm listId={list.id} />
+            <AddCardForm listId={list.id} dark={dark} />
           </div>
         )}
       </Droppable>

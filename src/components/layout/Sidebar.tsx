@@ -1,6 +1,7 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { LayoutDashboard, Inbox, Columns3, CalendarDays, PanelLeftClose, PanelLeft } from 'lucide-react'
 import { useStore } from '../../store/useStore'
+import { isColorDark, withAlpha } from '../../utils/colorUtils'
 import CaptureBox from '../shared/CaptureBox'
 import Avatar from '../shared/Avatar'
 
@@ -11,7 +12,7 @@ const NAV = [
   { to: '/planner', label: 'Planner', icon: CalendarDays },
 ]
 
-function Logo({ collapsed }: { collapsed: boolean }) {
+function Logo({ collapsed, dark }: { collapsed: boolean; dark: boolean }) {
   return (
     <div className="flex items-center gap-2.5 px-3 py-5">
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-dark text-white shadow-sm">
@@ -22,7 +23,7 @@ function Logo({ collapsed }: { collapsed: boolean }) {
         </svg>
       </span>
       {!collapsed && (
-        <span className="font-display text-[19px] font-bold tracking-tight text-ink">SchedFlow</span>
+        <span className={`font-display text-[19px] font-bold tracking-tight ${dark ? 'text-white' : 'text-ink'}`}>SchedFlow</span>
       )}
     </div>
   )
@@ -35,24 +36,39 @@ interface SidebarProps {
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { data, members } = useStore()
+  const location = useLocation()
   const inboxCount = data.inbox.length
   const you = members.find((m) => m.name === 'You') ?? members[0]
 
+  const boardMatch = location.pathname.match(/^\/boards\/([^/]+)$/)
+  const boardId = boardMatch?.[1]
+  const board = boardId ? data.boards[boardId] : null
+  const bg = board?.background || ''
+  const isBoard = !!(board && bg && !bg.startsWith('data:'))
+  const dark = isBoard && isColorDark(bg)
+
+  const sidebarBg = isBoard
+    ? withAlpha(bg, 0.08)
+    : ''
+
   return (
     <aside
-      className={`flex shrink-0 flex-col border-r border-border bg-surface-alt transition-[width] duration-200 ${
-        collapsed ? 'w-[52px]' : 'w-[236px]'
-      }`}
+      className={`flex shrink-0 flex-col border-r transition-[width] duration-200 ${
+        isBoard ? '' : 'bg-surface-alt'
+      } ${dark ? 'border-white/10' : 'border-border'} ${collapsed ? 'w-[52px]' : 'w-[236px]'}`}
+      style={isBoard ? { background: sidebarBg } : undefined}
     >
       <div className="flex items-center px-2 py-2">
-        {!collapsed && <Logo collapsed={collapsed} />}
+        {!collapsed && <Logo collapsed={collapsed} dark={dark} />}
         <button
           type="button"
           onClick={onToggle}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className={`flex h-8 shrink-0 items-center justify-center rounded-lg text-ink-muted transition hover:bg-surface hover:text-ink active:scale-95 ${
-            collapsed ? 'mx-auto mt-3 w-8' : 'ml-auto'
-          }`}
+          className={`flex h-8 shrink-0 items-center justify-center rounded-lg transition active:scale-95 ${
+            dark
+              ? 'text-white/50 hover:bg-white/10 hover:text-white'
+              : 'text-ink-muted hover:bg-surface hover:text-ink'
+          } ${collapsed ? 'mx-auto mt-3 w-8' : 'ml-auto'}`}
         >
           {collapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
         </button>
@@ -71,13 +87,21 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 collapsed
                   ? `relative flex h-9 w-9 mx-auto items-center justify-center rounded-xl transition ${
                       isActive
-                        ? 'bg-surface text-brand-dark shadow-sm'
-                        : 'text-ink-muted hover:bg-brand/10 hover:text-ink'
+                        ? dark
+                          ? 'bg-white/10 text-white shadow-sm'
+                          : 'bg-surface text-brand-dark shadow-sm'
+                        : dark
+                          ? 'text-white/50 hover:bg-white/10 hover:text-white'
+                          : 'text-ink-muted hover:bg-brand/10 hover:text-ink'
                     }`
                   : `group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition ${
                       isActive
-                        ? 'bg-surface text-brand-dark shadow-sm'
-                        : 'text-ink-muted hover:bg-brand/10 hover:text-ink'
+                        ? dark
+                          ? 'bg-white/10 text-white shadow-sm'
+                          : 'bg-surface text-brand-dark shadow-sm'
+                        : dark
+                          ? 'text-white/50 hover:bg-white/10 hover:text-white'
+                          : 'text-ink-muted hover:bg-brand/10 hover:text-ink'
                     }`
               }
             >
@@ -103,9 +127,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <div className="space-y-3 p-3">
           <CaptureBox />
           {you && (
-            <div className="flex items-center gap-2 rounded-xl bg-surface/60 px-2.5 py-2">
+            <div className={`flex items-center gap-2 rounded-xl px-2.5 py-2 ${
+              dark ? 'bg-white/5' : 'bg-surface/60'
+            }`}>
               <Avatar member={you} size={22} />
-              <span className="text-sm font-semibold text-ink">{you.name}</span>
+              <span className={`text-sm font-semibold ${dark ? 'text-white' : 'text-ink'}`}>{you.name}</span>
             </div>
           )}
         </div>

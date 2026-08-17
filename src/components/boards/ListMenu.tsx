@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MoreHorizontal, ChevronsLeft, ChevronsRight, Trash2, UserPlus, Palette } from 'lucide-react'
 import type { List } from '../../store/schema'
 import { useStore } from '../../store/useStore'
+import { isColorDark } from '../../utils/colorUtils'
 
 const LIST_COLORS = [
   '', '#FFFFFF', '#0DABA3', '#33B27A', '#FF8B5E', '#F6C453',
@@ -14,6 +15,8 @@ export default function ListMenu({ list }: { list: List }) {
   const [assignee, setAssignee] = useState(list.assignee)
   const ref = useRef<HTMLDivElement>(null)
 
+  const dark = isColorDark(list.backgroundColor)
+
   useEffect(() => {
     if (!open) return
     const onClick = (e: MouseEvent) => {
@@ -23,34 +26,37 @@ export default function ListMenu({ list }: { list: List }) {
     return () => document.removeEventListener('mousedown', onClick)
   }, [open])
 
-  const menuItemClass =
-    'flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium text-ink transition hover:bg-surface-alt'
-
   return (
     <div ref={ref} className="relative">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         title="List actions"
-        className="flex h-6 w-6 items-center justify-center rounded-md text-ink-faint transition hover:bg-surface-alt hover:text-ink"
+        className={`flex h-6 w-6 items-center justify-center rounded-md transition ${
+          dark ? 'text-white/50 hover:bg-white/10 hover:text-white' : 'text-ink-faint hover:bg-surface-alt hover:text-ink'
+        }`}
       >
         <MoreHorizontal size={15} />
       </button>
 
       {open && (
-        <div className="animate-in absolute right-0 top-8 z-20 w-56 rounded-xl bg-surface p-1.5 shadow-md ring-1 ring-border">
-          <button type="button" className={menuItemClass} onClick={() => {
+        <div className={`animate-in absolute right-0 top-8 z-20 w-56 rounded-xl p-1.5 shadow-md ring-1 ${
+          dark ? 'bg-gray-800 ring-white/10' : 'bg-surface ring-border'
+        }`}>
+          <button type="button" className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium transition ${
+            dark ? 'text-white hover:bg-white/10' : 'text-ink hover:bg-surface-alt'
+          }`} onClick={() => {
             toggleListCollapsed(list.id)
             setOpen(false)
           }}>
-            {list.collapsed ? <ChevronsRight size={15} className="text-ink-muted" /> : <ChevronsLeft size={15} className="text-ink-muted" />}
+            {list.collapsed ? <ChevronsRight size={15} className={dark ? 'text-white/60' : 'text-ink-muted'} /> : <ChevronsLeft size={15} className={dark ? 'text-white/60' : 'text-ink-muted'} />}
             {list.collapsed ? 'Expand list' : 'Collapse list'}
           </button>
 
-          <div className="my-1 h-px bg-border" />
+          <div className={`my-1 h-px ${dark ? 'bg-white/10' : 'bg-border'}`} />
 
           <div className="flex items-center gap-2 px-2.5 py-1.5">
-            <UserPlus size={15} className="shrink-0 text-ink-muted" />
+            <UserPlus size={15} className={`shrink-0 ${dark ? 'text-white/60' : 'text-ink-muted'}`} />
             <input
               value={assignee}
               onChange={(e) => setAssignee(e.target.value)}
@@ -61,14 +67,18 @@ export default function ListMenu({ list }: { list: List }) {
                 }
               }}
               placeholder="Assignee"
-              className="w-full rounded-md px-1 py-0.5 text-sm text-ink outline-none placeholder:text-ink-faint focus:bg-surface-alt"
+              className={`w-full rounded-md px-1 py-0.5 text-sm outline-none placeholder:text-ink-faint ${
+                dark ? 'bg-white/10 text-white placeholder:text-white/40' : 'text-ink focus:bg-surface-alt'
+              }`}
             />
           </div>
 
-          <div className="my-1 h-px bg-border" />
+          <div className={`my-1 h-px ${dark ? 'bg-white/10' : 'bg-border'}`} />
 
           <div className="px-2.5 py-2">
-            <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+            <div className={`mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${
+              dark ? 'text-white/40' : 'text-ink-faint'
+            }`}>
               <Palette size={12} />
               List color
             </div>
@@ -90,11 +100,13 @@ export default function ListMenu({ list }: { list: List }) {
             </div>
           </div>
 
-          <div className="my-1 h-px bg-border" />
+          <div className={`my-1 h-px ${dark ? 'bg-white/10' : 'bg-border'}`} />
 
           <button
             type="button"
-            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium text-danger transition hover:bg-danger-light"
+            className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium transition ${
+              dark ? 'text-red-400 hover:bg-red-500/20' : 'text-danger hover:bg-danger-light'
+            }`}
             onClick={() => {
               if (window.confirm(`Delete the "${list.name}" list and all of its cards?`)) {
                 deleteList(list.id)
