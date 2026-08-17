@@ -38,7 +38,6 @@ function makeCard(list: List, title: string, extra: Partial<Card> = {}): Card {
     done: false,
     files: [],
     comments: [],
-    reactions: {},
     activity: [],
     createdAt: now(),
     updatedAt: now(),

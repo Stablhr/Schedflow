@@ -10,7 +10,6 @@ import CardLocation from './CardLocation'
 import CardCover from './CardCover'
 import CardAttachments from './CardAttachments'
 import CardComments from './CardComments'
-import CardReactions from './CardReactions'
 import CardActivity from './CardActivity'
 import CoverPanel from './CoverPanel'
 import MoveCardDialog from './MoveCardDialog'
@@ -210,7 +209,6 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
               <CardDueDate card={card} />
               <CardLocation card={card} />
               <CardCover card={card} onOpenPanel={() => setCoverPanelOpen(true)} />
-              <CardReactions card={card} />
             </aside>
           </div>
 

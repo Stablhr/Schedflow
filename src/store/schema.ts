@@ -88,7 +88,6 @@ export interface Card {
   done: boolean
   files: FileAttachment[]
   comments: CommentItem[]
-  reactions: Reactions
   activity: ActivityItem[]
   createdAt: string
   updatedAt: string

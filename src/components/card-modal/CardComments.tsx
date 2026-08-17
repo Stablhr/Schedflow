@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { MessageSquare, SmilePlus } from 'lucide-react'
+import EmojiPicker from 'emoji-picker-react'
 import type { Card } from '../../store/schema'
 import { YOU_ID } from '../../store/schema'
 import { useStore } from '../../store/useStore'
@@ -9,13 +10,10 @@ import { hasUserCommentReaction, toggleUserCommentReaction } from '../../utils/r
 import SectionLabel from '../shared/SectionLabel'
 import Avatar from '../shared/Avatar'
 
-const FREQUENT_EMOJIS = ['👍', '🎉', '👀', '❤️', '🔥', '😂']
-
 export default function CardComments({ card }: { card: Card }) {
   const store = useStore()
   const [text, setText] = useState('')
   const [activePicker, setActivePicker] = useState<string | null>(null)
-  const [search, setSearch] = useState('')
   const pickerRef = useRef<HTMLDivElement>(null)
   const you = store.data.members[YOU_ID]
 
@@ -45,7 +43,6 @@ export default function CardComments({ card }: { card: Card }) {
         },
       }
     })
-    // strip zero-count entries
     const cleaned = comments.map((c) => {
       const r = { ...c.reactions }
       for (const [k, v] of Object.entries(r)) {
@@ -120,13 +117,10 @@ export default function CardComments({ card }: { card: Card }) {
                   </div>
                 )}
 
-                <div className="relative mt-1">
+                <div className="relative mt-1" ref={pickerRef}>
                   <button
                     type="button"
-                    onClick={() => {
-                      setActivePicker(pickerOpen ? null : comment.id)
-                      setSearch('')
-                    }}
+                    onClick={() => setActivePicker(pickerOpen ? null : comment.id)}
                     className="inline-flex items-center gap-1 rounded-lg p-1 text-ink-faint transition hover:bg-surface-alt hover:text-ink-muted"
                     title="Add reaction"
                   >
@@ -134,38 +128,20 @@ export default function CardComments({ card }: { card: Card }) {
                   </button>
 
                   {pickerOpen && (
-                    <div
-                      ref={pickerRef}
-                      className="absolute left-0 top-8 z-30 w-56 rounded-xl bg-surface p-2 shadow-md ring-1 ring-border animate-in"
-                    >
-                      <input
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search emoji…"
-                        autoFocus
-                        className="mb-2 w-full rounded-lg px-2.5 py-1.5 text-xs text-ink outline-none ring-1 ring-border focus:ring-2 focus:ring-brand"
+                    <div className="absolute left-0 top-8 z-30 animate-in">
+                      <EmojiPicker
+                        onEmojiClick={(emojiData) => {
+                          toggleCommentReaction(comment.id, emojiData.emoji)
+                          setActivePicker(null)
+                        }}
+                        theme={'light' as any}
+                        width={320}
+                        height={380}
+                        lazyLoadEmojis
+                        autoFocusSearch
+                        skinTonesDisabled
+                        previewConfig={{ showPreview: false }}
                       />
-                      <div className="flex flex-wrap gap-1">
-                        {FREQUENT_EMOJIS.filter(
-                          (e) => !search || e.includes(search),
-                        ).map((emoji) => (
-                          <button
-                            key={emoji}
-                            type="button"
-                            onClick={() => {
-                              toggleCommentReaction(comment.id, emoji)
-                              setActivePicker(null)
-                              setSearch('')
-                            }}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-base transition hover:bg-surface-alt active:scale-90"
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                      {search && FREQUENT_EMOJIS.filter((e) => e.includes(search)).length === 0 && (
-                        <p className="py-2 text-center text-xs text-ink-faint">No matches</p>
-                      )}
                     </div>
                   )}
                 </div>
