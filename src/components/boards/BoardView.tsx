@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import type { DropResult } from '@hello-pangea/dnd'
-import { motion } from 'framer-motion'
 import { useStore } from '../../store/useStore'
 import BoardTopBar from './BoardTopBar'
 import ListColumn from './ListColumn'
@@ -82,15 +81,13 @@ export default function BoardView() {
                 <Draggable key={list.id} draggableId={list.id} index={index}>
                   {(listProvided) => (
                     <div ref={listProvided.innerRef} {...listProvided.draggableProps}>
-                      <motion.div layout>
-                        <ListColumn
-                          list={list}
-                          dragHandleProps={listProvided.dragHandleProps}
-                          search={search}
-                          filter={filter}
-                          onOpenCard={setOpenCardId}
-                        />
-                      </motion.div>
+                      <ListColumn
+                        list={list}
+                        dragHandleProps={listProvided.dragHandleProps}
+                        search={search}
+                        filter={filter}
+                        onOpenCard={setOpenCardId}
+                      />
                     </div>
                   )}
                 </Draggable>
