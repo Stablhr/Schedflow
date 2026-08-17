@@ -51,7 +51,7 @@ export default function PlannerView() {
 
   const weekLabel = `${formatDate(toISODate(days[0]))} – ${formatDate(toISODate(days[6]))}`
   const navButtonClass =
-    'flex h-7 w-7 items-center justify-center rounded-lg text-ink-muted transition hover:bg-brand-light hover:text-brand-dark active:scale-95'
+    'flex h-7 w-7 items-center justify-center rounded-lg text-ink-muted transition hover:bg-brand-light hover:text-brand-dark hover-grow active:scale-95'
 
   return (
     <div className="flex h-full flex-col">
@@ -70,7 +70,7 @@ export default function PlannerView() {
           <button
             type="button"
             onClick={() => setWeekStart(startOfWeek())}
-            className="rounded-lg px-2 py-1 text-xs font-semibold text-brand transition hover:bg-brand-light active:scale-95"
+            className="rounded-lg px-2 py-1 text-xs font-semibold text-brand transition hover:bg-brand-light hover-grow active:scale-95"
           >
             Today
           </button>

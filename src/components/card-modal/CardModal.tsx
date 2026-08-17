@@ -110,7 +110,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
         type="button"
         onClick={onClose}
         title="Close"
-        className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full glass-subtle text-ink-muted shadow-md transition hover:text-ink active:scale-95"
+        className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full glass-subtle text-ink-muted shadow-md transition hover:text-ink hover-rotate active:scale-95"
       >
         <X size={18} />
       </button>
@@ -306,7 +306,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
             <button
               type="button"
               onClick={handleDelete}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger-light active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger-light hover-grow active:scale-95"
             >
               <Trash2 size={14} />
               Delete card

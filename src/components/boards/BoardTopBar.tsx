@@ -60,7 +60,7 @@ export default function BoardTopBar({
       <Link
         to="/boards"
         title="Back to boards"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition hover:bg-brand-light hover:text-brand-dark"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition hover:bg-brand-light hover:text-brand-dark hover-rotate"
         style={{ color: 'var(--surface-text-muted)' }}
       >
         <ChevronLeft size={20} />

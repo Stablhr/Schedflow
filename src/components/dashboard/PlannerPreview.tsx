@@ -38,7 +38,7 @@ export default function PlannerPreview() {
               key={toISODate(day)}
               to="/planner"
               title={`${count} card${count === 1 ? '' : 's'} on ${day.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}`}
-              className={`flex flex-col items-center rounded-lg px-0.5 py-1.5 transition hover:bg-brand-light sm:px-1 sm:py-2 ${
+              className={`flex flex-col items-center rounded-lg px-0.5 py-1.5 transition hover:bg-brand-light hover:scale-105 sm:px-1 sm:py-2 ${
                 count > 0 ? 'bg-brand-light/60' : 'bg-bg'
               }`}
             >

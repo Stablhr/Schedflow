@@ -65,7 +65,7 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
         <button
           type="button"
           onClick={copyLink}
-          className="mt-5 w-full rounded-xl bg-bg px-3 py-2.5 text-left ring-1 ring-border transition hover:ring-brand"
+          className="mt-5 w-full rounded-xl bg-bg px-3 py-2.5 text-left ring-1 ring-border transition hover:ring-brand hover-glow"
         >
           <span className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint">
             Shareable link

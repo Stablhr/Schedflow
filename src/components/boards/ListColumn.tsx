@@ -60,7 +60,7 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
             setEditing(false)
           }}
           title={list.name}
-          className="flex h-full cursor-pointer items-center justify-center rounded-xl py-3 shadow-sm backdrop-blur-xl transition hover:shadow-md"
+          className="flex h-full cursor-pointer items-center justify-center rounded-xl py-3 shadow-sm backdrop-blur-xl transition hover:shadow-md hover-grow"
           style={{ ...vars, background: bg }}
         >
           <span

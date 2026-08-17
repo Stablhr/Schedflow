@@ -69,7 +69,7 @@ function DoneToggle({ card }: { card: Card }) {
         e.stopPropagation()
         toggleDone(card.id)
       }}
-      className={`absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full shadow-sm ring-1 transition active:scale-90 ${
+      className={`absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full shadow-sm ring-1 transition active:scale-90 hover:scale-110 ${
         card.done
           ? 'bg-success text-white ring-success'
           : 'bg-white/85 text-ink-faint ring-ink-faint/40 hover:bg-brand-light hover:text-brand-dark hover:ring-brand'
@@ -99,7 +99,7 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={() => onOpenCard(card.id)}
-          className={`relative cursor-pointer rounded-xl bg-white/50 backdrop-blur-md p-2.5 shadow-sm ring-1 ring-white/20 transition-all duration-150 hover:shadow-md hover:ring-border ${
+          className={`relative cursor-pointer rounded-xl bg-white/50 backdrop-blur-md p-2.5 shadow-sm ring-1 ring-white/20 transition-all duration-200 hover:shadow-lg hover:ring-border hover:-translate-y-0.5 ${
             snapshot.isDragging ? 'scale-[1.03] shadow-lg ring-brand/30' : ''
           }`}
         >

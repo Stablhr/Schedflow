@@ -85,8 +85,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 title={collapsed ? item.label : undefined}
                 className={() =>
                   collapsed
-                    ? `relative flex h-9 w-9 mx-auto items-center justify-center rounded-xl transition`
-                    : `group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition`
+                    ? `relative flex h-9 w-9 mx-auto items-center justify-center rounded-xl transition hover-grow`
+                    : `group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition hover-slide-right`
                 }
                 style={({ isActive }) => ({
                   color: isActive ? 'var(--surface-text)' : 'var(--surface-text-muted)',
@@ -132,7 +132,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               key={item.to}
               to={item.to}
               end={item.end}
-              className="relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition"
+              className="relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition hover:bg-brand-light/40 hover:scale-105"
               style={({ isActive }) => ({
                 color: isActive ? 'var(--surface-text)' : 'var(--surface-text-muted)',
                 background: isActive ? 'var(--surface-bg-subtle)' : undefined,

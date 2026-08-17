@@ -2,8 +2,14 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Star } from 'lucide-react'
 import { useStore } from '../../store/useStore'
-import { blendGradient } from '../../utils/color'
 import CreateBoardModal from './CreateBoardModal'
+
+function boardBgStyle(bg: string): React.CSSProperties {
+  if (!bg) return {}
+  if (bg.startsWith('data:')) return { background: `url(${bg}) center/cover no-repeat` }
+  if (bg.startsWith('linear-gradient') || bg.startsWith('radial-gradient')) return { background: bg }
+  return { background: `linear-gradient(135deg, ${bg}, ${bg}dd)` }
+}
 
 export default function BoardsHome() {
   const { data, toggleStar } = useStore()
@@ -22,7 +28,7 @@ export default function BoardsHome() {
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95 sm:px-3.5 sm:py-2"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark hover-grow active:scale-95 sm:px-3.5 sm:py-2"
         >
           <Plus size={16} />
           <span className="hidden sm:inline">Create board</span>
@@ -42,10 +48,8 @@ export default function BoardsHome() {
             <div
               key={board.id}
               onClick={() => navigate(`/boards/${board.id}`)}
-              className="group relative h-24 cursor-pointer overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5 transition hover:shadow-md sm:h-28"
-              style={{
-                background: blendGradient(board.background),
-              }}
+              className="group relative h-24 cursor-pointer overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5 transition hover:shadow-md hover-lift sm:h-28"
+              style={boardBgStyle(board.background)}
             >
               <button
                 type="button"

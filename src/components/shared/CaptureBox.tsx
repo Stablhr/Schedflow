@@ -21,7 +21,7 @@ export default function CaptureBox({ autoFocus = false, variant = 'sidebar' }: {
         type="button"
         onClick={submit}
         title="Capture to Inbox"
-        className={`flex shrink-0 items-center justify-center rounded-lg text-brand transition hover:bg-brand-light active:scale-95 ${variant === 'sidebar' ? 'h-7 w-7' : 'h-8 w-8'}`}
+        className={`flex shrink-0 items-center justify-center rounded-lg text-brand transition hover:bg-brand-light hover-rotate active:scale-95 ${variant === 'sidebar' ? 'h-7 w-7' : 'h-8 w-8'}`}
       >
         <Plus size={16} />
       </button>

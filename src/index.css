@@ -130,3 +130,40 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(19, 42, 41, 0.08), 0 1px 3px rgba(19, 42, 41, 0.06);
 }
+
+@utility hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(19, 42, 41, 0.12), 0 3px 10px rgba(19, 42, 41, 0.08);
+  }
+}
+
+@utility hover-grow {
+  transition: transform 0.2s ease;
+  &:hover {
+    transform: scale(1.03);
+  }
+}
+
+@utility hover-glow {
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+  &:hover {
+    box-shadow: 0 0 0 3px rgba(13, 171, 163, 0.2), 0 4px 16px rgba(13, 171, 163, 0.15);
+    transform: translateY(-1px);
+  }
+}
+
+@utility hover-slide-right {
+  transition: transform 0.15s ease, background-color 0.15s ease;
+  &:hover {
+    transform: translateX(3px);
+  }
+}
+
+@utility hover-rotate {
+  transition: transform 0.2s ease;
+  &:hover {
+    transform: rotate(8deg);
+  }
+}
