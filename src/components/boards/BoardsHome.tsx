@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Star } from 'lucide-react'
 import { useStore } from '../../store/useStore'
-import { shade } from '../../utils/color'
+import { blendGradient } from '../../utils/color'
 import CreateBoardModal from './CreateBoardModal'
 
 export default function BoardsHome() {
@@ -44,7 +44,7 @@ export default function BoardsHome() {
               onClick={() => navigate(`/boards/${board.id}`)}
               className="group relative h-24 cursor-pointer overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5 transition hover:shadow-md sm:h-28"
               style={{
-                background: `linear-gradient(135deg, ${board.background}, ${shade(board.background, -22)})`,
+                background: blendGradient(board.background),
               }}
             >
               <button

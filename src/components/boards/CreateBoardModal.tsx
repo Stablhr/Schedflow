@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Check, X } from 'lucide-react'
 import { BOARD_TEMPLATES } from '../../store/schema'
+import { blendGradient } from '../../utils/color'
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
 
@@ -53,7 +54,7 @@ export default function CreateBoardModal({ open, onClose }: CreateBoardModalProp
             >
               <span
                 className="block h-9 rounded-lg"
-                style={{ background: `linear-gradient(135deg, ${t.swatch}, ${t.swatch})` }}
+                style={{ background: blendGradient(t.swatch) }}
               />
               <span className="mt-1.5 block truncate text-xs font-semibold text-ink">{t.name}</span>
               {selected === t.id && (

@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { LayoutDashboard, Inbox, Columns3, CalendarDays, PanelLeftClose, PanelLeft } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
+import { blendTwoStop } from '../../utils/color'
 import CaptureBox from '../shared/CaptureBox'
 import Avatar from '../shared/Avatar'
 
@@ -15,7 +16,7 @@ const NAV = [
 function Logo({ collapsed }: { collapsed: boolean }) {
   return (
     <div className="flex items-center gap-2.5 px-3 py-5">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-dark text-white shadow-sm">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-sm" style={{ background: blendTwoStop('#0DABA3', '#0A8981') }}>
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
           <path d="M4 7h16" opacity="0.55" />
           <path d="M4 12h16" />

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { X, Eye, EyeOff, Trash2, Archive, Check, RotateCcw, MoreHorizontal, ArrowRight, Palette, ImageIcon } from 'lucide-react'
 import { COVER_COLORS, BOARD_BACKGROUNDS } from '../../store/schema'
+import { blendTwoStop } from '../../utils/color'
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
 import CardDescription from './CardDescription'
@@ -97,7 +98,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
           {typeof card.cover === 'string' ? (
             <div
               className="h-full w-full"
-              style={{ background: `linear-gradient(135deg, ${card.cover}, #0A8981)` }}
+              style={{ background: blendTwoStop(card.cover as string, '#0A8981') }}
             />
           ) : (
             <img src={card.cover.dataUrl} alt="" className="h-full w-full object-cover" />

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { X, Share2, Eye, Tag, Archive, Palette, Trash2 } from 'lucide-react'
 import type { Board } from '../../store/schema'
 import { BOARD_BACKGROUNDS, COLOR_THEMES } from '../../store/schema'
+import { blendTwoStop } from '../../utils/color'
 import { useStore } from '../../store/useStore'
 import ShareModal from './ShareModal'
 import VisibilityModal from './VisibilityModal'
@@ -118,7 +119,7 @@ export default function BoardMenuDrawer({
             </p>
             <div className="mt-2 space-y-2">
               {COLOR_THEMES.map((theme) => {
-                const gradient = `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`
+                const gradient = blendTwoStop(theme.primary, theme.secondary)
                 const isActive = board.background === gradient
                 return (
                   <button

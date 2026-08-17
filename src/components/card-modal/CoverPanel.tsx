@@ -3,6 +3,7 @@ import { X, ImageIcon, AlertTriangle } from 'lucide-react'
 import type { Card, FileAttachment } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 import { uid } from '../../utils/id'
+import { blendGradient } from '../../utils/color'
 import { formatSize } from '../../utils/format'
 import { MAX_FILE_SIZE } from './CardAttachments'
 
@@ -119,7 +120,7 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
                   ) : (
                     <div
                       className="h-full w-full"
-                      style={{ background: activeColor ?? 'linear-gradient(135deg, #0DABA3, #0A8981)' }}
+                      style={{ background: activeColor ?? blendGradient('#0DABA3') }}
                     />
                   )}
                 </div>

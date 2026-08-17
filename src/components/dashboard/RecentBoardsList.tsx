@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Star, Clock3 } from 'lucide-react'
 import { useStore } from '../../store/useStore'
-import { shade } from '../../utils/color'
+import { blendGradient } from '../../utils/color'
 
 export default function RecentBoardsList({ limit = 4 }: { limit?: number }) {
   const { data } = useStore()
@@ -26,7 +26,7 @@ export default function RecentBoardsList({ limit = 4 }: { limit?: number }) {
             to={`/boards/${board.id}`}
             className="relative flex h-14 items-end overflow-hidden rounded-lg p-2.5 shadow-sm ring-1 ring-black/5 transition hover:shadow-md sm:h-16"
             style={{
-              background: `linear-gradient(135deg, ${board.background}, ${shade(board.background, -22)})`,
+              background: blendGradient(board.background),
             }}
           >
             {board.starred && (
