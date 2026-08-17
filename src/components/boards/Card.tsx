@@ -1,4 +1,5 @@
 import { Draggable } from '@hello-pangea/dnd'
+import { motion } from 'framer-motion'
 import { Paperclip, MessageSquare, Eye, Check } from 'lucide-react'
 import type { Card } from '../../store/schema'
 import { useStore } from '../../store/useStore'
@@ -99,63 +100,67 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={() => !snapshot.isDragging && onOpenCard(card.id)}
-          className={`relative cursor-pointer rounded-xl bg-white/50 backdrop-blur-md p-2.5 shadow-sm ring-1 ring-white/20 ${
-            snapshot.isDragging
-              ? 'z-50 rounded-2xl bg-white shadow-[0_12px_40px_rgba(13,171,163,0.2),0_4px_16px_rgba(19,42,41,0.12)] ring-brand/40 opacity-95'
-              : 'hover:shadow-lg hover:ring-border'
-          }`}
         >
-          <DoneToggle card={card} />
-          <CardCoverBand card={card} />
-
-          {labels.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {labels.slice(0, 4).map((label) => (
-                <LabelChip key={label.id} label={label} />
-              ))}
-              {extraLabels > 0 && (
-                <span className="rounded-full bg-surface-alt px-1.5 py-0.5 font-mono text-[10px] font-medium text-ink-muted">
-                  +{extraLabels}
-                </span>
-              )}
-            </div>
-          )}
-
-          <p
-            className={`mt-1 text-[14px] font-semibold leading-snug ${
-              card.done ? 'text-ink-muted line-through decoration-ink-faint' : 'text-ink'
+          <motion.div
+            layout
+            className={`relative cursor-pointer rounded-xl bg-white/50 backdrop-blur-md p-2.5 shadow-sm ring-1 ring-white/20 ${
+              snapshot.isDragging
+                ? 'z-50 rounded-2xl bg-white shadow-[0_12px_40px_rgba(13,171,163,0.2),0_4px_16px_rgba(19,42,41,0.12)] ring-brand/40 opacity-95'
+                : 'hover:shadow-lg hover:ring-border'
             }`}
           >
-            {card.title}
-          </p>
+            <DoneToggle card={card} />
+            <CardCoverBand card={card} />
 
-          {(card.dueDate ||
-            card.files.length > 0 ||
-            card.comments.length > 0 ||
-            card.watching ||
-            members.length > 0) && (
-            <div className="mt-2 flex items-center gap-1.5 text-ink-muted">
-              {card.dueDate && <DueBadge due={card.dueDate} />}
-              {card.files.length > 0 && (
-                <span className="inline-flex items-center gap-1 font-mono text-[11px]">
-                  <Paperclip size={12} />
-                  {card.files.length}
-                </span>
-              )}
-              {card.comments.length > 0 && (
-                <span className="inline-flex items-center gap-1 font-mono text-[11px]">
-                  <MessageSquare size={12} />
-                  {card.comments.length}
-                </span>
-              )}
-              {card.watching && <Eye size={12} className="text-brand" />}
-              <span className="ml-auto flex -space-x-1">
-                {members.slice(0, 4).map((m) => (
-                  <Avatar key={m.id} member={m} stacked />
+            {labels.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {labels.slice(0, 4).map((label) => (
+                  <LabelChip key={label.id} label={label} />
                 ))}
-              </span>
-            </div>
-          )}
+                {extraLabels > 0 && (
+                  <span className="rounded-full bg-surface-alt px-1.5 py-0.5 font-mono text-[10px] font-medium text-ink-muted">
+                    +{extraLabels}
+                  </span>
+                )}
+              </div>
+            )}
+
+            <p
+              className={`mt-1 text-[14px] font-semibold leading-snug ${
+                card.done ? 'text-ink-muted line-through decoration-ink-faint' : 'text-ink'
+              }`}
+            >
+              {card.title}
+            </p>
+
+            {(card.dueDate ||
+              card.files.length > 0 ||
+              card.comments.length > 0 ||
+              card.watching ||
+              members.length > 0) && (
+              <div className="mt-2 flex items-center gap-1.5 text-ink-muted">
+                {card.dueDate && <DueBadge due={card.dueDate} />}
+                {card.files.length > 0 && (
+                  <span className="inline-flex items-center gap-1 font-mono text-[11px]">
+                    <Paperclip size={12} />
+                    {card.files.length}
+                  </span>
+                )}
+                {card.comments.length > 0 && (
+                  <span className="inline-flex items-center gap-1 font-mono text-[11px]">
+                    <MessageSquare size={12} />
+                    {card.comments.length}
+                  </span>
+                )}
+                {card.watching && <Eye size={12} className="text-brand" />}
+                <span className="ml-auto flex -space-x-1">
+                  {members.slice(0, 4).map((m) => (
+                    <Avatar key={m.id} member={m} stacked />
+                  ))}
+                </span>
+              </div>
+            )}
+          </motion.div>
         </div>
       )}
     </Draggable>
