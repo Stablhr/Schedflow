@@ -47,7 +47,7 @@ export default function BoardTopBar({
   const filterActive = filter.labelIds.length > 0 || filter.memberIds.length > 0
 
   return (
-    <div className="flex items-center gap-2 border-b border-border bg-surface px-4 py-3">
+    <div className="flex items-center gap-2 border-b border-border/60 bg-surface/70 backdrop-blur-xl px-4 py-3">
       <Link
         to="/boards"
         title="Back to boards"
