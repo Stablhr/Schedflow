@@ -92,8 +92,8 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
   }
 
   return (
-    <Modal open onClose={onClose} className="max-w-2xl max-h-[85vh] sm:max-h-[80vh] rounded-2xl glass-heavy shadow-lg">
-      <div className="flex flex-col overflow-hidden rounded-2xl">
+    <Modal open onClose={onClose} className="max-w-2xl max-h-[85vh] sm:max-h-[80vh] h-full rounded-2xl glass-heavy shadow-lg">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl">
         {/* Close button */}
         <button
           type="button"
