@@ -92,225 +92,229 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
   }
 
   return (
-    <Modal open onClose={onClose} className="h-full overflow-hidden rounded-none rounded-t-2xl sm:h-auto sm:max-w-2xl sm:rounded-2xl glass-heavy shadow-lg">
-      {card.cover && (
-        <div className={`w-full ${card.coverSize === 'large' ? 'h-48' : typeof card.cover === 'string' ? 'h-28' : 'h-16'}`}>
-          {typeof card.cover === 'string' ? (
-            <div
-              className="h-full w-full"
-              style={{ background: blendTwoStop(card.cover as string, '#0A8981') }}
-            />
-          ) : (
-            <img src={card.cover.dataUrl} alt="" className="h-full w-full object-cover" />
-          )}
-        </div>
-      )}
+    <Modal open onClose={onClose} className="max-w-2xl max-h-[85vh] sm:max-h-[80vh] rounded-2xl glass-heavy shadow-lg">
+      <div className="flex flex-col overflow-hidden rounded-2xl">
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          title="Close"
+          className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full glass-subtle text-ink-muted shadow-md transition hover:text-ink hover-rotate active:scale-95 sm:right-4 sm:top-4"
+        >
+          <X size={18} />
+        </button>
 
-      <button
-        type="button"
-        onClick={onClose}
-        title="Close"
-        className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full glass-subtle text-ink-muted shadow-md transition hover:text-ink hover-rotate active:scale-95"
-      >
-        <X size={18} />
-      </button>
-
-      <div className="scroll-slim max-h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden sm:max-h-[calc(100vh-8rem)]">
-        <div className="p-4 sm:p-6">
-          <div className="flex flex-wrap items-start gap-2 sm:gap-3">
-            <div className="min-w-0 flex-1">
-              {editingTitle ? (
-                <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') commitTitle()
-                    if (e.key === 'Escape') {
-                      setTitle(card.title)
-                      setEditingTitle(false)
-                    }
-                  }}
-                  onBlur={commitTitle}
-                  autoFocus
-                  className="w-full rounded-lg px-2 py-1 font-display text-[20px] font-bold text-ink outline-none ring-2 ring-brand"
+        {/* Scrollable area: cover + content */}
+        <div className="scroll-slim min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+          {card.cover && (
+            <div className={`w-full ${card.coverSize === 'large' ? 'h-48' : typeof card.cover === 'string' ? 'h-28' : 'h-16'}`}>
+              {typeof card.cover === 'string' ? (
+                <div
+                  className="h-full w-full"
+                  style={{ background: blendTwoStop(card.cover as string, '#0A8981') }}
                 />
               ) : (
-                <h2
-                  onClick={() => {
-                    setTitle(card.title)
-                    setEditingTitle(true)
-                  }}
-                  title="Click to rename"
-                  className="cursor-text break-words rounded-lg px-2 py-1 font-display text-[20px] font-bold leading-snug text-ink transition hover:bg-surface-alt"
-                >
-                  {card.title}
-                </h2>
+                <img src={card.cover.dataUrl} alt="" className="h-full w-full object-cover" />
               )}
-              <p className="mt-0.5 px-2 text-xs text-ink-muted">
-                in list{' '}
-                <span className="font-semibold text-brand-dark">{list.name}</span>
-              </p>
             </div>
+          )}
 
-            <button
-              type="button"
-              onClick={() => toggleDone(card.id)}
-              title={card.done ? 'Mark as not done' : 'Mark as done'}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition active:scale-95 sm:px-2.5 ${
-                card.done
-                  ? 'bg-success text-white'
-                  : 'bg-surface-alt text-ink-muted hover:bg-success-light hover:text-success'
-              }`}
-            >
-              {card.done ? <RotateCcw size={14} /> : <Check size={14} />}
-              <span className="hidden sm:inline">{card.done ? 'Reopen' : 'Mark as done'}</span>
-            </button>
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-wrap items-start gap-2 sm:gap-3">
+              <div className="min-w-0 flex-1">
+                {editingTitle ? (
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') commitTitle()
+                      if (e.key === 'Escape') {
+                        setTitle(card.title)
+                        setEditingTitle(false)
+                      }
+                    }}
+                    onBlur={commitTitle}
+                    autoFocus
+                    className="w-full rounded-lg px-2 py-1 font-display text-[20px] font-bold text-ink outline-none ring-2 ring-brand"
+                  />
+                ) : (
+                  <h2
+                    onClick={() => {
+                      setTitle(card.title)
+                      setEditingTitle(true)
+                    }}
+                    title="Click to rename"
+                    className="cursor-text break-words rounded-lg px-2 py-1 font-display text-[20px] font-bold leading-snug text-ink transition hover:bg-surface-alt"
+                  >
+                    {card.title}
+                  </h2>
+                )}
+                <p className="mt-0.5 px-2 text-xs text-ink-muted">
+                  in list{' '}
+                  <span className="font-semibold text-brand-dark">{list.name}</span>
+                </p>
+              </div>
 
-            <button
-              type="button"
-              onClick={toggleWatch}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition active:scale-95 sm:px-2.5 ${
-                card.watching
-                  ? 'bg-brand-light text-brand-dark'
-                  : 'bg-surface-alt text-ink-muted hover:bg-brand-light hover:text-brand-dark'
-              }`}
-            >
-              {card.watching ? <Eye size={14} /> : <EyeOff size={14} />}
-              <span className="hidden sm:inline">{card.watching ? 'Watching' : 'Watch'}</span>
-            </button>
-
-            {/* Overflow menu */}
-            <div className="relative shrink-0" ref={overflowRef}>
               <button
                 type="button"
-                onClick={() => setOverflowOpen((o) => !o)}
-                title="More actions"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-ink-muted transition hover:bg-surface-alt active:scale-95"
+                onClick={() => toggleDone(card.id)}
+                title={card.done ? 'Mark as not done' : 'Mark as done'}
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition active:scale-95 sm:px-2.5 ${
+                  card.done
+                    ? 'bg-success text-white'
+                    : 'bg-surface-alt text-ink-muted hover:bg-success-light hover:text-success'
+                }`}
               >
-                <MoreHorizontal size={16} />
+                {card.done ? <RotateCcw size={14} /> : <Check size={14} />}
+                <span className="hidden sm:inline">{card.done ? 'Reopen' : 'Mark as done'}</span>
               </button>
-              {overflowOpen && (
-                <div className="absolute right-0 top-9 z-30 w-52 rounded-xl glass py-1 shadow-md animate-in">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOverflowOpen(false)
-                      setMoveDialogOpen(true)
-                    }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-alt"
-                  >
-                    <ArrowRight size={14} className="text-ink-muted" />
-                    Move
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleArchive}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-alt"
-                  >
-                    <Archive size={14} className="text-ink-muted" />
-                    Archive
-                  </button>
-                  <div className="my-1 h-px bg-border" />
-                  <div className="px-3 py-2">
-                    <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
-                      <Palette size={12} />
-                      Color
-                    </div>
-                    <div className="grid grid-cols-5 gap-1.5">
-                      {COVER_COLORS.map((color) => (
-                        <button
-                          key={color}
-                          type="button"
-                          title="Set cover color"
-                          onClick={() => {
-                            setColorCover(color)
-                            setOverflowOpen(false)
-                          }}
-                          className={`h-6 rounded-md transition hover:scale-110 active:scale-95 ${
-                            activeCoverColor === color ? 'ring-2 ring-ink ring-offset-1' : ''
-                          }`}
-                          style={{ background: color }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="my-1 h-px bg-border" />
-                  <div className="px-3 py-2">
-                    <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
-                      <Palette size={12} />
-                      Board background
-                    </div>
-                    <div className="grid grid-cols-4 gap-1.5">
-                      {BOARD_BACKGROUNDS.map((color) => (
-                        <button
-                          key={color}
-                          type="button"
-                          title="Set board background"
-                          onClick={() => {
-                            setBoardBackground(board.id, color)
-                            setOverflowOpen(false)
-                          }}
-                          className={`h-6 rounded-md transition hover:scale-110 active:scale-95 ${
-                            board.background === color ? 'ring-2 ring-ink ring-offset-1' : ''
-                          }`}
-                          style={{ background: color }}
-                        />
-                      ))}
-                    </div>
+
+              <button
+                type="button"
+                onClick={toggleWatch}
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition active:scale-95 sm:px-2.5 ${
+                  card.watching
+                    ? 'bg-brand-light text-brand-dark'
+                    : 'bg-surface-alt text-ink-muted hover:bg-brand-light hover:text-brand-dark'
+                }`}
+              >
+                {card.watching ? <Eye size={14} /> : <EyeOff size={14} />}
+                <span className="hidden sm:inline">{card.watching ? 'Watching' : 'Watch'}</span>
+              </button>
+
+              {/* Overflow menu */}
+              <div className="relative shrink-0" ref={overflowRef}>
+                <button
+                  type="button"
+                  onClick={() => setOverflowOpen((o) => !o)}
+                  title="More actions"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-ink-muted transition hover:bg-surface-alt active:scale-95"
+                >
+                  <MoreHorizontal size={16} />
+                </button>
+                {overflowOpen && (
+                  <div className="absolute right-0 top-9 z-30 w-52 rounded-xl glass py-1 shadow-md animate-in">
                     <button
                       type="button"
-                      onClick={() => bgFileRef.current?.click()}
-                      className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-2.5 py-1.5 text-[11px] font-semibold text-ink-muted transition hover:bg-brand-light hover:text-brand-dark active:scale-95"
-                    >
-                      <ImageIcon size={12} />
-                      Upload image
-                    </button>
-                    <input
-                      ref={bgFileRef}
-                      type="file"
-                      accept="image/*"
-                      hidden
-                      onChange={(e) => {
-                        uploadBgImage(e.target.files?.[0])
-                        e.target.value = ''
+                      onClick={() => {
                         setOverflowOpen(false)
+                        setMoveDialogOpen(true)
                       }}
-                    />
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-alt"
+                    >
+                      <ArrowRight size={14} className="text-ink-muted" />
+                      Move
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleArchive}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-alt"
+                    >
+                      <Archive size={14} className="text-ink-muted" />
+                      Archive
+                    </button>
+                    <div className="my-1 h-px bg-border" />
+                    <div className="px-3 py-2">
+                      <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+                        <Palette size={12} />
+                        Color
+                      </div>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {COVER_COLORS.map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            title="Set cover color"
+                            onClick={() => {
+                              setColorCover(color)
+                              setOverflowOpen(false)
+                            }}
+                            className={`h-6 rounded-md transition hover:scale-110 active:scale-95 ${
+                              activeCoverColor === color ? 'ring-2 ring-ink ring-offset-1' : ''
+                            }`}
+                            style={{ background: color }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="my-1 h-px bg-border" />
+                    <div className="px-3 py-2">
+                      <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+                        <Palette size={12} />
+                        Board background
+                      </div>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {BOARD_BACKGROUNDS.map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            title="Set board background"
+                            onClick={() => {
+                              setBoardBackground(board.id, color)
+                              setOverflowOpen(false)
+                            }}
+                            className={`h-6 rounded-md transition hover:scale-110 active:scale-95 ${
+                              board.background === color ? 'ring-2 ring-ink ring-offset-1' : ''
+                            }`}
+                            style={{ background: color }}
+                          />
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => bgFileRef.current?.click()}
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-2.5 py-1.5 text-[11px] font-semibold text-ink-muted transition hover:bg-brand-light hover:text-brand-dark active:scale-95"
+                      >
+                        <ImageIcon size={12} />
+                        Upload image
+                      </button>
+                      <input
+                        ref={bgFileRef}
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={(e) => {
+                          uploadBgImage(e.target.files?.[0])
+                          e.target.value = ''
+                          setOverflowOpen(false)
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-5 sm:mt-5 sm:gap-7 md:grid-cols-[1fr_220px]">
-            <div className="min-w-0 space-y-6">
-              <CardDescription card={card} />
-              <CardAttachments card={card} />
-              <CardComments card={card} />
+                )}
+              </div>
             </div>
 
-            <aside className="min-w-0 space-y-5">
-              <CardLabels card={card} />
-              <CardMembers card={card} />
-              <CardDueDate card={card} />
-              <CardLocation card={card} />
-              <CardCover card={card} onOpenPanel={() => setCoverPanelOpen(true)} />
-            </aside>
-          </div>
+            <div className="mt-4 grid grid-cols-1 gap-5 sm:mt-5 sm:gap-7 md:grid-cols-[1fr_220px]">
+              <div className="min-w-0 space-y-6">
+                <CardDescription card={card} />
+                <CardAttachments card={card} />
+                <CardComments card={card} />
+              </div>
 
-          <div className="mt-7 border-t border-border pt-4">
-            <CardActivity card={card} />
-          </div>
+              <aside className="min-w-0 space-y-5">
+                <CardLabels card={card} />
+                <CardMembers card={card} />
+                <CardDueDate card={card} />
+                <CardLocation card={card} />
+                <CardCover card={card} onOpenPanel={() => setCoverPanelOpen(true)} />
+              </aside>
+            </div>
 
-          <div className="mt-5 flex justify-end">
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger-light hover-grow active:scale-95"
-            >
-              <Trash2 size={14} />
-              Delete card
-            </button>
+            <div className="mt-7 border-t border-border pt-4">
+              <CardActivity card={card} />
+            </div>
+
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger-light hover-grow active:scale-95"
+              >
+                <Trash2 size={14} />
+                Delete card
+              </button>
+            </div>
           </div>
         </div>
       </div>

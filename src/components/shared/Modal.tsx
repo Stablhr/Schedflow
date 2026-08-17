@@ -21,9 +21,9 @@ export default function Modal({ open, onClose, children, className = '' }: Modal
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:px-4 sm:py-16">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3 sm:p-6 md:p-8">
       <div className="absolute inset-0 bg-ink/30 backdrop-blur-md" onClick={onClose} />
-      <div className={`animate-in relative w-full ${className}`}>{children}</div>
+      <div className={`animate-in relative z-10 w-full ${className}`}>{children}</div>
     </div>
   )
 }
