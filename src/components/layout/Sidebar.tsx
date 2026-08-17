@@ -51,9 +51,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   return (
     <aside
-      className={`flex shrink-0 flex-col border-r backdrop-blur-xl transition-[width] duration-200 ${
-        isBoard ? '' : 'bg-surface-alt/80'
-      } ${dark ? 'border-white/10' : isBoard ? 'border-black/5' : 'border-border/60'} ${collapsed ? 'w-[52px]' : 'w-[236px]'}`}
+      className={`flex shrink-0 flex-col border-r backdrop-blur-2xl transition-[width] duration-200 ${
+        isBoard ? '' : 'bg-surface-alt/60'
+      } ${dark ? 'border-white/15' : isBoard ? 'border-black/8' : 'border-border/50'} ${collapsed ? 'w-[52px]' : 'w-[236px]'}`}
       style={isBoard ? { background: sidebarBg } : undefined}
     >
       <div className="flex items-center px-2 py-2">

@@ -58,7 +58,7 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
             setEditing(false)
           }}
           title={list.name}
-          className="flex h-full cursor-pointer items-center justify-center rounded-xl py-3 shadow-sm backdrop-blur-sm transition hover:shadow-md"
+          className="flex h-full cursor-pointer items-center justify-center rounded-xl py-3 shadow-sm backdrop-blur-xl transition hover:shadow-md"
           style={{ background: list.backgroundColor || '#FFFFFF' }}
         >
           <span
@@ -73,7 +73,7 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
   }
 
   return (
-    <div className="flex w-[272px] shrink-0 flex-col rounded-xl shadow-sm backdrop-blur-sm" style={{ background: list.backgroundColor || '#FFFFFF' }}>
+    <div className="flex w-[272px] shrink-0 flex-col rounded-xl shadow-sm backdrop-blur-xl" style={{ background: list.backgroundColor || '#FFFFFF' }}>
       <div
         {...dragHandleProps}
         className="group flex cursor-grab items-center gap-1 px-2 pb-1 pt-2.5 active:cursor-grabbing"
