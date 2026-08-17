@@ -8,6 +8,7 @@ interface IconButtonProps {
   disabled?: boolean
   ariaLabel?: string
   active?: boolean
+  style?: React.CSSProperties
 }
 
 export default function IconButton({
@@ -18,6 +19,7 @@ export default function IconButton({
   disabled,
   ariaLabel,
   active,
+  style,
 }: IconButtonProps) {
   return (
     <button
@@ -26,6 +28,7 @@ export default function IconButton({
       aria-label={ariaLabel ?? title}
       onClick={onClick}
       disabled={disabled}
+      style={style}
       className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition active:scale-95 disabled:opacity-40 ${
         active
           ? 'bg-brand-light text-brand-dark'

@@ -8,6 +8,7 @@ import InboxView from './components/inbox/InboxView'
 import BoardsHome from './components/boards/BoardsHome'
 import BoardView from './components/boards/BoardView'
 import PlannerView from './components/planner/PlannerView'
+import ContrastTestPage from './components/dev/ContrastTestPage'
 
 function ErrorToast() {
   const { error, dismissError } = useStore()
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="/boards" element={<BoardsHome />} />
             <Route path="/boards/:boardId" element={<BoardView />} />
             <Route path="/planner" element={<PlannerView />} />
+            <Route path="/dev/contrast" element={<ContrastTestPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AppShell>

@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { LayoutDashboard, Inbox, Columns3, CalendarDays, PanelLeftClose, PanelLeft } from 'lucide-react'
 import { useStore } from '../../store/useStore'
-import { isColorDark, withAlpha } from '../../utils/colorUtils'
+import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
 import CaptureBox from '../shared/CaptureBox'
 import Avatar from '../shared/Avatar'
 
@@ -12,7 +12,7 @@ const NAV = [
   { to: '/planner', label: 'Planner', icon: CalendarDays },
 ]
 
-function Logo({ collapsed, dark }: { collapsed: boolean; dark: boolean }) {
+function Logo({ collapsed }: { collapsed: boolean }) {
   return (
     <div className="flex items-center gap-2.5 px-3 py-5">
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-dark text-white shadow-sm">
@@ -23,7 +23,7 @@ function Logo({ collapsed, dark }: { collapsed: boolean; dark: boolean }) {
         </svg>
       </span>
       {!collapsed && (
-        <span className={`font-display text-[19px] font-bold tracking-tight ${dark ? 'text-white' : 'text-ink'}`}>SchedFlow</span>
+        <span className="font-display text-[19px] font-bold tracking-tight" style={{ color: 'var(--surface-text)' }}>SchedFlow</span>
       )}
     </div>
   )
@@ -45,30 +45,27 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const board = boardId ? data.boards[boardId] : null
   const bg = board?.background || ''
   const isBoard = !!(board && bg && !bg.startsWith('data:'))
-  const dark = isBoard && isColorDark(bg)
 
-  const sidebarBg = isBoard ? withAlpha(bg, 0.3) : ''
+  const theme = useAdaptiveTheme(isBoard ? bg : '#E1F5F3')
+  const sidebarVars = adaptiveVars(theme)
 
   return (
     <aside
       className={`flex shrink-0 flex-col border-r backdrop-blur-2xl transition-[width] duration-200 ${
         isBoard ? '' : 'bg-surface-alt/60'
-      } ${dark ? 'border-white/15' : isBoard ? 'border-black/8' : 'border-border/50'} ${collapsed ? 'w-[52px]' : 'w-[236px]'}`}
-      style={isBoard ? { background: sidebarBg } : undefined}
+      } ${collapsed ? 'w-[52px]' : 'w-[236px]'}`}
+      style={{ ...sidebarVars, background: isBoard ? bg : undefined, borderColor: theme.border }}
     >
       <div className="flex items-center px-2 py-2">
-        {!collapsed && <Logo collapsed={collapsed} dark={dark} />}
+        {!collapsed && <Logo collapsed={collapsed} />}
         <button
           type="button"
           onClick={onToggle}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className={`flex h-8 shrink-0 items-center justify-center rounded-lg transition active:scale-95 ${
-            dark
-              ? 'text-white/50 hover:bg-white/15 hover:text-white'
-              : isBoard
-                ? 'text-ink/40 hover:bg-black/8 hover:text-ink'
-                : 'text-ink-muted hover:bg-surface hover:text-ink'
-          } ${collapsed ? 'mx-auto mt-3 w-8' : 'ml-auto'}`}
+            collapsed ? 'mx-auto mt-3 w-8' : 'ml-auto'
+          }`}
+          style={{ color: 'var(--surface-text-muted)' }}
         >
           {collapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
         </button>
@@ -83,45 +80,21 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               to={item.to}
               end={item.end}
               title={collapsed ? item.label : undefined}
-              className={({ isActive }) =>
+              className={() =>
                 collapsed
-                  ? `relative flex h-9 w-9 mx-auto items-center justify-center rounded-xl transition ${
-                      isActive
-                        ? dark
-                          ? 'bg-white/15 text-white shadow-sm'
-                          : isBoard
-                            ? 'bg-black/8 text-ink shadow-sm'
-                            : 'bg-surface text-brand-dark shadow-sm'
-                        : dark
-                          ? 'text-white/50 hover:bg-white/10 hover:text-white'
-                          : isBoard
-                            ? 'text-ink/40 hover:bg-black/5 hover:text-ink'
-                            : 'text-ink-muted hover:bg-brand/10 hover:text-ink'
-                    }`
-                  : `group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                      isActive
-                        ? dark
-                          ? 'bg-white/15 text-white shadow-sm'
-                          : isBoard
-                            ? 'bg-black/8 text-ink shadow-sm'
-                            : 'bg-surface text-brand-dark shadow-sm'
-                        : dark
-                          ? 'text-white/50 hover:bg-white/10 hover:text-white'
-                          : isBoard
-                            ? 'text-ink/40 hover:bg-black/5 hover:text-ink'
-                            : 'text-ink-muted hover:bg-brand/10 hover:text-ink'
-                    }`
+                  ? `relative flex h-9 w-9 mx-auto items-center justify-center rounded-xl transition`
+                  : `group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition`
               }
+              style={({ isActive }) => ({
+                color: isActive ? 'var(--surface-text)' : 'var(--surface-text-muted)',
+                background: isActive ? 'var(--surface-bg-subtle)' : undefined,
+              })}
             >
               <Icon size={17} className="shrink-0" />
               {!collapsed && <span className="flex-1">{item.label}</span>}
               {item.to === '/inbox' && inboxCount > 0 && (
                 <span
-                  className={`font-mono text-[10px] font-medium text-white ${
-                    collapsed
-                      ? 'absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1'
-                      : 'rounded-full bg-brand px-1.5 py-0.5 text-[10.5px]'
-                  }`}
+                  className="rounded-full bg-brand px-1.5 py-0.5 font-mono text-[10px] font-medium text-white"
                 >
                   {inboxCount}
                 </span>
@@ -135,11 +108,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <div className="space-y-3 p-3">
           <CaptureBox />
           {you && (
-            <div className={`flex items-center gap-2 rounded-xl px-2.5 py-2 ${
-              dark ? 'bg-white/10' : isBoard ? 'bg-black/5' : 'bg-surface/60'
-            }`}>
+            <div className="flex items-center gap-2 rounded-xl px-2.5 py-2" style={{ background: 'var(--surface-bg-subtle)' }}>
               <Avatar member={you} size={22} />
-              <span className={`text-sm font-semibold ${dark ? 'text-white' : isBoard ? 'text-ink' : 'text-ink'}`}>{you.name}</span>
+              <span className="text-sm font-semibold" style={{ color: 'var(--surface-text)' }}>{you.name}</span>
             </div>
           )}
         </div>

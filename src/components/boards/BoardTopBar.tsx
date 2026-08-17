@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ChevronLeft, Star, Search, SlidersHorizontal, LayoutGrid, MoreHorizontal, Check } from 'lucide-react'
 import type { Board } from '../../store/schema'
 import { useStore } from '../../store/useStore'
+import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
 import IconButton from '../shared/IconButton'
 import ViewsMenu from './ViewsMenu'
 import FilterPanel from './FilterPanel'
@@ -37,6 +38,10 @@ export default function BoardTopBar({
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(board.name)
 
+  const bg = board.background || '#FFFFFF'
+  const theme = useAdaptiveTheme(bg.startsWith('data:') ? '#FFFFFF' : bg)
+  const vars = adaptiveVars(theme)
+
   const commitRename = () => {
     setEditing(false)
     const trimmed = name.trim()
@@ -47,11 +52,15 @@ export default function BoardTopBar({
   const filterActive = filter.labelIds.length > 0 || filter.memberIds.length > 0
 
   return (
-    <div className="flex items-center gap-2 border-b border-border/50 bg-surface/50 backdrop-blur-2xl px-4 py-3">
+    <div
+      className="flex items-center gap-2 border-b backdrop-blur-2xl px-4 py-3"
+      style={{ ...vars, background: 'var(--surface-bg-subtle)', borderColor: theme.border }}
+    >
       <Link
         to="/boards"
         title="Back to boards"
-        className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-muted transition hover:bg-brand-light hover:text-brand-dark"
+        className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-brand-light hover:text-brand-dark"
+        style={{ color: 'var(--surface-text-muted)' }}
       >
         <ChevronLeft size={20} />
       </Link>
@@ -70,7 +79,8 @@ export default function BoardTopBar({
             }}
             onBlur={commitRename}
             autoFocus
-            className="rounded-lg px-2 py-1 font-display text-xl font-bold text-ink outline-none ring-1 ring-border focus:ring-2 focus:ring-brand"
+            className="rounded-lg px-2 py-1 font-display text-xl font-bold outline-none ring-1 ring-border focus:ring-2 focus:ring-brand"
+            style={{ color: 'var(--surface-text)', background: 'transparent' }}
           />
           <button
             type="button"
@@ -88,7 +98,8 @@ export default function BoardTopBar({
             setEditing(true)
           }}
           title="Click to rename"
-          className="cursor-text rounded-lg px-2 py-1 font-display text-xl font-bold text-ink transition hover:bg-surface-alt"
+          className="cursor-text rounded-lg px-2 py-1 font-display text-xl font-bold transition hover:bg-surface-alt"
+          style={{ color: 'var(--surface-text)' }}
         >
           {board.name}
         </h2>
@@ -99,30 +110,35 @@ export default function BoardTopBar({
         onClick={() => toggleStar(board.id)}
         title={board.starred ? 'Unstar board' : 'Star board'}
         className="flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-surface-alt active:scale-95"
+        style={{ color: 'var(--surface-text-faint)' }}
       >
-        <Star size={18} className={board.starred ? 'fill-warn text-warn' : 'text-ink-faint'} />
+        <Star size={18} className={board.starred ? 'fill-warn text-warn' : ''} />
       </button>
 
-      <div className="relative ml-2 flex items-center rounded-lg bg-bg px-2.5 ring-1 ring-border transition focus-within:ring-2 focus-within:ring-brand">
-        <Search size={14} className="text-ink-faint" />
+      <div
+        className="relative ml-2 flex items-center rounded-lg px-2.5 ring-1 transition focus-within:ring-2 focus-within:ring-brand"
+        style={{ background: 'var(--surface-bg-subtle)', color: 'var(--surface-text-faint)', borderColor: theme.border }}
+      >
+        <Search size={14} />
         <input
           value={search}
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Search this board"
           className="w-40 bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-ink-faint"
+          style={{ color: 'var(--surface-text)' }}
         />
       </div>
 
       <div className="relative ml-auto flex items-center gap-1">
         <span className="relative">
-          <IconButton title="Views" active={viewsOpen} onClick={onOpenViews}>
+          <IconButton title="Views" active={viewsOpen} onClick={onOpenViews} style={{ color: 'var(--surface-text-muted)' }}>
             <LayoutGrid size={17} />
           </IconButton>
           <ViewsMenu open={viewsOpen} onClose={onOpenViews} />
         </span>
 
         <span className="relative">
-          <IconButton title="Filter" active={filterOpen} onClick={onOpenFilter}>
+          <IconButton title="Filter" active={filterOpen} onClick={onOpenFilter} style={{ color: 'var(--surface-text-muted)' }}>
             <SlidersHorizontal size={17} />
           </IconButton>
           {filterActive && (
@@ -137,7 +153,7 @@ export default function BoardTopBar({
           />
         </span>
 
-        <IconButton title="Menu" onClick={onOpenMenu}>
+        <IconButton title="Menu" onClick={onOpenMenu} style={{ color: 'var(--surface-text-muted)' }}>
           <MoreHorizontal size={17} />
         </IconButton>
       </div>

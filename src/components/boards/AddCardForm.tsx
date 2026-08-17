@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 
-export default function AddCardForm({ listId, dark }: { listId: string; dark?: boolean }) {
+export default function AddCardForm({ listId }: { listId: string }) {
   const addCard = useStore().addCard
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
@@ -20,11 +20,8 @@ export default function AddCardForm({ listId, dark }: { listId: string; dark?: b
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-sm font-medium transition ${
-          dark
-            ? 'text-white/60 hover:bg-white/10 hover:text-white'
-            : 'text-ink-muted hover:bg-brand-light/60 hover:text-brand-dark'
-        }`}
+        className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-sm font-medium transition"
+        style={{ color: 'var(--surface-text-muted)' }}
       >
         <Plus size={15} />
         Add a card
@@ -33,7 +30,7 @@ export default function AddCardForm({ listId, dark }: { listId: string; dark?: b
   }
 
   return (
-    <div className={`mt-1 rounded-xl p-1.5 ring-1 ${dark ? 'bg-white/5 ring-white/10' : 'bg-bg/70 ring-border'}`}>
+    <div className="mt-1 rounded-xl p-1.5 ring-1" style={{ background: 'var(--surface-bg-subtle)', borderColor: 'var(--surface-border)' }}>
       <textarea
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -47,9 +44,8 @@ export default function AddCardForm({ listId, dark }: { listId: string; dark?: b
         placeholder="Card title…"
         autoFocus
         rows={2}
-        className={`w-full resize-none rounded-lg px-2.5 py-1.5 text-sm outline-none placeholder:text-ink-faint ${
-          dark ? 'bg-white/10 text-white placeholder:text-white/40' : 'bg-surface text-ink'
-        }`}
+        className="w-full resize-none rounded-lg px-2.5 py-1.5 text-sm outline-none placeholder:text-ink-faint"
+        style={{ color: 'var(--surface-text)', background: 'transparent' }}
       />
       <div className="mt-1 flex items-center gap-2">
         <button
@@ -62,7 +58,8 @@ export default function AddCardForm({ listId, dark }: { listId: string; dark?: b
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className={dark ? 'text-white/50 transition hover:text-white' : 'text-ink-muted transition hover:text-ink'}
+          className="transition"
+          style={{ color: 'var(--surface-text-muted)' }}
         >
           <X size={17} />
         </button>

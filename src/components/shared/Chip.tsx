@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import type { Label } from '../../store/schema'
+import { getAccessibleColors } from '../../utils/contrast'
 
 interface LabelChipProps {
   label: Label
@@ -8,10 +9,12 @@ interface LabelChipProps {
 }
 
 export default function LabelChip({ label, onRemove, className = '' }: LabelChipProps) {
+  const fg = getAccessibleColors(label.color)
+
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${className}`}
-      style={{ background: `${label.color}21`, color: label.color }}
+      style={{ background: fg.surface, color: fg.foreground, border: `1px solid ${fg.border}` }}
     >
       {label.name}
       {onRemove && (
