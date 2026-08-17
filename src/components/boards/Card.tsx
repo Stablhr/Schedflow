@@ -99,7 +99,7 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={() => !snapshot.isDragging && onOpenCard(card.id)}
-          className={`relative cursor-pointer rounded-xl bg-white/50 backdrop-blur-md p-2.5 shadow-sm ring-1 ring-white/20 ${
+          className={`relative cursor-pointer rounded-xl bg-white/90 p-2.5 shadow-sm ring-1 ring-white/20 ${
             snapshot.isDragging
               ? 'z-50 rounded-2xl bg-white shadow-[0_12px_40px_rgba(13,171,163,0.2),0_4px_16px_rgba(19,42,41,0.12)] ring-brand/40 opacity-95'
               : 'hover:shadow-lg hover:ring-border'
