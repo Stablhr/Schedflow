@@ -167,3 +167,13 @@
     transform: rotate(8deg);
   }
 }
+
+/* Prevent hover CSS transitions from fighting DnD library transforms */
+[data-dragging="true"] {
+  transition: none !important;
+}
+
+/* Smooth placeholder collapse when cards reorder */
+[data-rfd-placeholder-context] {
+  transition: height 0.2s ease;
+}

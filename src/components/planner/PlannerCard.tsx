@@ -14,8 +14,10 @@ export default function PlannerCard({ card, index }: { card: Card; index: number
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`cursor-grab rounded-lg glass-subtle p-2 shadow-sm ring-1 ring-transparent transition hover:shadow-md hover:ring-border active:cursor-grabbing ${
-            snapshot.isDragging ? 'opacity-40' : ''
+          className={`cursor-grab rounded-lg glass-subtle p-2 ring-1 ring-transparent active:cursor-grabbing ${
+            snapshot.isDragging
+              ? 'rounded-xl bg-white shadow-[0_10px_32px_rgba(13,171,163,0.16),0_4px_12px_rgba(19,42,41,0.08)] ring-brand/30 scale-[1.04]'
+              : 'shadow-sm hover:shadow-md hover:ring-border'
           }`}
         >
           <p className="truncate text-[13px] font-semibold leading-snug text-ink">{card.title}</p>

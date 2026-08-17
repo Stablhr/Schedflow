@@ -98,10 +98,19 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          onClick={() => onOpenCard(card.id)}
-          className={`relative cursor-pointer rounded-xl bg-white/50 backdrop-blur-md p-2.5 shadow-sm ring-1 ring-white/20 transition-all duration-200 hover:shadow-lg hover:ring-border hover:-translate-y-0.5 ${
-            snapshot.isDragging ? 'scale-[1.03] shadow-lg ring-brand/30' : ''
+          onClick={() => !snapshot.isDragging && onOpenCard(card.id)}
+          style={{
+            ...provided.draggableProps.style,
+            // Override DnD's default slight scale for a smoother, more natural feel
+            ...(snapshot.isDragging ? { transform: provided.draggableProps.style?.transform } : {}),
+          }}
+          className={`relative cursor-pointer rounded-xl bg-white/50 backdrop-blur-md p-2.5 ring-1 ring-white/20 ${
+            snapshot.isDragging
+              ? 'scale-[1.04] rounded-2xl bg-white shadow-[0_12px_40px_rgba(13,171,163,0.18),0_4px_16px_rgba(19,42,41,0.1)] ring-brand/40'
+              : 'shadow-sm hover:shadow-lg hover:ring-border hover:-translate-y-0.5'
           }`}
+          // Only apply hover CSS transitions when NOT dragging
+          data-dragging={snapshot.isDragging ? 'true' : undefined}
         >
           <DoneToggle card={card} />
           <CardCoverBand card={card} />

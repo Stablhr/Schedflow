@@ -133,9 +133,14 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
           <div
             ref={droppableProvided.innerRef}
             {...droppableProvided.droppableProps}
-            className={`scroll-slim flex max-h-[calc(100vh-220px)] min-h-2 flex-1 flex-col gap-1.5 overflow-y-auto rounded-b-xl px-2 pb-2 transition-colors duration-150 sm:max-h-[calc(100vh-180px)] ${
-              snapshot.isDraggingOver ? 'bg-brand-light/70' : ''
+            className={`scroll-slim flex max-h-[calc(100vh-220px)] min-h-2 flex-1 flex-col gap-1.5 overflow-y-auto rounded-b-xl px-2 pb-2 sm:max-h-[calc(100vh-180px)] ${
+              snapshot.isDraggingOver
+                ? 'bg-brand-light/60 ring-2 ring-inset ring-brand/20'
+                : ''
             }`}
+            style={{
+              transition: snapshot.isDraggingOver ? 'background-color 0.2s ease, box-shadow 0.2s ease' : 'background-color 0.3s ease',
+            }}
           >
             {cards.map((card, index) => (
               <CardFace key={card.id} card={card} index={index} onOpenCard={onOpenCard} />

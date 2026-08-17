@@ -10,9 +10,14 @@ export default function UnscheduledPool({ cards }: { cards: Card[] }) {
         <div
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`flex w-[180px] shrink-0 flex-col rounded-xl glass-subtle p-2 shadow-sm transition-colors sm:w-[230px] sm:p-3 ${
-            snapshot.isDraggingOver ? 'bg-brand-light/70' : ''
+          className={`flex w-[180px] shrink-0 flex-col rounded-xl glass-subtle p-2 shadow-sm sm:w-[230px] sm:p-3 ${
+            snapshot.isDraggingOver
+              ? 'bg-brand-light/60 ring-2 ring-inset ring-brand/20'
+              : ''
           }`}
+          style={{
+            transition: snapshot.isDraggingOver ? 'all 0.2s ease' : 'all 0.3s ease',
+          }}
         >
           <div className="flex items-center gap-1.5 px-1 pb-2">
             <Inbox size={14} className="text-ink-faint" />
