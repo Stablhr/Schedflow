@@ -47,7 +47,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const isBoard = !!(board && bg && !bg.startsWith('data:'))
   const dark = isBoard && isColorDark(bg)
 
-  const sidebarBg = isBoard ? withAlpha(bg, 0.15) : ''
+  const sidebarBg = isBoard ? withAlpha(bg, 0.3) : ''
 
   return (
     <aside
@@ -64,9 +64,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           className={`flex h-8 shrink-0 items-center justify-center rounded-lg transition active:scale-95 ${
             dark
-              ? 'text-white/50 hover:bg-white/10 hover:text-white'
+              ? 'text-white/50 hover:bg-white/15 hover:text-white'
               : isBoard
-                ? 'text-ink/40 hover:bg-black/5 hover:text-ink'
+                ? 'text-ink/40 hover:bg-black/8 hover:text-ink'
                 : 'text-ink-muted hover:bg-surface hover:text-ink'
           } ${collapsed ? 'mx-auto mt-3 w-8' : 'ml-auto'}`}
         >
@@ -88,9 +88,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   ? `relative flex h-9 w-9 mx-auto items-center justify-center rounded-xl transition ${
                       isActive
                         ? dark
-                          ? 'bg-white/10 text-white shadow-sm'
+                          ? 'bg-white/15 text-white shadow-sm'
                           : isBoard
-                            ? 'bg-black/5 text-ink shadow-sm'
+                            ? 'bg-black/8 text-ink shadow-sm'
                             : 'bg-surface text-brand-dark shadow-sm'
                         : dark
                           ? 'text-white/50 hover:bg-white/10 hover:text-white'
@@ -101,9 +101,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   : `group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition ${
                       isActive
                         ? dark
-                          ? 'bg-white/10 text-white shadow-sm'
+                          ? 'bg-white/15 text-white shadow-sm'
                           : isBoard
-                            ? 'bg-black/5 text-ink shadow-sm'
+                            ? 'bg-black/8 text-ink shadow-sm'
                             : 'bg-surface text-brand-dark shadow-sm'
                         : dark
                           ? 'text-white/50 hover:bg-white/10 hover:text-white'
@@ -136,7 +136,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <CaptureBox />
           {you && (
             <div className={`flex items-center gap-2 rounded-xl px-2.5 py-2 ${
-              dark ? 'bg-white/5' : isBoard ? 'bg-black/3' : 'bg-surface/60'
+              dark ? 'bg-white/10' : isBoard ? 'bg-black/5' : 'bg-surface/60'
             }`}>
               <Avatar member={you} size={22} />
               <span className={`text-sm font-semibold ${dark ? 'text-white' : isBoard ? 'text-ink' : 'text-ink'}`}>{you.name}</span>
