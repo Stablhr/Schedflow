@@ -2,10 +2,11 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { LayoutDashboard, Inbox, Columns3, CalendarDays, PanelLeftClose, PanelLeft, Sun, Moon, Monitor } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
-import { useThemeMode, useThemeCycle } from '../../hooks/useThemeMode'
+import { useThemeMode } from '../../hooks/useThemeMode'
 import { blendTwoStop } from '../../utils/color'
 import CaptureBox from '../shared/CaptureBox'
 import Avatar from '../shared/Avatar'
+import type { ThemeMode } from '../../store/schema'
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -37,11 +38,10 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
-  const { data, members } = useStore()
+  const { data, members, setDarkMode } = useStore()
   const location = useLocation()
   const inboxCount = data.inbox.length
   const you = members.find((m) => m.name === 'You') ?? members[0]
-  const { mode, cycle: cycleTheme } = useThemeCycle()
 
   const boardMatch = location.pathname.match(/^\/boards\/([^/]+)$/)
   const boardId = boardMatch?.[1]
@@ -50,8 +50,11 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const isBoard = !!(board && bg && !bg.startsWith('data:'))
 
   const resolved = useThemeMode()
+  const mode: ThemeMode = data.ui.darkMode ?? 'system'
   const theme = useAdaptiveTheme(isBoard ? bg : (resolved === 'dark' ? '#1A2B2A' : '#E1F5F3'))
   const sidebarVars = adaptiveVars(theme)
+
+  const ThemeIcon = mode === 'light' ? Sun : mode === 'dark' ? Moon : Monitor
 
   return (
     <>
@@ -112,17 +115,27 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
         {collapsed ? (
           <div className="flex flex-col items-center gap-1 px-2 pb-2">
-            <button
-              type="button"
-              onClick={cycleTheme}
-              title={`Theme: ${mode.charAt(0).toUpperCase() + mode.slice(1)} (click to cycle)`}
-              className="flex h-9 w-9 items-center justify-center rounded-xl transition hover-grow"
-              style={{ color: 'var(--surface-text-muted)' }}
-            >
-              {mode === 'light' && <Sun size={16} />}
-              {mode === 'dark' && <Moon size={16} />}
-              {mode === 'system' && <Monitor size={16} />}
-            </button>
+            <div className="flex flex-col rounded-xl bg-surface-alt/60 p-1">
+              {([
+                { value: 'light' as ThemeMode, icon: Sun, label: 'Light' },
+                { value: 'system' as ThemeMode, icon: Monitor, label: 'System' },
+                { value: 'dark' as ThemeMode, icon: Moon, label: 'Dark' },
+              ]).map(({ value, icon: Icon, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setDarkMode(value)}
+                  title={label}
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition active:scale-95 ${
+                    mode === value
+                      ? 'bg-brand text-white shadow-sm'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface'
+                  }`}
+                >
+                  <Icon size={15} />
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="space-y-3 p-3">
@@ -135,15 +148,28 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             )}
             <button
               type="button"
-              onClick={cycleTheme}
-              title={`Theme: ${mode.charAt(0).toUpperCase() + mode.slice(1)} (click to cycle)`}
-              className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-medium transition hover:bg-surface-alt active:scale-[0.98]"
-              style={{ color: 'var(--surface-text-muted)' }}
+              className="flex items-center rounded-xl bg-surface-alt/60 p-1"
             >
-              {mode === 'light' && <Sun size={16} />}
-              {mode === 'dark' && <Moon size={16} />}
-              {mode === 'system' && <Monitor size={16} />}
-              <span className="capitalize">{mode}</span>
+              {([
+                { value: 'light' as ThemeMode, icon: Sun, label: 'Light' },
+                { value: 'system' as ThemeMode, icon: Monitor, label: 'System' },
+                { value: 'dark' as ThemeMode, icon: Moon, label: 'Dark' },
+              ]).map(({ value, icon: Icon, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setDarkMode(value)}
+                  title={label}
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition active:scale-95 ${
+                    mode === value
+                      ? 'bg-brand text-white shadow-sm'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface'
+                  }`}
+                >
+                  <Icon size={14} />
+                  <span>{label}</span>
+                </button>
+              ))}
             </button>
           </div>
         )}
