@@ -66,7 +66,7 @@ export default function CardLocation({ card }: { card: Card }) {
               onBlur={save}
               placeholder="e.g. Studio, client office, remote…"
               autoFocus
-              className="w-full rounded-lg px-2 py-1 text-xs text-ink outline-none ring-1 ring-border transition focus:ring-2 focus:ring-brand"
+              className="w-full rounded-lg px-2 py-1 text-xs text-ink outline-none neu-input transition focus:neu-input-focus"
             />
           ) : (
             <button

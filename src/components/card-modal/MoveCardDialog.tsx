@@ -26,7 +26,7 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
   const [position, setPosition] = useState(targetCards.length)
 
   const inputClass =
-    'w-full rounded-lg px-2.5 py-1.5 text-sm text-ink outline-none ring-1 ring-border transition focus:ring-2 focus:ring-brand'
+    'w-full rounded-lg px-2.5 py-1.5 text-sm text-ink outline-none neu-input transition focus:neu-input-focus'
 
   const handleBoardMove = () => {
     if (!listId) return
@@ -51,7 +51,7 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
   }
 
   return (
-    <Modal open onClose={onClose} className="max-w-md rounded-2xl glass shadow-lg">
+    <Modal open onClose={onClose} solid className="max-w-md rounded-2xl shadow-lg">
       <div className="p-6">
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-light text-brand">

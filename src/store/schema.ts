@@ -101,7 +101,7 @@ export interface InboxItem {
   createdAt: string
 }
 
-export type ThemeMode = 'light' | 'dark' | 'system'
+export type ThemeMode = 'light' | 'dark'
 
 export interface AppData {
   version: number
@@ -194,7 +194,7 @@ export function emptyData(): AppData {
     },
     ui: {
       lastVisitedBoardId: null,
-      darkMode: 'system',
+      darkMode: typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
     },
   }
 }

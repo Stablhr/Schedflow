@@ -85,7 +85,7 @@ export default function BoardTopBar({
             }}
             onBlur={commitRename}
             autoFocus
-            className="w-28 rounded-lg px-2 py-1 font-display text-lg font-bold outline-none ring-1 ring-border focus:ring-2 focus:ring-brand sm:w-auto sm:text-xl"
+            className="w-28 rounded-lg px-2 py-1 font-display text-lg font-bold outline-none neu-input sm:w-auto sm:text-xl"
             style={{ color: 'var(--surface-text)', background: 'transparent' }}
           />
           <button

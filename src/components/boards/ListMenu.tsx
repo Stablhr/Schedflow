@@ -41,9 +41,10 @@ export default function ListMenu({ list }: { list: List }) {
 
       {open && (
         <div
-          className="animate-in absolute right-0 top-8 z-20 w-56 rounded-xl p-1.5 shadow-md ring-1"
-          style={{ background: theme.foreground === '#FFFFFF' ? '#1a2c2b' : '#FFFFFF', borderColor: theme.border, color: theme.foreground === '#FFFFFF' ? '#e0f0ef' : '#132A29' }}
+          className="glass-panel animate-in absolute right-0 top-8 z-20 w-56 p-1.5"
+          style={{ color: theme.foreground === '#FFFFFF' ? '#e0f0ef' : '#132A29' }}
         >
+          <div className="glass-scrim rounded-lg p-0.5">
           <button type="button" className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium transition hover:bg-white/10" onClick={() => {
             toggleListCollapsed(list.id)
             setOpen(false)
@@ -110,6 +111,7 @@ export default function ListMenu({ list }: { list: List }) {
             <Trash2 size={15} />
             Delete list
           </button>
+          </div>
         </div>
       )}
     </div>

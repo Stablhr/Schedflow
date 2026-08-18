@@ -50,7 +50,7 @@ export default function CardDescription({ card }: { card: Card }) {
           placeholder="Add a more detailed description…"
           autoFocus
           rows={3}
-          className="mt-2 w-full resize-none rounded-xl px-3 py-2 text-sm leading-relaxed text-ink outline-none ring-1 ring-border transition placeholder:text-ink-faint focus:ring-2 focus:ring-brand"
+          className="mt-2 w-full resize-none rounded-xl px-3 py-2 text-sm leading-relaxed text-ink outline-none neu-input transition placeholder:text-ink-faint focus:neu-input-focus"
         />
       )}
     </section>

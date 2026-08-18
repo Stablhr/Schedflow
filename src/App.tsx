@@ -20,13 +20,13 @@ function ErrorToast() {
   const { error, dismissError } = useStore()
   if (!error) return null
   return (
-    <div className="animate-in fixed bottom-4 left-1/2 z-[60] flex max-w-md -translate-x-1/2 items-center gap-2.5 rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-white shadow-lg">
+    <div className="glass-panel animate-in fixed bottom-4 left-1/2 z-[60] flex max-w-md -translate-x-1/2 items-center gap-2.5 glass-scrim px-4 py-2.5 text-sm font-medium text-ink">
       <AlertTriangle size={16} className="shrink-0 text-warn" />
       <span className="flex-1">{error}</span>
       <button
         type="button"
         onClick={dismissError}
-        className="shrink-0 text-white/60 transition hover:text-white"
+        className="shrink-0 text-ink-muted transition hover:text-ink"
       >
         <X size={16} />
       </button>

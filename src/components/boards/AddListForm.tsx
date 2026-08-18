@@ -39,7 +39,7 @@ export default function AddListForm({ boardId }: { boardId: string }) {
         }}
         placeholder="List name"
         autoFocus
-        className="w-full rounded-lg px-2 py-1.5 text-sm outline-none ring-1 ring-border transition focus:ring-2 focus:ring-brand"
+        className="w-full rounded-lg px-2 py-1.5 text-sm outline-none neu-input transition focus:neu-input-focus"
       />
       <div className="mt-2 flex items-center gap-2">
         <button

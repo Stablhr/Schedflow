@@ -55,7 +55,7 @@ export default function CardDueDate({ card }: { card: Card }) {
             onChange={(e) => setValue(e.target.value)}
             onBlur={() => setDue(value)}
             autoFocus
-            className="rounded-lg px-2 py-1 font-mono text-[11px] text-ink outline-none ring-1 ring-border transition focus:ring-2 focus:ring-brand"
+            className="rounded-lg px-2 py-1 font-mono text-[11px] text-ink outline-none neu-input transition focus:neu-input-focus"
           />
           {card.dueDate && (
             <button

@@ -13,7 +13,10 @@ export function loadData(): AppData {
       return emptyData()
     }
     if (!parsed.ui) parsed.ui = emptyData().ui
-    if (parsed.ui.darkMode == null) parsed.ui.darkMode = 'system'
+    const rawDarkMode = (parsed.ui as Record<string, unknown>).darkMode
+    if (rawDarkMode == null || rawDarkMode === 'system') {
+      parsed.ui.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    }
     return parsed
   } catch {
     return emptyData()

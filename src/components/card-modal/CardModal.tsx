@@ -85,7 +85,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
   }
 
   return (
-    <Modal open onClose={onClose} className="max-w-2xl max-h-[85vh] sm:max-h-[80vh] h-full rounded-2xl glass-heavy shadow-lg">
+    <Modal open onClose={onClose} className="max-w-2xl max-h-[85vh] sm:max-h-[80vh] h-full rounded-2xl">
       <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl">
         {/* Close button */}
         <button
@@ -186,7 +186,8 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                   <MoreHorizontal size={16} />
                 </button>
                 {overflowOpen && (
-                  <div className="absolute right-0 top-9 z-30 w-52 rounded-xl glass py-1 shadow-md animate-in">
+                  <div className="glass-panel absolute right-0 top-9 z-30 w-52 py-1 animate-in">
+                    <div className="glass-scrim px-1 py-0.5">
                     <button
                       type="button"
                       onClick={() => {
@@ -206,6 +207,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                       <Archive size={14} className="text-ink-muted" />
                       Archive
                     </button>
+                    </div>
                     <div className="my-1 h-px bg-border" />
                     <div className="px-3 py-2">
                       <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-faint">

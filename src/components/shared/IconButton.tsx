@@ -29,10 +29,10 @@ export default function IconButton({
       onClick={onClick}
       disabled={disabled}
       style={style}
-      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition active:scale-95 disabled:opacity-40 ${
+      className={`neu-compact inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] transition active:scale-95 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-brand ${
         active
-          ? 'bg-brand-light text-brand-dark'
-          : 'text-ink-muted hover:bg-brand-light hover:text-brand-dark'
+          ? 'neu-compact-pressed bg-brand-light text-brand-dark'
+          : 'text-ink-muted hover:bg-brand-light hover:text-brand-dark hover:neu-compact-hover'
       } ${className}`}
     >
       {children}

@@ -11,7 +11,7 @@ export default function ArchivedPanel({ board, onClose }: { board: Board; onClos
   )
 
   return (
-    <Modal open onClose={onClose} className="max-w-md rounded-2xl glass shadow-lg">
+    <Modal open onClose={onClose} solid className="max-w-md rounded-2xl shadow-lg">
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div>

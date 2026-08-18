@@ -32,8 +32,8 @@ export default function ViewsMenu({ open, onClose, activeView, onViewChange }: V
   if (!open) return null
 
   return (
-    <div ref={ref} className="animate-in absolute right-0 top-11 z-30 w-52 rounded-xl glass p-1.5 shadow-md">
-      <p className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+    <div ref={ref} className="glass-panel animate-in absolute right-0 top-11 z-30 w-52 p-1.5">
+      <p className="glass-scrim px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
         View
       </p>
       {VIEWS.map((view) => {

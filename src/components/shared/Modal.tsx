@@ -6,9 +6,11 @@ interface ModalProps {
   onClose: () => void
   children: ReactNode
   className?: string
+  /** Use solid background instead of glass — for modals nested inside glass panels */
+  solid?: boolean
 }
 
-export default function Modal({ open, onClose, children, className = '' }: ModalProps) {
+export default function Modal({ open, onClose, children, className = '', solid = false }: ModalProps) {
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
@@ -22,8 +24,8 @@ export default function Modal({ open, onClose, children, className = '' }: Modal
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-3 sm:p-6 md:p-8">
-      <div className="absolute inset-0 bg-ink/30 backdrop-blur-md" onClick={onClose} />
-      <div className={`animate-in relative z-10 flex h-full w-full flex-col overflow-hidden ${className}`}>{children}</div>
+      <div className="absolute inset-0 bg-ink/40 backdrop-blur-sm" onClick={onClose} />
+      <div className={`animate-in relative z-10 flex h-full w-full flex-col overflow-hidden ${solid ? 'bg-surface shadow-lg' : 'glass-panel'} ${className}`}>{children}</div>
     </div>
   )
 }

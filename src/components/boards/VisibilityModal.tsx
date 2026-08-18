@@ -13,7 +13,7 @@ export default function VisibilityModal({ board, onClose }: { board: Board; onCl
   const setBoardVisibility = useStore().setBoardVisibility
 
   return (
-    <Modal open onClose={onClose} className="max-w-md rounded-2xl glass shadow-lg">
+    <Modal open onClose={onClose} solid className="max-w-md rounded-2xl shadow-lg">
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div>

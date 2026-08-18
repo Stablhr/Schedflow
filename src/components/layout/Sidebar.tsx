@@ -1,12 +1,11 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Inbox, Columns3, CalendarDays, PanelLeftClose, PanelLeft, Sun, Moon, Monitor } from 'lucide-react'
+import { LayoutDashboard, Inbox, Columns3, CalendarDays, PanelLeftClose, PanelLeft, Sun, Moon } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
 import { useThemeMode } from '../../hooks/useThemeMode'
 import { blendTwoStop } from '../../utils/color'
 import CaptureBox from '../shared/CaptureBox'
 import Avatar from '../shared/Avatar'
-import type { ThemeMode } from '../../store/schema'
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -50,11 +49,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const isBoard = !!(board && bg && !bg.startsWith('data:'))
 
   const resolved = useThemeMode()
-  const mode: ThemeMode = data.ui.darkMode ?? 'system'
+  const mode = data.ui.darkMode ?? 'light'
   const theme = useAdaptiveTheme(isBoard ? bg : (resolved === 'dark' ? '#1A2B2A' : '#E1F5F3'))
   const sidebarVars = adaptiveVars(theme)
-
-  const ThemeIcon = mode === 'light' ? Sun : mode === 'dark' ? Moon : Monitor
 
   return (
     <>
@@ -91,8 +88,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 title={collapsed ? item.label : undefined}
                 className={() =>
                   collapsed
-                    ? `relative flex h-9 w-9 mx-auto items-center justify-center rounded-xl transition hover-grow`
-                    : `group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition hover-slide-right`
+                    ? `neu-compact relative flex h-9 w-9 mx-auto items-center justify-center rounded-[10px] transition hover-grow focus-visible:outline-2 focus-visible:outline-brand`
+                    : `neu-surface group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition hover-slide-right focus-visible:outline-2 focus-visible:outline-brand`
                 }
                 style={({ isActive }) => ({
                   color: isActive ? 'var(--surface-text)' : 'var(--surface-text-muted)',
@@ -117,18 +114,17 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <div className="flex flex-col items-center gap-1 px-2 pb-2">
             <div className="flex flex-col rounded-xl bg-surface-alt/60 p-1">
               {([
-                { value: 'light' as ThemeMode, icon: Sun, label: 'Light' },
-                { value: 'system' as ThemeMode, icon: Monitor, label: 'System' },
-                { value: 'dark' as ThemeMode, icon: Moon, label: 'Dark' },
+                { value: 'light' as const, icon: Sun, label: 'Light' },
+                { value: 'dark' as const, icon: Moon, label: 'Dark' },
               ]).map(({ value, icon: Icon, label }) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => setDarkMode(value)}
                   title={label}
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition active:scale-95 ${
+                  className={`neu-compact flex h-8 w-8 items-center justify-center rounded-[10px] transition active:scale-95 focus-visible:outline-2 focus-visible:outline-brand ${
                     mode === value
-                      ? 'bg-brand text-white shadow-sm'
+                      ? 'neu-compact-pressed bg-brand text-white shadow-sm'
                       : 'text-ink-muted hover:text-ink hover:bg-surface'
                   }`}
                 >
@@ -146,23 +142,19 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <span className="text-sm font-semibold" style={{ color: 'var(--surface-text)' }}>{you.name}</span>
               </div>
             )}
-            <button
-              type="button"
-              className="flex items-center rounded-xl bg-surface-alt/60 p-1"
-            >
+            <div className="grid grid-cols-2 rounded-xl bg-surface-alt/60 p-0.5">
               {([
-                { value: 'light' as ThemeMode, icon: Sun, label: 'Light' },
-                { value: 'system' as ThemeMode, icon: Monitor, label: 'System' },
-                { value: 'dark' as ThemeMode, icon: Moon, label: 'Dark' },
+                { value: 'light' as const, icon: Sun, label: 'Light' },
+                { value: 'dark' as const, icon: Moon, label: 'Dark' },
               ]).map(({ value, icon: Icon, label }) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => setDarkMode(value)}
                   title={label}
-                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition active:scale-95 ${
+                  className={`neu-compact flex flex-col items-center gap-0.5 rounded-[10px] py-1.5 text-[10px] font-semibold transition active:scale-95 focus-visible:outline-2 focus-visible:outline-brand ${
                     mode === value
-                      ? 'bg-brand text-white shadow-sm'
+                      ? 'neu-compact-pressed bg-brand text-white shadow-sm'
                       : 'text-ink-muted hover:text-ink hover:bg-surface'
                   }`}
                 >
@@ -170,7 +162,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   <span>{label}</span>
                 </button>
               ))}
-            </button>
+            </div>
           </div>
         )}
       </aside>

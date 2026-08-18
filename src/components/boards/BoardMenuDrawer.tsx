@@ -61,14 +61,14 @@ export default function BoardMenuDrawer({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-ink/30 backdrop-blur-md" onClick={onClose} />
-      <aside className="animate-in fixed bottom-0 right-0 top-0 z-40 flex w-full flex-col glass-heavy shadow-lg sm:bottom-auto sm:w-72">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3.5">
+      <div className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm" onClick={onClose} />
+      <aside className="glass-panel animate-in fixed bottom-0 right-0 top-0 z-40 flex w-full flex-col sm:bottom-auto sm:w-72">
+        <div className="glass-scrim flex items-center justify-between border-b border-border px-4 py-3.5">
           <h2 className="font-display text-lg font-bold text-ink">Menu</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-ink-faint transition hover:bg-surface-alt hover:text-ink"
+            className="neu-compact rounded-[10px] p-1.5 text-ink-faint transition hover:bg-surface-alt hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
           >
             <X size={16} />
           </button>
@@ -85,7 +85,7 @@ export default function BoardMenuDrawer({
               }}
               rows={3}
               placeholder="Add a description…"
-              className="mt-2 w-full resize-none rounded-lg px-2.5 py-2 text-sm leading-relaxed text-ink outline-none ring-1 ring-border transition placeholder:text-ink-faint focus:ring-2 focus:ring-brand"
+              className="mt-2 w-full resize-none rounded-lg px-2.5 py-2 text-sm leading-relaxed text-ink outline-none neu-input transition placeholder:text-ink-faint focus:neu-input-focus"
             />
           </section>
 

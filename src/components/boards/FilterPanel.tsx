@@ -54,9 +54,9 @@ export default function FilterPanel({ board, filter, onChange, open, onClose }: 
   return (
     <div
       ref={ref}
-      className="animate-in absolute right-0 top-11 z-30 w-56 rounded-xl glass p-3 shadow-md sm:w-64"
+      className="glass-panel animate-in absolute right-0 top-11 z-30 w-56 p-3 sm:w-64"
     >
-      <div className="flex items-center justify-between">
+      <div className="glass-scrim flex items-center justify-between rounded-lg px-2 py-1">
         <p className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">Filter</p>
         {isActive && (
           <button

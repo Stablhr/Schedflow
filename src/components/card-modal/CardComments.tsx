@@ -67,7 +67,7 @@ export default function CardComments({ card }: { card: Card }) {
             if (e.key === 'Enter') submit()
           }}
           placeholder="Write a comment…"
-          className="flex-1 rounded-xl px-3 py-2 text-sm text-ink outline-none ring-1 ring-border transition placeholder:text-ink-faint focus:ring-2 focus:ring-brand"
+          className="flex-1 rounded-xl px-3 py-2 text-sm text-ink outline-none neu-input transition placeholder:text-ink-faint focus:neu-input-focus"
         />
       </div>
 

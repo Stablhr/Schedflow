@@ -28,7 +28,7 @@ export default function CreateBoardModal({ open, onClose }: CreateBoardModalProp
   }
 
   return (
-    <Modal open={open} onClose={onClose} className="max-w-md rounded-2xl glass sm:rounded-2xl">
+    <Modal open={open} onClose={onClose} className="max-w-md rounded-2xl sm:rounded-2xl">
       <div className="flex items-center justify-between px-6 pt-5">
         <h2 className="font-display text-[20px] font-bold text-ink">Create board</h2>
         <button type="button" onClick={onClose} className="text-ink-muted transition hover:text-ink">
@@ -78,7 +78,7 @@ export default function CreateBoardModal({ open, onClose }: CreateBoardModalProp
             onKeyDown={(e) => e.key === 'Enter' && submit()}
             placeholder={template.name}
             autoFocus
-            className="mt-1.5 w-full rounded-xl px-3 py-2 text-sm outline-none ring-1 ring-border transition focus:ring-2 focus:ring-brand"
+            className="mt-1.5 w-full rounded-xl px-3 py-2 text-sm outline-none neu-input transition focus:neu-input-focus"
           />
         </div>
       </div>

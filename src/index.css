@@ -32,6 +32,22 @@
 
   --radius-xl: 12px;
   --radius-2xl: 16px;
+
+  /* Glassmorphism tokens */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-dark: rgba(19, 42, 41, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.35);
+  --glass-blur: 16px;
+  --glass-shadow: 0 8px 32px rgba(19, 42, 41, 0.18);
+  --glass-scrim: rgba(19, 42, 41, 0.06);
+
+  /* Neumorphism tokens */
+  --neu-bg: #EEF7F6;
+  --neu-shadow-light: rgba(255, 255, 255, 0.9);
+  --neu-shadow-dark: rgba(163, 191, 188, 0.55);
+  --neu-distance: 6px;
+  --neu-blur: 12px;
+  --neu-border: rgba(19, 42, 41, 0.08);
 }
 
 @layer base {
@@ -77,28 +93,40 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.25);
   --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.4);
+
+  /* Glass dark overrides */
+  --glass-bg: rgba(15, 26, 25, 0.72);
+  --glass-bg-dark: rgba(15, 26, 25, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --glass-scrim: rgba(15, 26, 25, 0.5);
+
+  /* Neumorphism dark overrides — inverted shadows for dark surfaces */
+  --neu-bg: #1A2B2A;
+  --neu-shadow-light: rgba(36, 53, 52, 0.6);
+  --neu-shadow-dark: rgba(0, 0, 0, 0.45);
+  --neu-border: rgba(255, 255, 255, 0.06);
 }
 
-.dark .glass {
-  background: rgba(15, 26, 25, 0.72);
-  border-color: rgba(255, 255, 255, 0.08);
+/* ── Glassmorphism utilities ─────────────────────────────── */
+
+/* Primary glass panel — for modals, drawers, dropdowns, toasts */
+@utility glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
 }
 
-.dark .glass-subtle {
-  background: rgba(15, 26, 25, 0.5);
-  border-color: rgba(255, 255, 255, 0.06);
+/* Text scrim — solid backing behind text on glass for legibility */
+@utility glass-scrim {
+  background: var(--glass-scrim);
+  border-radius: 12px;
 }
 
-.dark .glass-heavy {
-  background: rgba(26, 43, 42, 0.85);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.dark .glass-dark {
-  background: rgba(15, 26, 25, 0.75);
-  border-color: rgba(255, 255, 255, 0.05);
-}
-
+/* Legacy glass utilities — kept for backwards compat, will migrate */
 @utility glass {
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(24px) saturate(180%);
@@ -125,6 +153,88 @@
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark .glass-panel {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.dark .glass-scrim {
+  background: var(--glass-scrim);
+}
+
+/* ── Neumorphism utilities ───────────────────────────────── */
+
+/* Base neumorphic surface — for buttons, inputs, nav items on base layer */
+@utility neu-surface {
+  background: var(--neu-bg);
+  border: 1px solid var(--neu-border);
+  border-radius: 12px;
+  box-shadow:
+    var(--neu-distance) var(--neu-distance) var(--neu-blur) var(--neu-shadow-dark),
+    calc(var(--neu-distance) * -1) calc(var(--neu-distance) * -1) var(--neu-blur) var(--neu-shadow-light);
+  transition: box-shadow 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+@utility neu-surface-hover {
+  background: var(--neu-bg);
+  border: 1px solid var(--neu-border);
+  border-radius: 12px;
+  box-shadow:
+    calc(var(--neu-distance) * 1.25) calc(var(--neu-distance) * 1.25) calc(var(--neu-blur) * 1.25) var(--neu-shadow-dark),
+    calc(var(--neu-distance) * -1.25) calc(var(--neu-distance) * -1.25) calc(var(--neu-blur) * 1.25) var(--neu-shadow-light);
+  transition: box-shadow 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+/* Pressed/active state — shadows invert to look pushed in */
+@utility neu-pressed {
+  box-shadow:
+    inset var(--neu-distance) var(--neu-distance) var(--neu-blur) var(--neu-shadow-dark),
+    inset calc(var(--neu-distance) * -1) calc(var(--neu-distance) * -1) var(--neu-blur) var(--neu-shadow-light);
+}
+
+/* Compact neumorphic surface — smaller radius for icon buttons, small controls */
+@utility neu-compact {
+  background: var(--neu-bg);
+  border: 1px solid var(--neu-border);
+  border-radius: 10px;
+  box-shadow:
+    calc(var(--neu-distance) * 0.6) calc(var(--neu-distance) * 0.6) calc(var(--neu-blur) * 0.7) var(--neu-shadow-dark),
+    calc(var(--neu-distance) * -0.6) calc(var(--neu-distance) * -0.6) calc(var(--neu-blur) * 0.7) var(--neu-shadow-light);
+  transition: box-shadow 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+@utility neu-compact-hover {
+  box-shadow:
+    calc(var(--neu-distance) * 0.8) calc(var(--neu-distance) * 0.8) calc(var(--neu-blur) * 0.9) var(--neu-shadow-dark),
+    calc(var(--neu-distance) * -0.8) calc(var(--neu-distance) * -0.8) calc(var(--neu-blur) * 0.9) var(--neu-shadow-light);
+}
+
+@utility neu-compact-pressed {
+  box-shadow:
+    inset calc(var(--neu-distance) * 0.6) calc(var(--neu-distance) * 0.6) calc(var(--neu-blur) * 0.7) var(--neu-shadow-dark),
+    inset calc(var(--neu-distance) * -0.6) calc(var(--neu-distance) * -0.6) calc(var(--neu-blur) * 0.7) var(--neu-shadow-light);
+}
+
+/* Neumorphic input — slightly inset look for text fields */
+@utility neu-input {
+  background: var(--neu-bg);
+  border: 1px solid var(--neu-border);
+  border-radius: 10px;
+  box-shadow:
+    inset 2px 2px 5px var(--neu-shadow-dark),
+    inset -2px -2px 5px var(--neu-shadow-light);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+@utility neu-input-focus {
+  border-color: var(--color-brand);
+  box-shadow:
+    inset 2px 2px 5px var(--neu-shadow-dark),
+    inset -2px -2px 5px var(--neu-shadow-light),
+    0 0 0 2px rgba(13, 171, 163, 0.25);
 }
 
 @utility scroll-slim {
