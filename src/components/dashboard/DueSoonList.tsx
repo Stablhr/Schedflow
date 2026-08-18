@@ -15,7 +15,7 @@ export default function DueSoonList({ limit = 8 }: { limit?: number }) {
     <div className="rounded-xl glass-subtle p-3 shadow-sm sm:p-4">
       <div className="flex items-center gap-1.5">
         <AlarmClock size={14} className="text-accent" />
-        <h2 className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+        <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink">
           Due soon
         </h2>
       </div>
@@ -29,10 +29,10 @@ export default function DueSoonList({ limit = 8 }: { limit?: number }) {
                 to={`/boards/${card.boardId}`}
                 className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition hover:bg-surface-alt hover-slide-right"
               >
-                <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
                   {card.title}
                 </span>
-                <span className="hidden max-w-32 truncate text-[11px] text-ink-faint sm:block">
+                <span className="hidden max-w-32 truncate text-[11px] font-medium text-ink-muted sm:block">
                   {board?.name}
                 </span>
                 <DueBadge due={card.dueDate!} />
@@ -41,7 +41,7 @@ export default function DueSoonList({ limit = 8 }: { limit?: number }) {
           )
         })}
         {cards.length === 0 && (
-          <li className="rounded-lg px-2 py-3 text-center text-xs text-ink-faint">
+          <li className="rounded-lg px-2 py-3 text-center text-xs font-medium text-ink-muted">
             Nothing due soon.
           </li>
         )}

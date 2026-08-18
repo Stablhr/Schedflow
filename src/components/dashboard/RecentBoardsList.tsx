@@ -20,7 +20,7 @@ export default function RecentBoardsList({ limit = 4 }: { limit?: number }) {
     <div className="rounded-xl glass-subtle p-3 shadow-sm sm:p-4">
       <div className="flex items-center gap-1.5">
         <Clock3 size={14} className="text-brand" />
-        <h2 className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+        <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink">
           Recently active
         </h2>
       </div>
@@ -42,7 +42,7 @@ export default function RecentBoardsList({ limit = 4 }: { limit?: number }) {
           </Link>
         ))}
         {boards.length === 0 && (
-          <p className="col-span-2 rounded-lg px-2 py-3 text-center text-xs text-ink-faint">
+          <p className="col-span-2 rounded-lg px-2 py-3 text-center text-xs font-medium text-ink-muted">
             No boards yet.
           </p>
         )}

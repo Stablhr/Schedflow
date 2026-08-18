@@ -18,7 +18,7 @@ export default function PlannerPreview() {
     <div className="rounded-xl glass-subtle p-3 shadow-sm sm:p-4">
       <div className="flex items-center gap-1.5">
         <CalendarDays size={14} className="text-brand" />
-        <h2 className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+        <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink">
           This week
         </h2>
         <Link
@@ -42,8 +42,8 @@ export default function PlannerPreview() {
                 count > 0 ? 'bg-brand-light/60' : 'bg-bg'
               }`}
             >
-              <span className="text-[9px] font-bold uppercase text-ink-faint sm:text-[10px]">{dayLetter}</span>
-              <span className="font-display text-xs font-bold text-ink sm:text-sm">{day.getDate()}</span>
+              <span className="text-[9px] font-extrabold uppercase text-ink-muted sm:text-[10px]">{dayLetter}</span>
+              <span className="font-display text-xs font-extrabold text-ink sm:text-sm">{day.getDate()}</span>
               <span
                 className={`mt-0.5 h-1 w-1 rounded-full sm:mt-1 sm:h-1.5 sm:w-1.5 ${count > 0 ? 'bg-brand' : 'bg-ink-faint/30'}`}
               />
