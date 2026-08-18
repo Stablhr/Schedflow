@@ -105,7 +105,7 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
               ? 'z-50 rounded-2xl shadow-[0_12px_40px_rgba(13,171,163,0.2),0_4px_16px_rgba(19,42,41,0.12)] ring-brand/40 opacity-95 dark:shadow-[0_12px_40px_rgba(13,171,163,0.15),0_4px_16px_rgba(0,0,0,0.3)]'
               : 'hover:shadow-lg hover:ring-border'
           }`}
-          style={{ background: 'var(--color-surface)', color: 'var(--color-ink)', borderColor: snapshot.isDragging ? undefined : 'var(--color-border)' }}
+          style={{ ...provided.draggableProps.style, background: 'var(--color-surface)', color: 'var(--color-ink)', borderColor: snapshot.isDragging ? undefined : 'var(--color-border)' }}
         >
           <DoneToggle card={card} />
           <CardCoverBand card={card} />
