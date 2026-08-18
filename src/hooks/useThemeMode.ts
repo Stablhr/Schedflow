@@ -6,7 +6,7 @@ import { useStore } from '../store/useStore'
  * and the system preference. Also applies the `dark` class to <html>.
  */
 export function useThemeMode(): 'light' | 'dark' {
-  const { data, setDarkMode } = useStore()
+  const { data } = useStore()
   const mode = data.ui.darkMode
 
   const [systemPrefersDark, setSystemPrefersDark] = useState(() =>
@@ -32,12 +32,6 @@ export function useThemeMode(): 'light' | 'dark' {
       root.classList.remove('dark')
     }
   }, [resolved])
-
-  // Cycle: light → dark → system
-  const cycleTheme = () => {
-    const next = mode === 'light' ? 'dark' : mode === 'dark' ? 'system' : 'light'
-    setDarkMode(next)
-  }
 
   return resolved
 }

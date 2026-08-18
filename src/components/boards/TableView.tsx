@@ -1,9 +1,7 @@
 import { useState, useMemo } from 'react'
-import { ArrowUpDown, ArrowUp, ArrowDown, Check, Paperclip, MessageSquare, Eye } from 'lucide-react'
+import { ArrowUpDown, ArrowUp, ArrowDown, Check } from 'lucide-react'
 import type { Card } from '../../store/schema'
 import { useStore } from '../../store/useStore'
-import { formatDate } from '../../utils/dates'
-import { getUrgency } from '../../utils/dates'
 import DueBadge from '../shared/DueBadge'
 import LabelChip from '../shared/Chip'
 import Avatar from '../shared/Avatar'
@@ -56,7 +54,6 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
     if (!board) return []
 
     const lists = board.listOrder.map((id) => data.lists[id]).filter(Boolean)
-    const listMap = new Map(lists.map((l) => [l.id, l]))
 
     let allCards: (Card & { listName: string })[] = []
     for (const list of lists) {

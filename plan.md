@@ -42,18 +42,22 @@ src/
       CaptureBox.jsx
     boards/
       BoardsHome.jsx          // board picker / "all boards" grid
-      BoardView.jsx           // single board (lists + cards)
+      BoardView.jsx           // single board (lists + cards) — also hosts view switching
       ListColumn.jsx
       ListMenu.jsx
       Card.jsx
       AddCardForm.jsx
       AddListForm.jsx
       BoardTopBar.jsx
-      ViewsMenu.jsx
+      ViewsMenu.jsx           // view switcher dropdown (Board/Table/Calendar/Timeline/Map)
       FilterPanel.jsx
       BoardMenuDrawer.jsx
       ShareModal.jsx
       VisibilityModal.jsx
+      TableView.jsx           // spreadsheet-style card list with sortable columns
+      CalendarView.jsx        // monthly calendar grid with cards on due dates
+      TimelineView.jsx        // Gantt-chart horizontal timeline with list lanes
+      MapView.jsx             // geographic location card grid
     planner/
       PlannerView.jsx
       WeekGrid.jsx
@@ -80,15 +84,19 @@ src/
     useBoards.js
     useCards.js
     useInbox.js
+    useThemeMode.js            // dark/light/system theme resolution + toggle
   store/
     storage.js                 // all localStorage read/write logic lives here
     schema.js                  // shape/defaults for each entity
   utils/
+    contrast.js                // WCAG contrast engine + getContrastText + mid-tone fallback
+    color.js                   // gradient generators (blendTwoStop, blendGradient)
+    colorUtils.js              // re-exports from contrast.js
     dates.js                   // due-date urgency logic (overdue/soon/normal)
     id.js                      // uuid wrapper
   App.jsx
   main.jsx
-  index.css                    // Tailwind directives + any custom base styles
+  index.css                    // Tailwind directives + dark mode tokens + glass utilities
 ```
 
 **Rule:** No component should call `localStorage` directly. Everything goes through `store/storage.js` so the persistence layer can be swapped for a real backend later without touching UI components.
@@ -124,6 +132,7 @@ Store everything under a single namespaced root key to avoid collisions with oth
       labelIds: [],
       memberIds: [],
       dueDate: null,                // ISO date string, e.g. "2026-08-20"
+      startDate: null,              // ISO date string for date ranges (Calendar/Timeline views)
       location: '',
       watching: false,
       files: [ { id, name, type: 'file'|'image', dataUrl, size, addedAt } ],
@@ -141,7 +150,8 @@ Store everything under a single namespaced root key to avoid collisions with oth
   },
   ui: {
     starredBoardIds: [],
-    lastVisitedBoardId: null
+    lastVisitedBoardId: null,
+    darkMode: 'system'              // 'light' | 'dark' | 'system'
   }
 }
 ```
@@ -196,6 +206,16 @@ Each phase should be functional end-to-end (UI + state + persistence) before mov
 - Share modal, Visibility modal, Filter panel, Views menu (Board fully functional; others as placeholder shells per `Project-context.md`)
 - Board-level settings: background, labels management, archived items
 - Empty states, loading states, and a "Reset all data" option (clears the `flowline_data` key) for easier local testing
+
+### Phase 7 — Dark Mode & Views
+- Dark mode toggle (light/dark/system) in sidebar
+- Dark mode CSS tokens and glass utility overrides
+- Table view (sortable spreadsheet card list)
+- Calendar view (monthly grid with due dates)
+- Timeline view (Gantt chart with list lanes)
+- Map view (location card grid)
+- Adaptive text colors: `getContrastText` API + mid-tone fallback
+- Card color picker removal from overflow menu
 
 ---
 

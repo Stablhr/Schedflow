@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { addDays, toISODate, formatDate } from '../../utils/dates'
 import type { Card, List } from '../../store/schema'
@@ -22,7 +21,6 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
   const board = data.boards[boardId]
   const today = new Date()
   const [zoom, setZoom] = useState<ZoomLevel>('week')
-  const [scrollOffset, setScrollOffset] = useState(0)
 
   const config = ZOOM_CONFIG[zoom]
 

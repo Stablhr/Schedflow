@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { LayoutGrid, Table, CalendarDays, GanttChartSquare, Map, Check, ArrowUpRight } from 'lucide-react'
+import { LayoutGrid, Table, CalendarDays, GanttChartSquare, Map, Check } from 'lucide-react'
 import type { BoardViewType } from './BoardView'
 
 const VIEWS: { id: BoardViewType; label: string; icon: typeof LayoutGrid }[] = [

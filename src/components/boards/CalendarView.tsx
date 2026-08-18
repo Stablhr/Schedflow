@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../../store/useStore'
-import { addDays, formatDate, isSameDay, toISODate } from '../../utils/dates'
+import { addDays, isSameDay, toISODate } from '../../utils/dates'
 import type { Card } from '../../store/schema'
 
 interface CalendarViewProps {

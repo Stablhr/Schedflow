@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { MapPin, ExternalLink } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import type { Card } from '../../store/schema'
 
