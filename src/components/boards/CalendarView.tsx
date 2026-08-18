@@ -144,7 +144,7 @@ export default function CalendarView({ boardId, onOpenCard }: CalendarViewProps)
               <div
                 key={i}
                 className={`min-h-[80px] bg-surface p-1.5 transition ${
-                  isCurrentMonth ? '' : 'opacity-40'
+                  isCurrentMonth ? '' : 'bg-surface-alt/50 text-ink-faint'
                 } ${isToday ? 'ring-2 ring-inset ring-brand' : ''}`}
               >
                 <div className={`mb-1 text-right text-xs font-semibold ${

@@ -84,7 +84,7 @@ export default function BoardView() {
                     ? `url(${board.background}) center/cover no-repeat`
                     : board.background
                       ? `${board.background}`
-                      : 'rgba(225,245,243,0.6)',
+                      : undefined,
                 }}
               >
                 {lists.map((list, index) => (

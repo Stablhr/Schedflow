@@ -48,7 +48,7 @@ export default function BoardsHome() {
             <div
               key={board.id}
               onClick={() => navigate(`/boards/${board.id}`)}
-              className="group relative h-24 cursor-pointer overflow-hidden rounded-xl shadow-sm ring-1 ring-black/5 transition hover:shadow-md hover-lift sm:h-28"
+              className="group relative h-24 cursor-pointer overflow-hidden rounded-xl shadow-sm ring-1 ring-border transition hover:shadow-md hover-lift sm:h-28"
               style={boardBgStyle(board.background)}
             >
               <button

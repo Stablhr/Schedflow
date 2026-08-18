@@ -76,9 +76,9 @@
   --color-surface: #1A2B2A;
   --color-surface-alt: #243534;
   --color-ink: #E8F0EF;
-  --color-ink-muted: #94AFAC;
-  --color-ink-faint: #5C7C79;
-  --color-brand: #0DABA3;
+  --color-ink-muted: #B4CCC9;
+  --color-ink-faint: #8BA9A6;
+  --color-brand: #14C4BC;
   --color-brand-dark: #10C4BB;
   --color-brand-light: #1A3D3A;
   --color-accent: #FF8B5E;
@@ -163,6 +163,26 @@
 
 .dark .glass-scrim {
   background: var(--glass-scrim);
+}
+
+.dark .glass-subtle {
+  background: rgba(15, 26, 25, 0.55);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .glass {
+  background: rgba(15, 26, 25, 0.65);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .glass-heavy {
+  background: rgba(15, 26, 25, 0.8);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.dark .glass-dark {
+  background: rgba(10, 18, 17, 0.82);
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
 /* ── Neumorphism utilities ───────────────────────────────── */

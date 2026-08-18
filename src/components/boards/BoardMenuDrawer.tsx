@@ -128,7 +128,7 @@ export default function BoardMenuDrawer({
                     title={theme.name}
                     onClick={() => setBoardBackground(board.id, gradient)}
                     className={`flex w-full items-center gap-3 rounded-lg p-2 transition ${
-                      isActive ? 'ring-2 ring-brand' : 'ring-1 ring-black/10 hover:ring-black/20'
+                      isActive ? 'ring-2 ring-brand' : 'ring-1 ring-border hover:ring-border'
                     }`}
                   >
                     <div
@@ -155,7 +155,7 @@ export default function BoardMenuDrawer({
                   title="Set background"
                   onClick={() => setBoardBackground(board.id, color)}
                   className={`h-6 w-6 rounded-md transition hover:scale-110 ${
-                    board.background === color ? 'ring-2 ring-ink' : 'ring-1 ring-black/10'
+                    board.background === color ? 'ring-2 ring-ink' : 'ring-1 ring-border'
                   }`}
                   style={{ background: color }}
                 />

@@ -100,7 +100,7 @@ export default function ListMenu({ list }: { list: List }) {
 
           <button
             type="button"
-            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium text-red-400 transition hover:bg-red-500/20"
+            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium text-danger transition hover:bg-danger-light"
             onClick={() => {
               if (window.confirm(`Delete the "${list.name}" list and all of its cards?`)) {
                 deleteList(list.id)
