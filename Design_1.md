@@ -312,3 +312,110 @@ Gradients use `linear-gradient(135deg, primary, secondary)` — top-left to bott
 ## 13. Card Modal Spacing
 
 The card modal uses generous vertical margin (`py-16` on the Modal container) to float above the board content with clear visual separation. The scroll container uses `max-h-[calc(100vh-8rem)]` to prevent the modal from touching viewport edges while maximizing usable content area.
+
+---
+
+## 14. Dark Mode Theme
+
+Three-way theme toggle (light → dark → system) in the sidebar. Dark mode inverts all surfaces while preserving the turquoise brand identity.
+
+### Dark mode token mapping
+
+| Token | Light | Dark |
+|-------|-------|------|
+| `--color-bg` | `#F3FBFA` | `#0F1A19` |
+| `--color-surface` | `#FFFFFF` | `#1A2B2A` |
+| `--color-surface-alt` | `#E1F5F3` | `#243534` |
+| `--color-ink` | `#132A29` | `#E8F0EF` |
+| `--color-ink-muted` | `#5C7C79` | `#94AFAC` |
+| `--color-ink-faint` | `#94AFAC` | `#5C7C79` |
+| `--color-brand` | `#0DABA3` | `#0DABA3` (unchanged) |
+| `--color-brand-dark` | `#0A8981` | `#10C4BB` |
+| `--color-brand-light` | `#D2F3F0` | `#1A3D3A` |
+| `--color-border` | `#CDEBE7` | `#2D4442` |
+
+### Glass utilities in dark mode
+
+| Utility | Light | Dark |
+|---------|-------|------|
+| `glass` | `rgba(255,255,255,0.72)` | `rgba(15,26,25,0.72)` |
+| `glass-subtle` | `rgba(255,255,255,0.50)` | `rgba(15,26,25,0.5)` |
+| `glass-heavy` | `rgba(255,255,255,0.85)` | `rgba(26,43,42,0.85)` |
+| `glass-dark` | `rgba(19,42,41,0.75)` | `rgba(15,26,25,0.75)` |
+
+### Tailwind dark variant support
+
+`@custom-variant dark (&:where(.dark, .dark *))` enables `dark:` prefix throughout the app for any component that needs dark-specific overrides beyond the token system.
+
+### Toggle behavior
+
+- **Location:** Bottom of sidebar (both collapsed and expanded modes)
+- **Cycle:** light → dark → system (click cycles forward)
+- **Icons:** Sun (light), Moon (dark), Monitor (system)
+- **System mode:** Respects `prefers-color-scheme` media query, updates live if OS setting changes
+
+---
+
+## 15. Board Views
+
+Five view modes accessible from the Views menu dropdown in the board top bar. All views share the same search and filter state from BoardTopBar.
+
+### Table View
+
+Spreadsheet-style card list with sortable columns. Dense, data-grid layout for auditing many cards at once.
+
+**Columns:** Card (title), List, Labels, Members, Due Date, Status
+**Interactions:** Click header to sort (asc/desc), click row to open card
+**Filtering:** Respects board search + label/member filters
+
+### Calendar View
+
+Monthly calendar grid showing cards on their due dates. Traditional calendar layout for date-first planning.
+
+**Features:** Month navigation (prev/next/today), today highlight, cards as colored pills with label left-border, up to 3 cards per day cell with "+N more" overflow
+
+### Timeline View
+
+Gantt-chart style horizontal timeline with list lanes. For long-range planning and seeing how work fits together over time.
+
+**Features:** Zoom controls (Day/Week/Month), today vertical line, cards as colored bars spanning date ranges, unscheduled lane for cards without dates
+
+### Map View
+
+Geographic visualization of cards with locations. Structured location list with card details.
+
+**Features:** Cards with locations displayed in grid, sidebar listing cards without locations, click to open card modal
+
+### Views Menu
+
+All five views are clickable in the dropdown. Active view highlighted with brand color and check icon. Switching views is instant — no page reload.
+
+---
+
+## 16. Adaptive Text Colors (Enhanced)
+
+### `getContrastText` API
+
+Simplified utility returning black or white text color with WCAG AA compliance information.
+
+```
+getContrastText(bgHex) → {
+  color: '#000000' | '#FFFFFF',
+  ratio: number,          // contrast ratio (1–21)
+  meetsAA: boolean,       // >= 4.5:1
+  meetsAALarge: boolean   // >= 3:1
+}
+```
+
+### Mid-tone fallback
+
+When neither black nor white achieves WCAG AA contrast (e.g., medium blue `#2277D3`), apply a text-shadow for perceived contrast improvement:
+
+- White text: `text-shadow: 0 1px 2px rgba(0,0,0,0.4)`
+- Black text: `text-shadow: 0 1px 1px rgba(255,255,255,0.4)`
+
+### Where applied
+
+- Card cover color bands (solid full-opacity backgrounds)
+- Board backgrounds (via `useAdaptiveTheme`)
+- Label chips — NOT applied (they use tinted low-opacity backgrounds, designed for legibility against white card surfaces)

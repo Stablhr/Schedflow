@@ -203,3 +203,58 @@ export function withAlpha(hex: string, alpha: number): string {
   if (!rgb) return hex
   return `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`
 }
+
+// ── Simplified Contrast Text API ──────────────────────────────
+
+export interface ContrastTextResult {
+  color: '#000000' | '#FFFFFF'
+  ratio: number
+  meetsAA: boolean
+  meetsAALarge: boolean
+}
+
+/**
+ * Returns black or white — whichever has higher contrast against the given background.
+ * Also returns whether that pairing meets WCAG AA (4.5:1) so callers can apply
+ * a mid-tone fallback (text-shadow or scrim) when neither black nor white contrasts well.
+ */
+export function getContrastText(bgHex: string): ContrastTextResult {
+  const cached = contrastTextCache.get(bgHex)
+  if (cached) return cached
+
+  const rgb = parseColor(bgHex)
+  if (!rgb) {
+    const result: ContrastTextResult = { color: '#000000', ratio: 21, meetsAA: true, meetsAALarge: true }
+    contrastTextCache.set(bgHex, result)
+    return result
+  }
+
+  const bgLum = relativeLuminance(rgb)
+  const blackRatio = contrastRatio(bgLum, 0)
+  const whiteRatio = contrastRatio(bgLum, 1)
+  const useWhite = whiteRatio > blackRatio
+  const bestRatio = useWhite ? whiteRatio : blackRatio
+
+  const result: ContrastTextResult = {
+    color: useWhite ? '#FFFFFF' : '#000000',
+    ratio: bestRatio,
+    meetsAA: bestRatio >= 4.5,
+    meetsAALarge: bestRatio >= 3,
+  }
+  contrastTextCache.set(bgHex, result)
+  return result
+}
+
+const contrastTextCache = new Map<string, ContrastTextResult>()
+
+/**
+ * Returns a CSS text-shadow string for mid-tone fallback when neither
+ * black nor white achieves WCAG AA contrast against the background.
+ * White text gets a dark shadow; black text gets a light shadow.
+ */
+export function getMidToneFallback(textColor: string): string {
+  if (textColor === '#FFFFFF') {
+    return '0 1px 2px rgba(0,0,0,0.4)'
+  }
+  return '0 1px 1px rgba(255,255,255,0.4)'
+}

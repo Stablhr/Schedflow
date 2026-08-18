@@ -8,6 +8,7 @@ import IconButton from '../shared/IconButton'
 import ViewsMenu from './ViewsMenu'
 import FilterPanel from './FilterPanel'
 import type { BoardFilter } from './FilterPanel'
+import type { BoardViewType } from './BoardView'
 
 interface BoardTopBarProps {
   board: Board
@@ -16,7 +17,9 @@ interface BoardTopBarProps {
   viewsOpen: boolean
   filterOpen: boolean
   filter: BoardFilter
+  activeView: BoardViewType
   onOpenViews: () => void
+  onViewChange: (view: BoardViewType) => void
   onOpenFilter: () => void
   onFilterChange: (filter: BoardFilter) => void
   onOpenMenu: () => void
@@ -29,7 +32,9 @@ export default function BoardTopBar({
   viewsOpen,
   filterOpen,
   filter,
+  activeView,
   onOpenViews,
+  onViewChange,
   onOpenFilter,
   onFilterChange,
   onOpenMenu,
@@ -146,7 +151,7 @@ export default function BoardTopBar({
           <IconButton title="Views" active={viewsOpen} onClick={onOpenViews} style={{ color: 'var(--surface-text-muted)' }}>
             <LayoutGrid size={17} />
           </IconButton>
-          <ViewsMenu open={viewsOpen} onClose={onOpenViews} />
+          <ViewsMenu open={viewsOpen} onClose={onOpenViews} activeView={activeView} onViewChange={onViewChange} />
         </span>
 
         <span className="relative">

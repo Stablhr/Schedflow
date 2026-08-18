@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-bg: #F3FBFA;
   --color-surface: #FFFFFF;
@@ -50,6 +52,51 @@
       padding-bottom: calc(0.375rem + env(safe-area-inset-bottom));
     }
   }
+}
+
+/* ── Dark mode token overrides ────────────────────────────── */
+.dark {
+  --color-bg: #0F1A19;
+  --color-surface: #1A2B2A;
+  --color-surface-alt: #243534;
+  --color-ink: #E8F0EF;
+  --color-ink-muted: #94AFAC;
+  --color-ink-faint: #5C7C79;
+  --color-brand: #0DABA3;
+  --color-brand-dark: #10C4BB;
+  --color-brand-light: #1A3D3A;
+  --color-accent: #FF8B5E;
+  --color-accent-light: #3D2A1F;
+  --color-success: #33B27A;
+  --color-success-light: #1A2E23;
+  --color-danger: #FF5E6C;
+  --color-danger-light: #3D1F23;
+  --color-warn: #F6C453;
+  --color-warn-light: #3D331F;
+  --color-border: #2D4442;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.dark .glass {
+  background: rgba(15, 26, 25, 0.72);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .glass-subtle {
+  background: rgba(15, 26, 25, 0.5);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .glass-heavy {
+  background: rgba(26, 43, 42, 0.85);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .glass-dark {
+  background: rgba(15, 26, 25, 0.75);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 @utility glass {

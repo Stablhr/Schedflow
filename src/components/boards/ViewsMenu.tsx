@@ -1,17 +1,23 @@
 import { useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
-import { LayoutGrid, Table, CalendarDays, LayoutDashboard, GanttChartSquare, Map, Check, ArrowUpRight } from 'lucide-react'
+import { LayoutGrid, Table, CalendarDays, GanttChartSquare, Map, Check, ArrowUpRight } from 'lucide-react'
+import type { BoardViewType } from './BoardView'
 
-const VIEWS = [
-  { id: 'board', label: 'Board', icon: LayoutGrid, to: null as string | null },
-  { id: 'table', label: 'Table', icon: Table, to: null },
-  { id: 'calendar', label: 'Calendar', icon: CalendarDays, to: '/planner' },
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: null },
-  { id: 'timeline', label: 'Timeline', icon: GanttChartSquare, to: null },
-  { id: 'map', label: 'Map', icon: Map, to: null },
+const VIEWS: { id: BoardViewType; label: string; icon: typeof LayoutGrid }[] = [
+  { id: 'board', label: 'Board', icon: LayoutGrid },
+  { id: 'table', label: 'Table', icon: Table },
+  { id: 'calendar', label: 'Calendar', icon: CalendarDays },
+  { id: 'timeline', label: 'Timeline', icon: GanttChartSquare },
+  { id: 'map', label: 'Map', icon: Map },
 ]
 
-export default function ViewsMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+interface ViewsMenuProps {
+  open: boolean
+  onClose: () => void
+  activeView: BoardViewType
+  onViewChange: (view: BoardViewType) => void
+}
+
+export default function ViewsMenu({ open, onClose, activeView, onViewChange }: ViewsMenuProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -32,40 +38,24 @@ export default function ViewsMenu({ open, onClose }: { open: boolean; onClose: (
       </p>
       {VIEWS.map((view) => {
         const Icon = view.icon
-        const isActive = view.id === 'board'
-        if (view.to) {
-          return (
-            <Link
-              key={view.id}
-              to={view.to}
-              onClick={onClose}
-              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm font-medium text-ink transition hover:bg-surface-alt"
-            >
-              <Icon size={15} className="text-ink-muted" />
-              <span className="flex-1">{view.label}</span>
-              <ArrowUpRight size={13} className="text-ink-faint" />
-            </Link>
-          )
-        }
+        const isActive = view.id === activeView
         return (
           <button
             key={view.id}
             type="button"
-            onClick={onClose}
-            disabled={!isActive}
+            onClick={() => {
+              onViewChange(view.id)
+              onClose()
+            }}
             className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition ${
               isActive
-                ? 'font-semibold text-brand-dark'
-                : 'cursor-default font-medium text-ink-muted'
-            } ${isActive ? 'bg-brand-light' : ''}`}
+                ? 'font-semibold text-brand-dark bg-brand-light'
+                : 'font-medium text-ink hover:bg-surface-alt'
+            }`}
           >
             <Icon size={15} />
             <span className="flex-1">{view.label}</span>
-            {isActive ? (
-              <Check size={14} className="text-brand-dark" />
-            ) : (
-              <span className="font-mono text-[9.5px] text-ink-faint">soon</span>
-            )}
+            {isActive && <Check size={14} className="text-brand-dark" />}
           </button>
         )
       })}

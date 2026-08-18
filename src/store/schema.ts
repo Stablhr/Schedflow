@@ -83,6 +83,7 @@ export interface Card {
   labelIds: string[]
   memberIds: string[]
   dueDate: string | null
+  startDate: string | null
   location: string
   watching: boolean
   archived: boolean
@@ -100,6 +101,8 @@ export interface InboxItem {
   createdAt: string
 }
 
+export type ThemeMode = 'light' | 'dark' | 'system'
+
 export interface AppData {
   version: number
   boards: Record<string, Board>
@@ -109,6 +112,7 @@ export interface AppData {
   members: Record<string, Member>
   ui: {
     lastVisitedBoardId: string | null
+    darkMode: ThemeMode
   }
 }
 
@@ -190,6 +194,7 @@ export function emptyData(): AppData {
     },
     ui: {
       lastVisitedBoardId: null,
+      darkMode: 'system',
     },
   }
 }

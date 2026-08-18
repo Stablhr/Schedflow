@@ -1,0 +1,252 @@
+import { useState, useMemo } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useStore } from '../../store/useStore'
+import { addDays, toISODate, formatDate } from '../../utils/dates'
+import type { Card, List } from '../../store/schema'
+
+interface TimelineViewProps {
+  boardId: string
+  onOpenCard: (cardId: string) => void
+}
+
+type ZoomLevel = 'day' | 'week' | 'month'
+
+const ZOOM_CONFIG = {
+  day: { columnWidth: 60, label: 'Day', columns: 21 },
+  week: { columnWidth: 100, label: 'Week', columns: 14 },
+  month: { columnWidth: 140, label: 'Month', columns: 8 },
+}
+
+export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps) {
+  const { data } = useStore()
+  const board = data.boards[boardId]
+  const today = new Date()
+  const [zoom, setZoom] = useState<ZoomLevel>('week')
+  const [scrollOffset, setScrollOffset] = useState(0)
+
+  const config = ZOOM_CONFIG[zoom]
+
+  const startDate = useMemo(() => {
+    const d = new Date(today)
+    d.setDate(d.getDate() - Math.floor(config.columns / 3))
+    return d
+  }, [config.columns])
+
+  const timeColumns = useMemo(() => {
+    const cols: Date[] = []
+    for (let i = 0; i < config.columns; i++) {
+      cols.push(addDays(startDate, i * (zoom === 'month' ? 30 : zoom === 'week' ? 7 : 1)))
+    }
+    return cols
+  }, [startDate, config.columns, zoom])
+
+  const totalWidth = config.columns * config.columnWidth
+
+  const lists = useMemo(() => {
+    if (!board) return []
+    return board.listOrder.map((id) => data.lists[id]).filter(Boolean) as List[]
+  }, [board, data.lists])
+
+  const cardsByList = useMemo(() => {
+    const map = new Map<string, Card[]>()
+    for (const list of lists) {
+      const listCards: Card[] = []
+      for (const cardId of list.cardOrder) {
+        const card = data.cards[cardId]
+        if (card && !card.archived) {
+          listCards.push(card)
+        }
+      }
+      map.set(list.id, listCards)
+    }
+    return map
+  }, [lists, data.cards])
+
+  const unscheduledCards = useMemo(() => {
+    if (!board) return []
+    const result: Card[] = []
+    for (const list of lists) {
+      for (const cardId of list.cardOrder) {
+        const card = data.cards[cardId]
+        if (card && !card.archived && !card.dueDate) {
+          result.push(card)
+        }
+      }
+    }
+    return result
+  }, [board, lists, data.cards])
+
+  const todayOffset = useMemo(() => {
+    const diffMs = today.getTime() - startDate.getTime()
+    const diffDays = diffMs / (1000 * 60 * 60 * 24)
+    return diffDays * config.columnWidth
+  }, [startDate, config.columnWidth])
+
+  const getCardPosition = (card: Card) => {
+    const start = card.startDate ? new Date(card.startDate) : null
+    const end = card.dueDate ? new Date(card.dueDate) : null
+
+    if (!end) return null
+
+    const endMs = end.getTime()
+    const startMs = start ? start.getTime() : endMs
+
+    const left = ((startMs - startDate.getTime()) / (1000 * 60 * 60 * 24)) * config.columnWidth
+    const width = Math.max(
+      config.columnWidth * 0.5,
+      ((endMs - startMs) / (1000 * 60 * 60 * 24) + 1) * config.columnWidth,
+    )
+
+    return { left: Math.max(0, left), width }
+  }
+
+  if (!board) return null
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border glass-subtle px-3 py-2.5 sm:px-4">
+        <h2 className="font-display text-lg font-bold text-ink sm:text-xl">Timeline</h2>
+
+        <div className="ml-2 flex items-center gap-1 rounded-lg bg-surface-alt p-0.5">
+          {(['day', 'week', 'month'] as ZoomLevel[]).map((z) => (
+            <button
+              key={z}
+              type="button"
+              onClick={() => setZoom(z)}
+              className={`rounded-md px-2 py-1 text-[11px] font-semibold transition ${
+                zoom === z
+                  ? 'bg-brand text-white'
+                  : 'text-ink-muted hover:text-ink'
+              }`}
+            >
+              {ZOOM_CONFIG[z].label}
+            </button>
+          ))}
+        </div>
+
+        <span className="ml-1 font-mono text-[11px] text-ink-muted">
+          {formatDate(toISODate(startDate))} – {formatDate(toISODate(addDays(startDate, config.columns - 1)))}
+        </span>
+      </div>
+
+      <div className="scroll-slim flex-1 overflow-auto">
+        <div className="min-w-[600px]">
+          {/* Time header */}
+          <div className="sticky top-0 z-10 flex border-b border-border bg-surface-alt/80 backdrop-blur-sm">
+            <div className="w-[140px] shrink-0 border-r border-border px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+              List
+            </div>
+            <div className="relative flex-1 overflow-hidden" style={{ height: 40 }}>
+              <div className="flex" style={{ width: totalWidth }}>
+                {timeColumns.map((col, i) => {
+                  const isToday = toISODate(col) === toISODate(today)
+                  return (
+                    <div
+                      key={i}
+                      className={`shrink-0 border-r border-border px-2 py-2 text-[10px] font-medium ${
+                        isToday ? 'bg-brand-light text-brand-dark font-bold' : 'text-ink-muted'
+                      }`}
+                      style={{ width: config.columnWidth }}
+                    >
+                      {formatDate(toISODate(col))}
+                    </div>
+                  )
+                })}
+              </div>
+              {/* Today line */}
+              <div
+                className="absolute top-0 bottom-0 w-0.5 bg-brand z-10"
+                style={{ left: todayOffset }}
+              />
+            </div>
+          </div>
+
+          {/* List rows */}
+          {lists.map((list) => {
+            const listCards = cardsByList.get(list.id) ?? []
+            return (
+              <div key={list.id} className="flex border-b border-border">
+                <div className="w-[140px] shrink-0 border-r border-border px-3 py-2.5">
+                  <span className="truncate text-xs font-semibold text-ink">{list.name}</span>
+                  <span className="ml-1 font-mono text-[10px] text-ink-faint">{listCards.length}</span>
+                </div>
+                <div className="relative flex-1 overflow-hidden" style={{ height: Math.max(44, listCards.length * 28 + 16) }}>
+                  <div className="flex" style={{ width: totalWidth }}>
+                    {timeColumns.map((_, i) => (
+                      <div
+                        key={i}
+                        className="shrink-0 border-r border-border/50"
+                        style={{ width: config.columnWidth }}
+                      />
+                    ))}
+                  </div>
+                  {/* Today line */}
+                  <div
+                    className="absolute top-0 bottom-0 w-0.5 bg-brand/30 z-5"
+                    style={{ left: todayOffset }}
+                  />
+                  {/* Cards */}
+                  {listCards.map((card, ci) => {
+                    const pos = getCardPosition(card)
+                    if (!pos) return null
+                    const boardLabels = board.labels
+                    const label = card.labelIds[0] ? boardLabels[card.labelIds[0]] : null
+                    return (
+                      <button
+                        key={card.id}
+                        type="button"
+                        onClick={() => onOpenCard(card.id)}
+                        title={card.title}
+                        className={`absolute flex items-center rounded-md px-2 py-1 text-[10px] font-semibold text-white shadow-sm transition hover:shadow-md hover:scale-[1.02] active:scale-[0.98] ${
+                          card.done ? 'opacity-60' : ''
+                        }`}
+                        style={{
+                          left: pos.left,
+                          width: pos.width,
+                          top: ci * 28 + 8,
+                          background: label ? label.color : '#0DABA3',
+                          height: 22,
+                        }}
+                      >
+                        <span className="truncate">{card.title}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+
+          {/* Unscheduled */}
+          {unscheduledCards.length > 0 && (
+            <div className="flex border-b border-border bg-surface-alt/30">
+              <div className="w-[140px] shrink-0 border-r border-border px-3 py-2.5">
+                <span className="truncate text-xs font-semibold text-ink-faint">Unscheduled</span>
+                <span className="ml-1 font-mono text-[10px] text-ink-faint">{unscheduledCards.length}</span>
+              </div>
+              <div className="flex-1 px-3 py-2">
+                <div className="flex flex-wrap gap-1">
+                  {unscheduledCards.slice(0, 8).map((card) => (
+                    <button
+                      key={card.id}
+                      type="button"
+                      onClick={() => onOpenCard(card.id)}
+                      className="rounded-md bg-surface px-2 py-1 text-[10px] font-medium text-ink ring-1 ring-border transition hover:ring-brand/40 active:scale-[0.98]"
+                    >
+                      {card.title}
+                    </button>
+                  ))}
+                  {unscheduledCards.length > 8 && (
+                    <span className="px-2 py-1 text-[10px] text-ink-faint">
+                      +{unscheduledCards.length - 8} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -219,6 +219,169 @@ Each phase should be functional end-to-end (UI + state + persistence) before mov
 
 ---
 
+## 9. Dark Mode Theme System
+
+### Feature: Light / Dark / System Theme Toggle
+
+Three-way theme cycle (light → dark → system) controlled from the sidebar toggle button. Respects system `prefers-color-scheme` when set to "system".
+
+**Schema:** `ui.darkMode: 'light' | 'dark' | 'system'` added to `AppData.ui`. Default: `'system'`.
+
+**`src/hooks/useThemeMode.ts`** (new):
+- `useThemeMode()` — resolves effective theme (`'light' | 'dark'`), applies `dark` class to `<html>`, watches `prefers-color-scheme` media query for system mode.
+- `useThemeCycle()` — returns `{ mode, cycle }` for the toggle button. Cycle order: light → dark → system.
+
+**CSS token overrides in `index.css`:**
+```css
+.dark {
+  --color-bg: #0F1A19;
+  --color-surface: #1A2B2A;
+  --color-surface-alt: #243534;
+  --color-ink: #E8F0EF;
+  --color-ink-muted: #94AFAC;
+  --color-ink-faint: #5C7C79;
+  --color-brand-light: #1A3D3A;
+  --color-border: #2D4442;
+}
+.dark .glass { background: rgba(15,26,25,0.72); }
+.dark .glass-subtle { background: rgba(15,26,25,0.5); }
+.dark .glass-heavy { background: rgba(26,43,42,0.85); }
+```
+
+**Sidebar toggle:** Sun/Moon/Monitor icon at the bottom of the sidebar (both collapsed and expanded modes). Clicking cycles through light → dark → system.
+
+**Dark mode variant support:** `@custom-variant dark (&:where(.dark, .dark *))` enables `dark:` Tailwind prefix throughout the app.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/store/schema.ts` | Add `ThemeMode` type, `darkMode` to `AppData.ui`, `startDate` to Card |
+| `src/store/useStore.ts` | Add `setDarkMode` to Store interface |
+| `src/store/StoreProvider.tsx` | Implement `setDarkMode`, add `startDate` to `makeCard()` |
+| `src/hooks/useThemeMode.ts` | **New** — theme resolution + cycle hook |
+| `src/index.css` | Dark mode token overrides, glass dark variants, `@custom-variant dark` |
+| `src/components/layout/Sidebar.tsx` | Theme toggle button (sun/moon/monitor) |
+| `src/components/boards/Card.tsx` | Dark-mode-compatible card surfaces |
+
+---
+
+## 10. Board Views (Table, Calendar, Timeline, Map)
+
+### Feature: Table View
+
+Spreadsheet-style card list with sortable columns. Accessible from the Views menu dropdown.
+
+**Columns:** Card (title), List, Labels, Members, Due Date, Status (Active/Done).
+**Sorting:** Click column headers to toggle ascending/descending sort.
+**Filtering:** Respects existing board search and label/member filters from BoardTopBar.
+
+**`src/components/boards/TableView.tsx`** (new):
+- CSS Grid layout with sortable column headers
+- Cards rendered as rows with adaptive label chips, avatar stacks, due badges
+- Empty state when no cards match filters
+- Click row → opens CardModal
+
+### Feature: Calendar View
+
+Monthly calendar grid showing cards on their due dates. Traditional calendar layout.
+
+**`src/components/boards/CalendarView.tsx`** (new):
+- 7-column grid (Sun–Sat), 6 rows for weeks
+- Month navigation (prev/next/today)
+- Each day cell shows up to 3 card pills with label color left-border
+- Cards with `startDate` + `dueDate` span across days
+- Today highlighted with brand ring
+- Click card → opens CardModal
+
+**Schema change:** `Card.startDate: string | null` added for date-range cards (used by Calendar and Timeline views).
+
+### Feature: Timeline View
+
+Gantt-chart style horizontal timeline with list lanes.
+
+**`src/components/boards/TimelineView.tsx`** (new):
+- Horizontal scrollable container with time-axis header
+- Each list = horizontal lane (row)
+- Cards rendered as colored bars spanning their date range
+- Zoom controls: Day / Week / Month granularity
+- Today vertical line indicator
+- Cards without dates shown in "Unscheduled" lane at bottom
+- Cards colored by first label color
+
+### Feature: Map View
+
+Geographic visualization of cards with locations.
+
+**`src/components/boards/MapView.tsx`** (new):
+- Card location cards displayed in a grid layout
+- Cards with locations shown with MapPin icons and label colors
+- Sidebar listing cards without locations
+- Click card → opens CardModal
+
+**Note:** Full interactive map (Leaflet + OpenStreetMap) can be added as a future enhancement. Current implementation provides a structured location list view.
+
+### ViewsMenu Update
+
+The Views menu is now fully functional — all five views (Board, Table, Calendar, Timeline, Map) are clickable and switch the active view within the board context. No more "coming soon" placeholders.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/components/boards/BoardView.tsx` | Add `activeView` state, render views conditionally |
+| `src/components/boards/BoardTopBar.tsx` | Accept `activeView` + `onViewChange` props |
+| `src/components/boards/ViewsMenu.tsx` | All views clickable, `onViewChange` callback |
+| `src/components/boards/TableView.tsx` | **New** — spreadsheet table view |
+| `src/components/boards/CalendarView.tsx` | **New** — monthly calendar grid |
+| `src/components/boards/TimelineView.tsx` | **New** — Gantt chart timeline |
+| `src/components/boards/MapView.tsx` | **New** — location card grid |
+| `src/store/schema.ts` | Add `startDate` to Card interface |
+
+---
+
+## 11. Adaptive Text Colors (Enhanced)
+
+### Feature: `getContrastText` API + Mid-Tone Fallback
+
+Simplified contrast utility for any user-selectable background. Returns black or white text color with WCAG AA compliance info.
+
+**`src/utils/contrast.ts`** — New functions:
+- `getContrastText(bgHex)` → `{ color, ratio, meetsAA, meetsAALarge }`
+- `getMidToneFallback(textColor)` → CSS text-shadow string for mid-tone backgrounds
+
+**Mid-tone fallback strategy (Option A):** When `meetsAA` is false, apply a subtle `text-shadow` matching the opposite text color:
+- White text: `text-shadow: 0 1px 2px rgba(0,0,0,0.4)`
+- Black text: `text-shadow: 0 1px 1px rgba(255,255,255,0.4)`
+
+**Applied to:**
+- Card cover color bands (future-proofing for any text on colored covers)
+- Board backgrounds (via existing `useAdaptiveTheme`)
+- NOT applied to label chips (they use tinted backgrounds, not solid)
+
+**Performance:** Results memoized per hex value via `Map` cache.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/utils/contrast.ts` | Add `getContrastText`, `getMidToneFallback`, `ContrastTextResult` |
+| `src/utils/colorUtils.ts` | Re-export new functions |
+
+---
+
+## 12. Card Color Picker Removal
+
+The color swatch grid (`COVER_COLORS`) has been removed from the card modal's overflow (three-dot) menu. Cover functionality remains accessible via the Cover panel in the card modal sidebar (for image covers). Board background color picker remains in the overflow menu.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/components/card-modal/CardModal.tsx` | Remove COVER_COLORS grid section from overflow menu |
+
+---
+
 ## 7. Implementation Plan — Cover Panel, Comment Reactions, Move Card
 
 ### Feature 1: Cover Source Panel (Attachments → Cover)

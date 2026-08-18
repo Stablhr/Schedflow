@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { AppData, Board, Card, Label, List, Member, Share } from './schema'
+import type { AppData, Board, Card, Label, List, Member, Share, ThemeMode } from './schema'
 
 export interface Store {
   data: AppData
@@ -42,6 +42,7 @@ export interface Store {
   deleteLabel: (boardId: string, labelId: string) => void
   addShare: (boardId: string, name: string, role: Share['role']) => void
   removeShare: (boardId: string, shareId: string) => void
+  setDarkMode: (mode: ThemeMode) => void
   resetAll: () => void
 }
 

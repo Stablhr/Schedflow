@@ -1,7 +1,8 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Inbox, Columns3, CalendarDays, PanelLeftClose, PanelLeft } from 'lucide-react'
+import { LayoutDashboard, Inbox, Columns3, CalendarDays, PanelLeftClose, PanelLeft, Sun, Moon, Monitor } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
+import { useThemeMode, useThemeCycle } from '../../hooks/useThemeMode'
 import { blendTwoStop } from '../../utils/color'
 import CaptureBox from '../shared/CaptureBox'
 import Avatar from '../shared/Avatar'
@@ -40,6 +41,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const location = useLocation()
   const inboxCount = data.inbox.length
   const you = members.find((m) => m.name === 'You') ?? members[0]
+  const { mode, cycle: cycleTheme } = useThemeCycle()
 
   const boardMatch = location.pathname.match(/^\/boards\/([^/]+)$/)
   const boardId = boardMatch?.[1]
@@ -47,7 +49,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const bg = board?.background || ''
   const isBoard = !!(board && bg && !bg.startsWith('data:'))
 
-  const theme = useAdaptiveTheme(isBoard ? bg : '#E1F5F3')
+  const resolved = useThemeMode()
+  const theme = useAdaptiveTheme(isBoard ? bg : (resolved === 'dark' ? '#1A2B2A' : '#E1F5F3'))
   const sidebarVars = adaptiveVars(theme)
 
   return (
@@ -107,7 +110,21 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           })}
         </nav>
 
-        {!collapsed && (
+        {collapsed ? (
+          <div className="flex flex-col items-center gap-1 px-2 pb-2">
+            <button
+              type="button"
+              onClick={cycleTheme}
+              title={`Theme: ${mode.charAt(0).toUpperCase() + mode.slice(1)} (click to cycle)`}
+              className="flex h-9 w-9 items-center justify-center rounded-xl transition hover-grow"
+              style={{ color: 'var(--surface-text-muted)' }}
+            >
+              {mode === 'light' && <Sun size={16} />}
+              {mode === 'dark' && <Moon size={16} />}
+              {mode === 'system' && <Monitor size={16} />}
+            </button>
+          </div>
+        ) : (
           <div className="space-y-3 p-3">
             <CaptureBox />
             {you && (
@@ -116,6 +133,18 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <span className="text-sm font-semibold" style={{ color: 'var(--surface-text)' }}>{you.name}</span>
               </div>
             )}
+            <button
+              type="button"
+              onClick={cycleTheme}
+              title={`Theme: ${mode.charAt(0).toUpperCase() + mode.slice(1)} (click to cycle)`}
+              className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-medium transition hover:bg-surface-alt active:scale-[0.98]"
+              style={{ color: 'var(--surface-text-muted)' }}
+            >
+              {mode === 'light' && <Sun size={16} />}
+              {mode === 'dark' && <Moon size={16} />}
+              {mode === 'system' && <Monitor size={16} />}
+              <span className="capitalize">{mode}</span>
+            </button>
           </div>
         )}
       </aside>
