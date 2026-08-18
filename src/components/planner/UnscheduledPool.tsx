@@ -16,8 +16,7 @@ export default function UnscheduledPool({ cards }: { cards: Card[] }) {
               : 'ring-border/50'
           }`}
           style={{
-            transition: snapshot.isDraggingOver ? 'all 0.2s ease' : 'all 0.3s ease',
-            background: snapshot.isDraggingOver ? undefined : 'var(--color-surface-alt)',
+            transition: snapshot.isDraggingOver ? 'background-color 0.2s ease, box-shadow 0.2s ease' : 'background-color 0.3s ease',
           }}
         >
           <div className="flex items-center gap-1.5 px-1 pb-2">

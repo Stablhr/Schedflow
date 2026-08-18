@@ -30,7 +30,7 @@ export default function RecentBoardsList({ limit = 4 }: { limit?: number }) {
           <Link
             key={board.id}
             to={`/boards/${board.id}`}
-            className="relative flex h-14 items-end overflow-hidden rounded-lg p-2.5 shadow-sm ring-1 ring-black/5 transition hover:shadow-md hover-lift sm:h-16"
+            className="relative flex h-14 items-end overflow-hidden rounded-lg p-2.5 shadow-sm ring-1 ring-border transition hover:shadow-md hover-lift sm:h-16"
             style={boardBgStyle(board.background)}
           >
             {board.starred && (
