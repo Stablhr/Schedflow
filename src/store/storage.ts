@@ -12,6 +12,8 @@ export function loadData(): AppData {
     if (!parsed || typeof parsed !== 'object' || parsed.version !== SCHEMA_VERSION) {
       return emptyData()
     }
+    if (!parsed.ui) parsed.ui = emptyData().ui
+    if (parsed.ui.darkMode == null) parsed.ui.darkMode = 'system'
     return parsed
   } catch {
     return emptyData()

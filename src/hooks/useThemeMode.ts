@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '../store/useStore'
+import type { ThemeMode } from '../store/schema'
 
 /**
  * Resolves the effective theme ('light' | 'dark') from the user's preference
@@ -7,7 +8,7 @@ import { useStore } from '../store/useStore'
  */
 export function useThemeMode(): 'light' | 'dark' {
   const { data } = useStore()
-  const mode = data.ui.darkMode
+  const mode: ThemeMode = data.ui.darkMode ?? 'system'
 
   const [systemPrefersDark, setSystemPrefersDark] = useState(() =>
     typeof window !== 'undefined'
@@ -38,7 +39,7 @@ export function useThemeMode(): 'light' | 'dark' {
 
 export function useThemeCycle() {
   const { data, setDarkMode } = useStore()
-  const mode = data.ui.darkMode
+  const mode: ThemeMode = data.ui.darkMode ?? 'system'
 
   const cycle = () => {
     const next = mode === 'light' ? 'dark' : mode === 'dark' ? 'system' : 'light'
