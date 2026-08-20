@@ -57,8 +57,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     <>
       {/* Desktop sidebar */}
       <aside
-        className={`hidden shrink-0 flex-col border-r transition-[width] duration-200 md:flex ${
-          isBoard ? '' : 'bg-surface-alt'
+        className={`hidden shrink-0 flex-col border-r backdrop-blur-2xl transition-[width] duration-200 md:flex ${
+          isBoard ? '' : 'bg-surface-alt/60'
         } ${collapsed ? 'w-[52px]' : 'w-[236px]'}`}
         style={{ ...sidebarVars, background: isBoard ? bg : undefined, borderColor: theme.border }}
       >
@@ -68,7 +68,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
             type="button"
             onClick={onToggle}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className={`flex h-8 shrink-0 items-center justify-center rounded-lg transition hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 ${
+            className={`flex h-8 shrink-0 items-center justify-center rounded-lg transition active:scale-95 ${
               collapsed ? 'mx-auto mt-3 w-8' : 'ml-auto'
             }`}
             style={{ color: 'var(--surface-text-muted)' }}
@@ -77,7 +77,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </button>
         </div>
 
-        <nav className={`mt-2 flex-1 space-y-0.5 ${collapsed ? 'px-2' : 'px-3'}`}>
+        <nav className={`mt-2 flex-1 space-y-1 ${collapsed ? 'px-2' : 'px-3'}`}>
           {NAV.map((item) => {
             const Icon = item.icon
             return (
@@ -88,8 +88,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 title={collapsed ? item.label : undefined}
                 className={() =>
                   collapsed
-                    ? `relative flex h-9 w-9 mx-auto items-center justify-center rounded-lg transition hover:bg-black/5 dark:hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-brand`
-                    : `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-black/5 dark:hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-brand`
+                    ? `neu-compact relative flex h-9 w-9 mx-auto items-center justify-center rounded-[10px] transition hover-grow focus-visible:outline-2 focus-visible:outline-brand`
+                    : `neu-surface group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition hover-slide-right focus-visible:outline-2 focus-visible:outline-brand`
                 }
                 style={({ isActive }) => ({
                   color: isActive ? 'var(--surface-text)' : 'var(--surface-text-muted)',
@@ -99,7 +99,9 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <Icon size={17} className="shrink-0" />
                 {!collapsed && <span className="flex-1">{item.label}</span>}
                 {item.to === '/inbox' && inboxCount > 0 && (
-                  <span className="rounded-full bg-brand px-1.5 py-0.5 font-mono text-[10px] font-medium text-white">
+                  <span
+                    className="rounded-full bg-brand px-1.5 py-0.5 font-mono text-[10px] font-medium text-white"
+                  >
                     {inboxCount}
                   </span>
                 )}
@@ -110,7 +112,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
         {collapsed ? (
           <div className="flex flex-col items-center gap-1 px-2 pb-2">
-            <div className="flex flex-col rounded-lg bg-black/5 dark:bg-white/5 p-1">
+            <div className="flex flex-col rounded-xl bg-surface-alt/60 p-1">
               {([
                 { value: 'light' as const, icon: Sun, label: 'Light' },
                 { value: 'dark' as const, icon: Moon, label: 'Dark' },
@@ -120,10 +122,10 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   type="button"
                   onClick={() => setDarkMode(value)}
                   title={label}
-                  className={`flex h-8 w-8 items-center justify-center rounded-md transition active:scale-95 focus-visible:outline-2 focus-visible:outline-brand ${
+                  className={`neu-compact flex h-8 w-8 items-center justify-center rounded-[10px] transition active:scale-95 focus-visible:outline-2 focus-visible:outline-brand ${
                     mode === value
-                      ? 'bg-brand text-white shadow-sm'
-                      : 'text-ink-muted hover:text-ink hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'neu-compact-pressed bg-brand text-white shadow-sm'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface'
                   }`}
                 >
                   <Icon size={15} />
@@ -135,12 +137,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <div className="space-y-3 p-3">
             <CaptureBox />
             {you && (
-              <div className="flex items-center gap-2 rounded-lg px-2.5 py-2" style={{ background: 'var(--surface-bg-subtle)' }}>
+              <div className="flex items-center gap-2 rounded-xl px-2.5 py-2" style={{ background: 'var(--surface-bg-subtle)' }}>
                 <Avatar member={you} size={22} />
-                <span className="text-sm font-medium" style={{ color: 'var(--surface-text)' }}>{you.name}</span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--surface-text)' }}>{you.name}</span>
               </div>
             )}
-            <div className="grid grid-cols-2 rounded-lg bg-black/5 dark:bg-white/5 p-0.5">
+            <div className="grid grid-cols-2 rounded-xl bg-surface-alt/60 p-0.5">
               {([
                 { value: 'light' as const, icon: Sun, label: 'Light' },
                 { value: 'dark' as const, icon: Moon, label: 'Dark' },
@@ -150,10 +152,10 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   type="button"
                   onClick={() => setDarkMode(value)}
                   title={label}
-                  className={`flex flex-col items-center gap-0.5 rounded-md py-1.5 text-[10px] font-semibold transition active:scale-95 focus-visible:outline-2 focus-visible:outline-brand ${
+                  className={`neu-compact flex flex-col items-center gap-0.5 rounded-[10px] py-1.5 text-[10px] font-semibold transition active:scale-95 focus-visible:outline-2 focus-visible:outline-brand ${
                     mode === value
-                      ? 'bg-brand text-white shadow-sm'
-                      : 'text-ink-muted hover:text-ink hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'neu-compact-pressed bg-brand text-white shadow-sm'
+                      : 'text-ink-muted hover:text-ink hover:bg-surface'
                   }`}
                 >
                   <Icon size={14} />
@@ -167,7 +169,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       {/* Mobile bottom nav */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t px-2 py-1.5 md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t px-2 py-1.5 backdrop-blur-2xl md:hidden"
         style={{ ...sidebarVars, background: isBoard ? bg : undefined, borderColor: theme.border }}
       >
         {NAV.map((item) => {
@@ -177,7 +179,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               key={item.to}
               to={item.to}
               end={item.end}
-              className="relative flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 transition hover:bg-black/5 dark:hover:bg-white/5"
+              className="relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition hover:bg-brand-light/40 hover:scale-105"
               style={({ isActive }) => ({
                 color: isActive ? 'var(--surface-text)' : 'var(--surface-text-muted)',
                 background: isActive ? 'var(--surface-bg-subtle)' : undefined,
