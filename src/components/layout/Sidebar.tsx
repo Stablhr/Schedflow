@@ -37,6 +37,69 @@ interface SidebarProps {
   onToggle: () => void
 }
 
+function BoardDropdown({
+  recentBoards,
+  boardId,
+  onClose,
+  className = '',
+}: {
+  recentBoards: { id: string; name: string; background: string; starred: boolean }[]
+  boardId: string | undefined
+  onClose: () => void
+  className?: string
+}) {
+  return (
+    <div
+      className={`glass-panel animate-in pointer-events-auto w-64 p-1.5 ${className}`}
+      role="menu"
+    >
+      {recentBoards.length === 0 ? (
+        <p className="px-3 py-4 text-center text-xs text-ink-faint">
+          No boards yet
+        </p>
+      ) : (
+        <>
+          {recentBoards.map((b) => {
+            const isCurrent = b.id === boardId
+            return (
+              <Link
+                key={b.id}
+                to={`/boards/${b.id}`}
+                onClick={onClose}
+                role="menuitem"
+                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors duration-150 ${
+                  isCurrent
+                    ? 'bg-brand/10 font-semibold text-brand'
+                    : 'text-ink hover:bg-surface-alt'
+                }`}
+              >
+                <span
+                  className="h-3 w-3 shrink-0 rounded-sm"
+                  style={{ background: b.background || '#0DABA3' }}
+                />
+                <span className="min-w-0 flex-1 truncate">{b.name}</span>
+                {b.starred && (
+                  <Star size={12} className="shrink-0 fill-warn text-warn" />
+                )}
+              </Link>
+            )
+          })}
+          <div className="my-1 border-t border-border" />
+          <Link
+            to="/boards"
+            onClick={onClose}
+            role="menuitem"
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-muted transition-colors duration-150 hover:bg-surface-alt hover:text-ink"
+          >
+            View all boards
+            <ChevronRight size={14} />
+          </Link>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { data, members, setDarkMode } = useStore()
   const location = useLocation()
@@ -115,26 +178,19 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <div
                   key={item.to}
                   ref={boardsRef}
-                  className="relative"
+                  className="relative overflow-visible"
                   onMouseEnter={() => setBoardsOpen(true)}
                   onMouseLeave={() => setBoardsOpen(false)}
                 >
-                  <div
-                    role="button"
-                    tabIndex={0}
+                  <button
+                    type="button"
                     onClick={() => setBoardsOpen((o) => !o)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        setBoardsOpen((o) => !o)
-                      }
-                    }}
                     className={
                       collapsed
-                        ? `neu-compact relative flex h-9 w-9 mx-auto items-center justify-center rounded-[10px] transition hover-grow focus-visible:outline-2 focus-visible:outline-brand ${
+                        ? `neu-compact relative flex h-9 w-9 mx-auto items-center justify-center rounded-[10px] transition hover-grow focus-visible:outline-2 focus-visible:outline-brand cursor-pointer ${
                             boardsOpen ? 'neu-compact-pressed' : ''
                           }`
-                        : `neu-surface group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition hover-slide-right focus-visible:outline-2 focus-visible:outline-brand ${
+                        : `neu-surface group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition hover-slide-right focus-visible:outline-2 focus-visible:outline-brand cursor-pointer ${
                             boardsOpen ? 'neu-compact-pressed' : ''
                           }`
                     }
@@ -146,7 +202,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     <Icon size={17} className="shrink-0" />
                     {!collapsed && (
                       <>
-                        <span className="flex-1">{item.label}</span>
+                        <span className="flex-1 text-left">{item.label}</span>
                         <ChevronRight
                           size={14}
                           className={`shrink-0 transition-transform duration-150 ${
@@ -155,54 +211,15 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                         />
                       </>
                     )}
-                  </div>
+                  </button>
 
                   {boardsOpen && (
-                    <div className="glass-panel animate-in absolute left-full top-0 z-50 ml-2 w-64 p-1.5" role="menu">
-                      {recentBoards.length === 0 ? (
-                        <p className="px-3 py-4 text-center text-xs text-ink-faint">
-                          No boards yet
-                        </p>
-                      ) : (
-                        <>
-                          {recentBoards.map((b) => {
-                            const isCurrent = b.id === boardId
-                            return (
-                              <Link
-                                key={b.id}
-                                to={`/boards/${b.id}`}
-                                onClick={() => setBoardsOpen(false)}
-                                role="menuitem"
-                                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors duration-150 ${
-                                  isCurrent
-                                    ? 'bg-brand/10 font-semibold text-brand'
-                                    : 'text-ink hover:bg-surface-alt'
-                                }`}
-                              >
-                                <span
-                                  className="h-3 w-3 shrink-0 rounded-sm"
-                                  style={{ background: b.background || '#0DABA3' }}
-                                />
-                                <span className="min-w-0 flex-1 truncate">{b.name}</span>
-                                {b.starred && (
-                                  <Star size={12} className="shrink-0 fill-warn text-warn" />
-                                )}
-                              </Link>
-                            )
-                          })}
-                          <div className="my-1 border-t border-border" />
-                          <Link
-                            to="/boards"
-                            onClick={() => setBoardsOpen(false)}
-                            role="menuitem"
-                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-muted transition-colors duration-150 hover:bg-surface-alt hover:text-ink"
-                          >
-                            View all boards
-                            <ChevronRight size={14} />
-                          </Link>
-                        </>
-                      )}
-                    </div>
+                    <BoardDropdown
+                      recentBoards={recentBoards}
+                      boardId={boardId}
+                      onClose={() => setBoardsOpen(false)}
+                      className="absolute left-full top-0 z-[60] ml-1 max-h-[70vh] overflow-y-auto scroll-slim"
+                    />
                   )}
                 </div>
               )
@@ -310,7 +327,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <button
                   type="button"
                   onClick={() => setBoardsOpen((o) => !o)}
-                  className="relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition hover:bg-brand-light/40 hover:scale-105"
+                  className="relative flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 transition hover:bg-brand-light/40 hover:scale-105 cursor-pointer"
                   style={{
                     color: boardsOpen ? 'var(--surface-text)' : 'var(--surface-text-muted)',
                     background: boardsOpen ? 'var(--surface-bg-subtle)' : undefined,
@@ -321,51 +338,12 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 </button>
 
                 {boardsOpen && (
-                  <div className="glass-panel animate-in absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 p-1.5" role="menu">
-                    {recentBoards.length === 0 ? (
-                      <p className="px-3 py-4 text-center text-xs text-ink-faint">
-                        No boards yet
-                      </p>
-                    ) : (
-                      <>
-                        {recentBoards.map((b) => {
-                          const isCurrent = b.id === boardId
-                          return (
-                            <Link
-                              key={b.id}
-                              to={`/boards/${b.id}`}
-                              onClick={() => setBoardsOpen(false)}
-                              role="menuitem"
-                              className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors duration-150 ${
-                                isCurrent
-                                  ? 'bg-brand/10 font-semibold text-brand'
-                                  : 'text-ink hover:bg-surface-alt'
-                              }`}
-                            >
-                              <span
-                                className="h-3 w-3 shrink-0 rounded-sm"
-                                style={{ background: b.background || '#0DABA3' }}
-                              />
-                              <span className="min-w-0 flex-1 truncate">{b.name}</span>
-                              {b.starred && (
-                                <Star size={12} className="shrink-0 fill-warn text-warn" />
-                              )}
-                            </Link>
-                          )
-                        })}
-                        <div className="my-1 border-t border-border" />
-                        <Link
-                          to="/boards"
-                          onClick={() => setBoardsOpen(false)}
-                          role="menuitem"
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ink-muted transition-colors duration-150 hover:bg-surface-alt hover:text-ink"
-                        >
-                          View all boards
-                          <ChevronRight size={14} />
-                        </Link>
-                      </>
-                    )}
-                  </div>
+                  <BoardDropdown
+                    recentBoards={recentBoards}
+                    boardId={boardId}
+                    onClose={() => setBoardsOpen(false)}
+                    className="absolute bottom-[calc(100%+4px)] left-1/2 z-[60] -translate-x-1/2 max-h-[60vh] overflow-y-auto scroll-slim"
+                  />
                 )}
               </div>
             )
