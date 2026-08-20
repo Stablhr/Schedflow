@@ -131,8 +131,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         setBoardsOpen(false)
       }
     }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    document.addEventListener('click', handler)
+    return () => document.removeEventListener('click', handler)
   }, [boardsOpen])
 
   useEffect(() => {
