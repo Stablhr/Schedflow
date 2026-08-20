@@ -20,6 +20,12 @@ export interface Share {
   role: ShareRole
 }
 
+export interface ShareLink {
+  token: string
+  enabled: boolean
+  createdAt: string
+}
+
 export interface FileAttachment {
   id: string
   name: string
@@ -59,6 +65,7 @@ export interface Board {
   listOrder: string[]
   labels: Record<string, Label>
   shares: Share[]
+  shareLink?: ShareLink
 }
 
 export interface List {

@@ -1,8 +1,19 @@
-import { useState } from 'react'
-import { UserPlus, X } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import {
+  X,
+  UserPlus,
+  Link2,
+  Copy,
+  Check,
+  Lock,
+  ChevronDown,
+} from 'lucide-react'
 import type { Board, ShareRole } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
+import Avatar from '../shared/Avatar'
+
+const ROLE_OPTIONS: ShareRole[] = ['admin', 'member', 'observer']
 
 const ROLE_LABELS: Record<ShareRole, string> = {
   admin: 'Admin',
@@ -11,145 +22,313 @@ const ROLE_LABELS: Record<ShareRole, string> = {
 }
 
 const ROLE_DESCRIPTIONS: Record<ShareRole, string> = {
-  admin: 'Full control over the board.',
-  member: 'Can edit cards and lists.',
-  observer: 'View only.',
+  admin: 'Full control over the board, including managing members.',
+  member: 'Can edit cards, lists, and board content.',
+  observer: 'View only — cannot make changes.',
 }
 
 export default function ShareModal({ board, onClose }: { board: Board; onClose: () => void }) {
-  const { addShare, removeShare } = useStore()
+  const { addShare, removeShare, updateShareRole, members, createShareLink } = useStore()
+
+  const currentUser = members.find((m) => m.name === 'You') ?? members[0]
+
   const [name, setName] = useState('')
   const [role, setRole] = useState<ShareRole>('member')
-  const [copied, setCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+  const [activeTab, setActiveTab] = useState<'members' | 'requests'>('members')
+  const [openPermId, setOpenPermId] = useState<string | null>(null)
+
+  const inputRef = useRef<HTMLInputElement>(null)
+  const permRef = useRef<HTMLDivElement>(null)
 
   const shares = board.shares ?? []
-  const link = `${window.location.origin}/boards/${board.id}`
 
-  const copyLink = async () => {
+  useEffect(() => {
+    if (!openPermId) return
+    const handler = (e: MouseEvent) => {
+      if (permRef.current && !permRef.current.contains(e.target as Node)) {
+        setOpenPermId(null)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [openPermId])
+
+  const add = () => {
+    const trimmed = name.trim()
+    if (!trimmed) {
+      setErrorMsg('Please enter a name or email.')
+      return
+    }
+    if (shares.some((s) => s.name.toLowerCase() === trimmed.toLowerCase())) {
+      setErrorMsg('This person is already a member of this board.')
+      return
+    }
+    addShare(board.id, trimmed, role)
+    setName('')
+    setRole('member')
+    setErrorMsg('')
+  }
+
+  const handleCreateLink = () => {
+    createShareLink(board.id)
+  }
+
+  const shareUrl = board.shareLink
+    ? `${window.location.origin}/boards/${board.id}?token=${board.shareLink.token}`
+    : `${window.location.origin}/boards/${board.id}`
+
+  const copyShareLink = async () => {
     try {
-      await navigator.clipboard.writeText(link)
-      setCopied(true)
-      window.setTimeout(() => setCopied(false), 1500)
+      await navigator.clipboard.writeText(shareUrl)
+      setLinkCopied(true)
+      window.setTimeout(() => setLinkCopied(false), 2000)
     } catch {
       // clipboard unavailable
     }
   }
 
-  const add = () => {
-    const trimmed = name.trim()
-    if (!trimmed) return
-    addShare(board.id, trimmed, role)
-    setName('')
+  const handleRoleChange = (shareId: string, newRole: ShareRole) => {
+    updateShareRole(board.id, shareId, newRole)
+    setOpenPermId(null)
   }
 
   const inputClass =
-    'rounded-lg px-2.5 py-1.5 text-sm text-ink outline-none neu-input transition focus:neu-input-focus'
+    'rounded-lg px-3 py-2 text-sm outline-none transition neu-input focus:neu-input-focus'
 
   return (
-    <Modal open onClose={onClose} solid className="max-w-md rounded-2xl shadow-lg">
-      <div className="p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="font-display text-xl font-bold text-ink">Share board</h2>
-            <p className="mt-0.5 text-sm text-ink-muted">{board.name}</p>
-          </div>
+    <Modal open onClose={onClose} solid className="max-w-lg !h-auto !max-h-[85dvh] rounded-2xl shadow-lg">
+      <div className="flex max-h-[85dvh] flex-col overflow-hidden">
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 className="font-display text-lg font-bold text-ink">Share board</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-ink-faint transition hover:bg-surface-alt hover:text-ink"
+            aria-label="Close share board"
+            className="rounded-lg p-1.5 text-ink-faint transition-colors duration-150 hover:bg-surface-alt hover:text-ink"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={copyLink}
-          className="mt-5 w-full rounded-xl bg-bg px-3 py-2.5 text-left ring-1 ring-border transition hover:ring-brand hover-glow"
-        >
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-ink-faint">
-            Shareable link
-          </span>
-          <span className="mt-0.5 block truncate font-mono text-[11px] text-brand">{link}</span>
-          <span className="mt-1 block text-xs font-semibold text-ink">
-            {copied ? 'Copied to clipboard!' : 'Click to copy'}
-          </span>
-        </button>
-
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-end">
-          <div className="flex-1">
-            <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">
-              Name or email
-            </label>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && add()}
-              placeholder="e.g. Alex"
-              className={`w-full ${inputClass}`}
-            />
-          </div>
-          <div className="flex gap-2 sm:block">
-            <div>
-              <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">
-                Role
-              </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as ShareRole)}
-                className={inputClass}
-              >
-                {(Object.keys(ROLE_LABELS) as ShareRole[]).map((r) => (
-                  <option key={r} value={r}>
-                    {ROLE_LABELS[r]}
-                  </option>
-                ))}
-              </select>
+        <div className="flex-1 overflow-y-auto scroll-slim">
+          {/* ── Invite form ── */}
+          <div className="px-5 pt-4 pb-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+              <div className="flex-1">
+                <input
+                  ref={inputRef}
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value)
+                    if (errorMsg) setErrorMsg('')
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && add()}
+                  placeholder="Email address or name"
+                  className={`w-full ${inputClass}`}
+                />
+                {errorMsg && (
+                  <p className="mt-1.5 text-xs text-danger">{errorMsg}</p>
+                )}
+              </div>
+              <div className="flex gap-2 sm:block">
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as ShareRole)}
+                  className={`${inputClass} min-w-[110px]`}
+                >
+                  {ROLE_OPTIONS.map((r) => (
+                    <option key={r} value={r}>
+                      {ROLE_LABELS[r]}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={add}
+                  disabled={!name.trim()}
+                  className="flex h-10 items-center justify-center gap-1.5 rounded-lg bg-brand px-4 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-brand-dark active:scale-95 disabled:opacity-40 sm:h-[38px]"
+                >
+                  <UserPlus size={15} />
+                  Share
+                </button>
+              </div>
             </div>
+          </div>
+
+          {/* ── Share link ── */}
+          <div className="mx-5 rounded-xl border border-border bg-bg/50 p-3.5">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-alt">
+                <Link2 size={16} className="text-ink-muted" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-ink">Share this board with a link</p>
+                {board.shareLink?.enabled ? (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="min-w-0 flex-1 truncate rounded-lg bg-surface px-2.5 py-1.5 font-mono text-xs text-ink-muted ring-1 ring-border">
+                      {shareUrl}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={copyShareLink}
+                      className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-surface px-2.5 text-xs font-medium text-ink transition-colors duration-150 hover:bg-surface-alt ring-1 ring-border"
+                    >
+                      {linkCopied ? (
+                        <>
+                          <Check size={13} className="text-success" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={13} />
+                          Copy
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleCreateLink}
+                    className="mt-1.5 text-sm font-medium text-brand transition-colors duration-150 hover:text-brand-dark"
+                  >
+                    Create link
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Tabs ── */}
+          <div className="mt-4 flex items-center gap-1 border-b border-border px-5" role="tablist">
             <button
               type="button"
-              onClick={add}
-              disabled={!name.trim()}
-              className="flex h-[38px] items-center gap-1.5 rounded-lg bg-brand px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95 disabled:opacity-40"
+              role="tab"
+              aria-selected={activeTab === 'members'}
+              onClick={() => setActiveTab('members')}
+              className={`px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
+                activeTab === 'members'
+                  ? 'border-b-2 border-brand text-brand'
+                  : 'text-ink-muted hover:text-ink'
+              }`}
             >
-              <UserPlus size={15} />
-              Add
+              Board members ({shares.length})
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === 'requests'}
+              onClick={() => setActiveTab('requests')}
+              className={`px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
+                activeTab === 'requests'
+                  ? 'border-b-2 border-brand text-brand'
+                  : 'text-ink-muted hover:text-ink'
+              }`}
+            >
+              Join requests
+            </button>
+          </div>
+
+          {/* ── Tab content ── */}
+          <div className="px-5 py-3" role="tabpanel">
+            {activeTab === 'members' && (
+              <>
+                {shares.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-ink-faint">
+                    No members yet. Invite someone above to get started.
+                  </p>
+                ) : (
+                  <div className="space-y-1">
+                    {shares.map((share) => {
+                      const isYou = currentUser && share.name === currentUser.name
+                      return (
+                        <div
+                          key={share.id}
+                          className="group flex items-center gap-3 rounded-lg px-2 py-2 transition-colors duration-150 hover:bg-surface-alt"
+                        >
+                          <Avatar
+                            member={{
+                              id: share.id,
+                              name: share.name,
+                              color: '#0DABA3',
+                            }}
+                            size={34}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-ink">
+                              {share.name}
+                              {isYou && <span className="ml-1 text-xs text-ink-faint">(you)</span>}
+                            </p>
+                            <p className="text-xs text-ink-muted">
+                              {ROLE_LABELS[share.role]}
+                            </p>
+                          </div>
+                          <div className="relative shrink-0" ref={openPermId === share.id ? permRef : undefined}>
+                            <button
+                              type="button"
+                              onClick={() => setOpenPermId(openPermId === share.id ? null : share.id)}
+                              className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors duration-150 hover:bg-surface-alt hover:text-ink"
+                            >
+                              {ROLE_LABELS[share.role]}
+                              <ChevronDown size={13} />
+                            </button>
+                            {openPermId === share.id && (
+                              <div className="glass-panel animate-in absolute right-0 top-full z-30 mt-1 w-36 p-1">
+                                {ROLE_OPTIONS.map((r) => (
+                                  <button
+                                    key={r}
+                                    type="button"
+                                    onClick={() => handleRoleChange(share.id, r)}
+                                    className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-150 ${
+                                      share.role === r
+                                        ? 'font-semibold text-brand bg-brand/10'
+                                        : 'text-ink hover:bg-surface-alt'
+                                    }`}
+                                  >
+                                    {ROLE_LABELS[r]}
+                                  </button>
+                                ))}
+                                <div className="my-1 border-t border-border" />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    removeShare(board.id, share.id)
+                                    setOpenPermId(null)
+                                  }}
+                                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-danger transition-colors duration-150 hover:bg-danger-light"
+                                >
+                                  <Lock size={13} />
+                                  Remove
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </>
+            )}
+
+            {activeTab === 'requests' && (
+              <p className="py-6 text-center text-sm text-ink-faint">
+                No pending join requests.
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="mt-5 space-y-1">
-          {shares.length === 0 && (
-            <p className="rounded-lg bg-bg px-3 py-2.5 text-xs text-ink-faint">
-              No collaborators yet — invites are shared locally on this device.
-            </p>
-          )}
-          {shares.map((share) => (
-            <div key={share.id} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-surface-alt">
-              <span
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
-                style={{ background: '#0DABA3' }}
-              >
-                {share.name.charAt(0).toUpperCase()}
-              </span>
-              <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">{share.name}</span>
-              <span className="text-[11px] text-ink-muted">{ROLE_LABELS[share.role]}</span>
-              <button
-                type="button"
-                onClick={() => removeShare(board.id, share.id)}
-                title="Remove"
-                className="rounded-lg p-1 text-ink-faint transition hover:bg-danger-light hover:text-danger"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          ))}
+        {/* ── Footer ── */}
+        <div className="border-t border-border px-5 py-3">
+          <p className="text-xs leading-relaxed text-ink-faint">
+            {ROLE_DESCRIPTIONS[role]} Collaborators are stored locally — real accounts and sync arrive
+            with a future backend.
+          </p>
         </div>
-
-        <p className="mt-4 text-[11px] leading-snug text-ink-faint">
-          {ROLE_DESCRIPTIONS[role]} Collaborators are local for now — real accounts and sync arrive
-          with a future backend.
-        </p>
       </div>
     </Modal>
   )

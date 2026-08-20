@@ -42,6 +42,8 @@ export interface Store {
   deleteLabel: (boardId: string, labelId: string) => void
   addShare: (boardId: string, name: string, role: Share['role']) => void
   removeShare: (boardId: string, shareId: string) => void
+  updateShareRole: (boardId: string, shareId: string, role: Share['role']) => void
+  createShareLink: (boardId: string) => void
   setDarkMode: (mode: ThemeMode) => void
   resetAll: () => void
 }

@@ -504,6 +504,34 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
     })
 
+  const updateShareRole = (boardId: string, shareId: string, role: Share['role']) =>
+    mutate((prev) => {
+      const board = prev.boards[boardId]
+      if (!board) return prev
+      const shares = (board.shares ?? []).map((s) => (s.id === shareId ? { ...s, role } : s))
+      return {
+        ...prev,
+        boards: { ...prev.boards, [boardId]: { ...board, shares, updatedAt: now() } },
+      }
+    })
+
+  const createShareLink = (boardId: string) =>
+    mutate((prev) => {
+      const board = prev.boards[boardId]
+      if (!board) return prev
+      return {
+        ...prev,
+        boards: {
+          ...prev.boards,
+          [boardId]: {
+            ...board,
+            shareLink: { token: uid(), enabled: true, createdAt: now() },
+            updatedAt: now(),
+          },
+        },
+      }
+    })
+
   const moveInboxToBoard = (itemId: string, boardId: string, listId: string) =>
     mutate((prev) => {
       const item = prev.inbox.find((i) => i.id === itemId)
@@ -597,6 +625,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     deleteLabel,
     addShare,
     removeShare,
+    updateShareRole,
+    createShareLink,
     setDarkMode,
     resetAll,
   }
