@@ -218,7 +218,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       recentBoards={recentBoards}
                       boardId={boardId}
                       onClose={() => setBoardsOpen(false)}
-                      className="absolute left-full top-0 z-[60] ml-1 max-h-[70vh] overflow-y-auto scroll-slim"
+                      className="absolute left-full bottom-full z-[60] mb-1 ml-1 max-h-72 origin-bottom overflow-y-auto scroll-slim"
                     />
                   )}
                 </div>
