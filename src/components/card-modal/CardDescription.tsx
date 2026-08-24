@@ -24,14 +24,14 @@ export default function CardDescription({ card }: { card: Card }) {
 
       {card.desc && !editing ? (
         <div>
-          <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-ink">{card.desc}</p>
+          <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-text-primary">{card.desc}</p>
           <button
             type="button"
             onClick={() => {
               setValue(card.desc)
               setEditing(true)
             }}
-            className="mt-2 text-xs font-semibold text-brand hover:underline"
+            className="mt-2 text-xs font-semibold text-primary-hover hover:underline"
           >
             Edit
           </button>
@@ -50,7 +50,7 @@ export default function CardDescription({ card }: { card: Card }) {
           placeholder="Add a more detailed description…"
           autoFocus
           rows={3}
-          className="mt-2 w-full resize-none rounded-xl px-3 py-2 text-sm leading-relaxed text-ink outline-none neu-input transition placeholder:text-ink-faint focus:neu-input-focus"
+          className="mt-2 w-full resize-none rounded-md border border-border-strong bg-surface px-3 py-2 text-sm leading-relaxed text-text-primary outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
       )}
     </section>

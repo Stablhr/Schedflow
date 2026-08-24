@@ -24,7 +24,7 @@ export default function CardDueDate({ card }: { card: Card }) {
 
       {card.dueDate && !editing ? (
         <div className="mt-2 flex items-center gap-1.5">
-          <span className="rounded-lg bg-surface-alt px-2.5 py-1 font-mono text-[11px] font-medium text-ink-muted">
+          <span className="rounded-md bg-surface-alt px-2.5 py-1 font-mono text-[11px] font-medium text-text-secondary">
             {formatDate(card.dueDate)}
           </span>
           <button
@@ -34,15 +34,16 @@ export default function CardDueDate({ card }: { card: Card }) {
               setValue(card.dueDate ?? '')
               setEditing(true)
             }}
-            className="text-xs font-semibold text-brand hover:underline"
+            className="text-xs font-semibold text-primary-hover hover:underline"
           >
             Edit
           </button>
           <button
             type="button"
             title="Remove due date"
+            aria-label="Remove due date"
             onClick={() => setDue('')}
-            className="text-ink-faint transition hover:text-danger"
+            className="text-text-muted transition-colors duration-150 hover:text-danger-text"
           >
             <X size={14} />
           </button>
@@ -55,7 +56,7 @@ export default function CardDueDate({ card }: { card: Card }) {
             onChange={(e) => setValue(e.target.value)}
             onBlur={() => setDue(value)}
             autoFocus
-            className="rounded-lg px-2 py-1 font-mono text-[11px] text-ink outline-none neu-input transition focus:neu-input-focus"
+            className="rounded-md border border-border-strong bg-surface px-2 py-1 font-mono text-[11px] text-text-primary outline-none transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           {card.dueDate && (
             <button
@@ -64,7 +65,7 @@ export default function CardDueDate({ card }: { card: Card }) {
                 setValue('')
                 setDue('')
               }}
-              className="text-xs font-semibold text-ink-faint hover:text-danger"
+              className="text-xs font-semibold text-text-secondary hover:text-danger-text"
             >
               Remove
             </button>

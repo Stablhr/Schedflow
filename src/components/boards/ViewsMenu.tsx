@@ -32,8 +32,8 @@ export default function ViewsMenu({ open, onClose, activeView, onViewChange }: V
   if (!open) return null
 
   return (
-    <div ref={ref} className="glass-panel animate-in absolute right-0 top-11 z-30 w-52 p-1.5">
-      <p className="glass-scrim px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+    <div ref={ref} className="animate-in absolute right-0 top-11 z-30 w-52 rounded-lg border border-border-strong bg-surface-elevated p-1.5 shadow-subtle">
+      <p className="px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
         View
       </p>
       {VIEWS.map((view) => {
@@ -47,15 +47,15 @@ export default function ViewsMenu({ open, onClose, activeView, onViewChange }: V
               onViewChange(view.id)
               onClose()
             }}
-            className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm transition ${
+            className={`flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm transition-colors duration-150 ${
               isActive
-                ? 'font-semibold text-brand-dark bg-brand-light'
-                : 'font-medium text-ink hover:bg-surface-alt'
+                ? 'font-semibold text-primary-hover bg-primary-subtle'
+                : 'font-medium text-text-primary hover:bg-surface-alt'
             }`}
           >
             <Icon size={15} />
             <span className="flex-1">{view.label}</span>
-            {isActive && <Check size={14} className="text-brand-dark" />}
+            {isActive && <Check size={14} className="text-primary-hover" />}
           </button>
         )
       })}

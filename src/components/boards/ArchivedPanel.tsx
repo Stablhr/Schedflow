@@ -11,17 +11,18 @@ export default function ArchivedPanel({ board, onClose }: { board: Board; onClos
   )
 
   return (
-    <Modal open onClose={onClose} solid className="max-w-md rounded-2xl shadow-lg">
+    <Modal open onClose={onClose} className="max-w-md">
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="font-display text-xl font-bold text-ink">Archived cards</h2>
-            <p className="mt-0.5 text-sm text-ink-muted">{board.name}</p>
+            <h2 className="text-[17px] font-semibold text-text-primary">Archived cards</h2>
+            <p className="mt-0.5 text-sm text-text-secondary">{board.name}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-ink-faint transition hover:bg-surface-alt hover:text-ink"
+            aria-label="Close archived cards"
+            className="rounded-md p-1.5 text-text-secondary transition-colors duration-150 hover:bg-surface-alt hover:text-text-primary"
           >
             <X size={16} />
           </button>
@@ -29,15 +30,15 @@ export default function ArchivedPanel({ board, onClose }: { board: Board; onClos
 
         <div className="mt-5 space-y-1.5">
           {cards.length === 0 && (
-            <p className="rounded-lg bg-bg px-3 py-3 text-center text-xs text-ink-faint">
+            <p className="rounded-md bg-surface-alt px-3 py-3 text-center text-xs text-text-muted">
               Nothing archived.
             </p>
           )}
           {cards.map((card) => (
-            <div key={card.id} className="flex items-center gap-2 rounded-xl bg-bg px-3 py-2 sm:py-2.5">
+            <div key={card.id} className="flex items-center gap-2 rounded-md bg-surface-alt px-3 py-2 sm:py-2.5">
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-ink">{card.title}</p>
-                <p className="truncate text-[11px] text-ink-muted">
+                <p className="truncate text-sm font-medium text-text-primary">{card.title}</p>
+                <p className="truncate font-mono text-[11px] text-text-secondary">
                   {data.lists[card.listId]?.name ?? 'Unknown list'}
                 </p>
               </div>
@@ -45,7 +46,7 @@ export default function ArchivedPanel({ board, onClose }: { board: Board; onClos
                 type="button"
                 onClick={() => restoreCard(card.id)}
                 title="Restore to board"
-                className="rounded-lg p-1.5 text-brand transition hover:bg-brand-light"
+                className="rounded-md p-1.5 text-primary-hover transition-colors duration-150 hover:bg-primary-subtle"
               >
                 <RotateCcw size={15} />
               </button>
@@ -55,7 +56,7 @@ export default function ArchivedPanel({ board, onClose }: { board: Board; onClos
                   if (window.confirm(`Permanently delete "${card.title}"?`)) deleteCard(card.id)
                 }}
                 title="Delete permanently"
-                className="rounded-lg p-1.5 text-ink-faint transition hover:bg-danger-light hover:text-danger"
+                className="rounded-md p-1.5 text-text-muted transition-colors duration-150 hover:bg-danger-subtle hover:text-danger-text"
               >
                 <Trash2 size={15} />
               </button>

@@ -3,9 +3,9 @@ import { formatDate, getUrgency } from '../../utils/dates'
 import type { Urgency } from '../../utils/dates'
 
 const STYLES: Record<Exclude<Urgency, 'none'>, string> = {
-  normal: 'bg-surface-alt text-ink-muted',
-  soon: 'bg-accent-light text-accent',
-  overdue: 'bg-danger-light text-danger',
+  normal: 'bg-surface-alt text-text-secondary',
+  soon: 'bg-warning-subtle text-warning-text',
+  overdue: 'bg-danger-subtle text-danger-text',
 }
 
 export default function DueBadge({ due, className = '' }: { due: string; className?: string }) {

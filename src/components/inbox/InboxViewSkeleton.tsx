@@ -10,7 +10,7 @@ export default function InboxViewSkeleton() {
 
       <div className="mt-6 space-y-2">
         {Array.from({ length: 5 }, (_, i) => (
-          <div key={i} className="flex items-center gap-3 rounded-xl glass-subtle px-4 py-3 shadow-sm">
+          <div key={i} className="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3">
             <Skeleton className="h-4 flex-1" />
             <Skeleton className="hidden h-3 w-20 sm:block" />
             <div className="flex items-center gap-1">

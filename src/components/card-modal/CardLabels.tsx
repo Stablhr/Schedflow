@@ -30,7 +30,7 @@ export default function CardLabels({ card }: { card: Card }) {
 
       <div className="mt-2 flex flex-wrap gap-1">
         {activeLabels.length === 0 ? (
-          <span className="text-xs text-ink-faint">No labels</span>
+          <span className="text-xs text-text-muted">No labels</span>
         ) : (
           activeLabels.map((label) => <LabelChip key={label.id} label={label} />)
         )}
@@ -39,15 +39,15 @@ export default function CardLabels({ card }: { card: Card }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="mt-2 text-xs font-semibold text-brand hover:underline"
+        className="mt-2 text-xs font-semibold text-primary-hover hover:underline"
       >
         {open ? 'Done' : 'Add labels'}
       </button>
 
       {open && (
-        <div className="animate-in mt-2 space-y-0.5 rounded-xl glass-subtle p-1.5">
+        <div className="animate-in mt-2 space-y-0.5 rounded-lg border border-border-strong bg-surface-elevated p-1.5 shadow-subtle">
           {labels.length === 0 && (
-            <p className="px-2 py-1 text-xs text-ink-faint">No labels on this board yet.</p>
+            <p className="px-2 py-1 text-xs text-text-muted">No labels on this board yet.</p>
           )}
           {labels.map((label) => {
             const active = card.labelIds.includes(label.id)
@@ -56,7 +56,7 @@ export default function CardLabels({ card }: { card: Card }) {
                 key={label.id}
                 type="button"
                 onClick={() => toggle(label.id)}
-                className="flex w-full items-center justify-between rounded-lg px-1.5 py-1 hover:bg-surface"
+                className="flex w-full items-center justify-between rounded-md px-1.5 py-1 transition-colors duration-150 hover:bg-surface-alt"
               >
                 <span
                   className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
@@ -64,7 +64,7 @@ export default function CardLabels({ card }: { card: Card }) {
                 >
                   {label.name}
                 </span>
-                {active && <Check size={14} className="text-brand" />}
+                {active && <Check size={14} className="text-primary-hover" />}
               </button>
             )
           })}

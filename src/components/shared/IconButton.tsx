@@ -11,6 +11,7 @@ interface IconButtonProps {
   style?: React.CSSProperties
 }
 
+/** Shared square icon button — Design.md §15.5/§15.7. Flat, subtle hover, semantic active state. */
 export default function IconButton({
   children,
   onClick,
@@ -29,10 +30,11 @@ export default function IconButton({
       onClick={onClick}
       disabled={disabled}
       style={style}
-      className={`neu-compact inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] transition active:scale-95 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-brand ${
+      aria-pressed={active || undefined}
+      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 ${
         active
-          ? 'neu-compact-pressed bg-brand-light text-brand-dark'
-          : 'text-ink-muted hover:bg-brand-light hover:text-brand-dark hover:neu-compact-hover'
+          ? 'bg-primary-subtle text-primary-hover'
+          : 'text-text-secondary hover:bg-surface-alt hover:text-text-primary'
       } ${className}`}
     >
       {children}

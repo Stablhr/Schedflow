@@ -94,13 +94,14 @@ export default function CalendarView({ boardId, onOpenCard }: CalendarViewProps)
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-border glass-subtle px-3 py-2.5 sm:px-4">
-        <h2 className="font-display text-lg font-bold text-ink sm:text-xl">Calendar</h2>
+      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-surface px-3 py-2.5 sm:px-4">
+        <h2 className="text-lg font-semibold text-text-primary sm:text-xl">Calendar</h2>
 
         <div className="ml-2 flex items-center gap-1 sm:ml-4">
           <button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-muted transition hover:bg-brand-light hover:text-brand-dark active:scale-95"
+            aria-label="Previous month"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-text-secondary transition-colors duration-150 hover:bg-primary-subtle hover:text-primary-hover active:scale-[0.98]"
             onClick={prevMonth}
           >
             <ChevronLeft size={16} />
@@ -108,28 +109,29 @@ export default function CalendarView({ boardId, onOpenCard }: CalendarViewProps)
           <button
             type="button"
             onClick={goToday}
-            className="rounded-lg px-2 py-1 text-xs font-semibold text-brand transition hover:bg-brand-light active:scale-95"
+            className="rounded-md px-2 py-1 text-xs font-semibold text-primary-hover transition-colors duration-150 hover:bg-primary-subtle active:scale-[0.98]"
           >
             Today
           </button>
           <button
             type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-muted transition hover:bg-brand-light hover:text-brand-dark active:scale-95"
+            aria-label="Next month"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-text-secondary transition-colors duration-150 hover:bg-primary-subtle hover:text-primary-hover active:scale-[0.98]"
             onClick={nextMonth}
           >
             <ChevronRight size={16} />
           </button>
         </div>
 
-        <span className="ml-1 font-display text-sm font-bold text-ink">
+        <span className="ml-1 font-mono text-sm font-medium text-text-primary">
           {MONTHS[currentMonth]} {currentYear}
         </span>
       </div>
 
       <div className="scroll-slim flex-1 overflow-auto p-3">
-        <div className="grid min-w-[700px] grid-cols-7 gap-px rounded-xl bg-border overflow-hidden">
+        <div className="grid min-w-[700px] grid-cols-7 gap-px overflow-hidden rounded-lg bg-border">
           {WEEKDAYS.map((day) => (
-            <div key={day} className="bg-surface-alt px-2 py-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+            <div key={day} className="bg-surface-alt px-2 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
               {day}
             </div>
           ))}
@@ -143,12 +145,12 @@ export default function CalendarView({ boardId, onOpenCard }: CalendarViewProps)
             return (
               <div
                 key={i}
-                className={`min-h-[80px] bg-surface p-1.5 transition ${
-                  isCurrentMonth ? '' : 'bg-surface-alt/50 text-ink-faint'
-                } ${isToday ? 'ring-2 ring-inset ring-brand' : ''}`}
+                className={`min-h-[80px] p-1.5 transition-colors duration-150 ${
+                  isCurrentMonth ? 'bg-surface' : 'bg-surface-alt/50 text-text-muted'
+                } ${isToday ? 'ring-2 ring-inset ring-primary' : ''}`}
               >
-                <div className={`mb-1 text-right text-xs font-semibold ${
-                  isToday ? 'text-brand' : 'text-ink-muted'
+                <div className={`mb-1 text-right font-mono text-xs font-medium ${
+                  isToday ? 'text-primary-hover' : 'text-text-secondary'
                 }`}>
                   {day.getDate()}
                 </div>
@@ -161,15 +163,15 @@ export default function CalendarView({ boardId, onOpenCard }: CalendarViewProps)
                         key={card.id}
                         type="button"
                         onClick={() => onOpenCard(card.id)}
-                        className="flex w-full items-center gap-1 rounded px-1 py-0.5 text-left text-[10px] font-medium transition hover:bg-brand-light active:scale-[0.98]"
+                        className="flex w-full items-center gap-1 rounded px-1 py-0.5 text-left text-[10px] font-medium transition-colors duration-150 hover:bg-primary-subtle"
                         style={label ? { borderLeft: `2px solid ${label.color}` } : undefined}
                       >
-                        <span className="truncate text-ink">{card.title}</span>
+                        <span className="truncate text-text-primary">{card.title}</span>
                       </button>
                     )
                   })}
                   {dayCards.length > 3 && (
-                    <span className="block px-1 text-[9px] font-medium text-ink-faint">
+                    <span className="block px-1 text-[9px] font-medium text-text-muted">
                       +{dayCards.length - 3} more
                     </span>
                   )}

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Check, X } from 'lucide-react'
 import { BOARD_TEMPLATES } from '../../store/schema'
-import { blendGradient } from '../../utils/color'
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
 
@@ -28,10 +27,15 @@ export default function CreateBoardModal({ open, onClose }: CreateBoardModalProp
   }
 
   return (
-    <Modal open={open} onClose={onClose} className="max-w-md rounded-2xl sm:rounded-2xl">
+    <Modal open={open} onClose={onClose} className="max-w-md">
       <div className="flex items-center justify-between px-6 pt-5">
-        <h2 className="font-display text-[20px] font-bold text-ink">Create board</h2>
-        <button type="button" onClick={onClose} className="text-ink-muted transition hover:text-ink">
+        <h2 className="text-[17px] font-semibold text-text-primary">Create board</h2>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close create board"
+          className="rounded-md p-1.5 text-text-secondary transition-colors duration-150 hover:bg-surface-alt hover:text-text-primary"
+        >
           <X size={18} />
         </button>
       </div>
@@ -46,19 +50,20 @@ export default function CreateBoardModal({ open, onClose }: CreateBoardModalProp
                 setSelected(t.id)
                 setName('')
               }}
-              className={`relative rounded-xl p-2 text-left ring-1 transition ${
+              aria-pressed={selected === t.id}
+              className={`relative rounded-lg p-2 text-left ring-1 transition-colors duration-150 ${
                 selected === t.id
-                  ? 'ring-2 ring-brand bg-brand-light/40'
-                  : 'ring-border hover:bg-surface-alt'
+                  ? 'ring-2 ring-primary bg-primary-subtle/40 dark:bg-primary-subtle'
+                  : 'ring-border-strong hover:bg-surface-alt'
               }`}
             >
               <span
-                className="block h-9 rounded-lg"
-                style={{ background: blendGradient(t.swatch) }}
+                className="block h-9 rounded-md"
+                style={{ background: t.swatch }}
               />
-              <span className="mt-1.5 block truncate text-xs font-semibold text-ink">{t.name}</span>
+              <span className="mt-1.5 block truncate text-xs font-semibold text-text-primary">{t.name}</span>
               {selected === t.id && (
-                <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-white">
+                <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
                   <Check size={12} />
                 </span>
               )}
@@ -66,19 +71,20 @@ export default function CreateBoardModal({ open, onClose }: CreateBoardModalProp
           ))}
         </div>
 
-        <p className="mt-3 text-xs leading-relaxed text-ink-muted">{template.description}</p>
+        <p className="mt-3 text-xs leading-relaxed text-text-secondary">{template.description}</p>
 
         <div className="mt-4">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+          <label htmlFor="board-title" className="text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
             Board title
           </label>
           <input
+            id="board-title"
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && submit()}
             placeholder={template.name}
             autoFocus
-            className="mt-1.5 w-full rounded-xl px-3 py-2 text-sm outline-none neu-input transition focus:neu-input-focus"
+            className="mt-1.5 w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text-primary outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>
       </div>
@@ -87,14 +93,14 @@ export default function CreateBoardModal({ open, onClose }: CreateBoardModalProp
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg px-3.5 py-2 text-sm font-semibold text-ink-muted transition hover:bg-surface-alt"
+          className="rounded-md px-3.5 py-2 text-sm font-medium text-text-secondary transition-colors duration-150 hover:bg-surface-alt hover:text-text-primary"
         >
           Cancel
         </button>
         <button
           type="button"
           onClick={submit}
-          className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95"
+          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:scale-[0.98]"
         >
           Create
         </button>

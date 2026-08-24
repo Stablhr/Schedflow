@@ -46,8 +46,8 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
   const SortIcon = ({ colKey }: { colKey: SortKey }) => {
     if (sort.key !== colKey) return <ArrowUpDown size={12} className="opacity-0 group-hover:opacity-40" />
     return sort.dir === 'asc'
-      ? <ArrowUp size={12} className="text-brand" />
-      : <ArrowDown size={12} className="text-brand" />
+      ? <ArrowUp size={12} className="text-primary-hover" />
+      : <ArrowDown size={12} className="text-primary-hover" />
   }
 
   const cards = useMemo(() => {
@@ -119,17 +119,17 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-border glass-subtle px-4 py-3">
+      <div className="border-b border-border bg-surface px-4 py-3">
         <div className="flex items-center gap-3">
-          <h2 className="font-display text-lg font-bold text-ink">Table</h2>
-          <span className="font-mono text-xs text-ink-muted">{cards.length} cards</span>
+          <h2 className="text-base font-semibold text-text-primary">Table</h2>
+          <span className="font-mono text-xs text-text-secondary">{cards.length} cards</span>
         </div>
       </div>
 
       <div className="scroll-slim flex-1 overflow-auto">
         {cards.length === 0 ? (
           <div className="flex h-48 items-center justify-center">
-            <p className="text-sm text-ink-muted">No cards match your filters.</p>
+            <p className="text-sm text-text-secondary">No cards match your filters.</p>
           </div>
         ) : (
           <div
@@ -142,7 +142,7 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
                 key={col.key}
                 type="button"
                 onClick={() => toggleSort(col.key)}
-                className="group flex items-center gap-1.5 border-b border-r border-border bg-surface-alt/60 px-3 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-ink-faint transition hover:bg-surface-alt"
+                className="group flex items-center gap-1.5 border-b border-r border-border bg-surface-alt/60 px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary transition-colors duration-150 hover:bg-surface-alt"
               >
                 <span>{col.label}</span>
                 <SortIcon colKey={col.key} />
@@ -162,20 +162,20 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
                 <div
                   key={card.id}
                   onClick={() => onOpenCard(card.id)}
-                  className="contents cursor-pointer"
+                  className="contents cursor-pointer transition-colors duration-150 hover:bg-surface-alt/40"
                   role="row"
                 >
                   {/* Title */}
                   <div className="flex items-center gap-2 border-b border-r border-border px-3 py-2.5">
                     {card.done && <Check size={14} className="shrink-0 text-success" />}
-                    <span className={`truncate text-sm font-semibold ${card.done ? 'text-ink-muted line-through' : 'text-ink'}`}>
+                    <span className={`truncate text-sm font-medium ${card.done ? 'text-text-muted line-through' : 'text-text-primary'}`}>
                       {card.title}
                     </span>
                   </div>
 
                   {/* List */}
                   <div className="flex items-center border-b border-r border-border px-3 py-2.5">
-                    <span className="truncate rounded-md bg-surface-alt px-2 py-0.5 text-xs font-medium text-ink-muted">
+                    <span className="truncate rounded-md bg-surface-alt px-2 py-0.5 text-xs font-medium text-text-secondary">
                       {card.listName}
                     </span>
                   </div>
@@ -186,7 +186,7 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
                       <LabelChip key={label.id} label={label} />
                     ))}
                     {labels.length > 3 && (
-                      <span className="rounded-full bg-surface-alt px-1.5 py-0.5 font-mono text-[10px] font-medium text-ink-muted">
+                      <span className="rounded-full bg-surface-alt px-1.5 py-0.5 font-mono text-[10px] font-medium text-text-secondary">
                         +{labels.length - 3}
                       </span>
                     )}
@@ -203,15 +203,15 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
 
                   {/* Due Date */}
                   <div className="flex items-center border-b border-r border-border px-3 py-2.5">
-                    {card.dueDate ? <DueBadge due={card.dueDate} /> : <span className="text-xs text-ink-faint">—</span>}
+                    {card.dueDate ? <DueBadge due={card.dueDate} /> : <span className="text-xs text-text-muted">—</span>}
                   </div>
 
                   {/* Status */}
                   <div className="flex items-center border-b border-border px-3 py-2.5">
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.03em] ${
                       card.done
-                        ? 'bg-success-light text-success'
-                        : 'bg-surface-alt text-ink-muted'
+                        ? 'bg-success-subtle text-success-text'
+                        : 'bg-surface-alt text-text-secondary'
                     }`}>
                       {card.done ? 'Done' : 'Active'}
                     </span>

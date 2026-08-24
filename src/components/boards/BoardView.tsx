@@ -33,8 +33,8 @@ export default function BoardView() {
   if (!board) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-2 p-8">
-        <p className="text-sm text-ink-muted">This board doesn't exist.</p>
-        <Link to="/boards" className="text-sm font-semibold text-brand hover:underline">
+        <p className="text-sm text-text-secondary">This board doesn't exist.</p>
+        <Link to="/boards" className="text-sm font-semibold text-primary-hover hover:underline">
           Back to boards
         </Link>
       </div>

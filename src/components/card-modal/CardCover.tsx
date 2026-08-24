@@ -19,7 +19,7 @@ export default function CardCover({ card, onOpenPanel }: CardCoverProps) {
         <button
           type="button"
           onClick={onOpenPanel}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-2.5 py-1.5 text-xs font-semibold text-ink-muted transition hover:bg-brand-light hover:text-brand-dark active:scale-95"
+          className="inline-flex items-center gap-1.5 rounded-md bg-surface-alt px-2.5 py-1.5 text-xs font-semibold text-text-secondary transition-colors duration-150 hover:bg-primary-subtle hover:text-primary-hover active:scale-[0.98]"
         >
           <ImageIcon size={13} />
           Change cover
@@ -32,7 +32,7 @@ export default function CardCover({ card, onOpenPanel }: CardCoverProps) {
               updateCard(card.id, { cover: null, coverSize: 'small' })
               addActivity(card.id, 'removed the cover')
             }}
-            className="flex items-center gap-1 text-xs font-semibold text-ink-faint transition hover:text-danger"
+            className="flex items-center gap-1 text-xs font-semibold text-text-secondary transition-colors duration-150 hover:text-danger-text"
           >
             <X size={12} />
             Remove cover

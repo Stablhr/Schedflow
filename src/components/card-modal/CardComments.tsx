@@ -67,7 +67,7 @@ export default function CardComments({ card }: { card: Card }) {
             if (e.key === 'Enter') submit()
           }}
           placeholder="Write a comment…"
-          className="flex-1 rounded-xl px-3 py-2 text-sm text-ink outline-none neu-input transition placeholder:text-ink-faint focus:neu-input-focus"
+          className="flex-1 rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text-primary outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
       </div>
 
@@ -82,14 +82,14 @@ export default function CardComments({ card }: { card: Card }) {
             <div key={comment.id} className="flex items-start gap-2">
               <Avatar member={author} size={24} />
               <div className="min-w-0 flex-1">
-                <div className="rounded-xl bg-bg px-3 py-2">
+                <div className="rounded-lg bg-surface-alt px-3 py-2">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xs font-semibold text-ink">{author.name}</span>
-                    <span className="font-mono text-[10.5px] text-ink-faint">
+                    <span className="text-xs font-semibold text-text-primary">{author.name}</span>
+                    <span className="font-mono text-[10.5px] text-text-muted">
                       {formatDateTime(comment.createdAt)}
                     </span>
                   </div>
-                  <p className="mt-0.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-ink">
+                  <p className="mt-0.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-text-primary">
                     {comment.text}
                   </p>
                 </div>
@@ -103,10 +103,10 @@ export default function CardComments({ card }: { card: Card }) {
                           key={emoji}
                           type="button"
                           onClick={() => toggleCommentReaction(comment.id, emoji)}
-                          className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs transition active:scale-95 ${
+                          className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs transition-colors duration-150 active:scale-[0.98] ${
                             active
-                              ? 'bg-brand-light text-brand-dark ring-1 ring-brand'
-                              : 'bg-surface-alt text-ink-muted hover:bg-brand-light'
+                              ? 'bg-primary-subtle text-primary-hover ring-1 ring-inset ring-primary'
+                              : 'bg-surface-alt text-text-secondary hover:bg-surface-elevated'
                           }`}
                         >
                           <span>{emoji}</span>
@@ -150,7 +150,7 @@ export default function CardComments({ card }: { card: Card }) {
           )
         })}
         {card.comments.length === 0 && (
-          <p className="text-xs text-ink-faint">No comments yet.</p>
+          <p className="text-xs text-text-muted">No comments yet.</p>
         )}
       </div>
     </section>

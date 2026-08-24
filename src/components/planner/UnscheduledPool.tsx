@@ -10,28 +10,25 @@ export default function UnscheduledPool({ cards }: { cards: Card[] }) {
         <div
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`flex w-[180px] shrink-0 flex-col rounded-xl p-2 shadow-sm ring-1 sm:w-[230px] sm:p-3 ${
+          className={`flex w-[180px] shrink-0 flex-col rounded-lg p-2 sm:w-[230px] sm:p-3 ${
             snapshot.isDraggingOver
-              ? 'bg-brand-light/60 ring-2 ring-inset ring-brand/20'
-              : 'ring-border/50'
+              ? 'bg-primary-subtle/60 ring-2 ring-inset ring-primary'
+              : 'ring-1 ring-border'
           }`}
-          style={{
-            transition: snapshot.isDraggingOver ? 'background-color 0.2s ease, box-shadow 0.2s ease' : 'background-color 0.3s ease',
-          }}
         >
           <div className="flex items-center gap-1.5 px-1 pb-2">
-            <Inbox size={14} className="text-ink-faint" />
-            <h2 className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+            <Inbox size={14} className="text-text-muted" />
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
               Unscheduled
             </h2>
-            <span className="ml-auto font-mono text-[10.5px] text-ink-faint">{cards.length}</span>
+            <span className="ml-auto font-mono text-[10.5px] text-text-muted">{cards.length}</span>
           </div>
           <div className="scroll-slim flex max-h-[calc(100vh-170px)] min-h-2 flex-1 flex-col gap-1.5 overflow-y-auto">
             {cards.map((card, i) => (
               <PlannerCard key={card.id} card={card} index={i} />
             ))}
             {cards.length === 0 && (
-              <p className="px-1 py-3 text-center text-xs text-ink-faint">All cards scheduled</p>
+              <p className="px-1 py-3 text-center text-xs text-text-muted">All cards scheduled</p>
             )}
           </div>
           {provided.placeholder}

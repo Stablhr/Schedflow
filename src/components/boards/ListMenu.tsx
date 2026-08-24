@@ -2,10 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { MoreHorizontal, ChevronsLeft, ChevronsRight, Trash2, UserPlus, Palette } from 'lucide-react'
 import type { List } from '../../store/schema'
 import { useStore } from '../../store/useStore'
-import { useAdaptiveTheme } from '../../hooks/useAdaptiveTheme'
 
 const LIST_COLORS = [
-  '', '#FFFFFF', '#0DABA3', '#33B27A', '#FF8B5E', '#F6C453',
+  '', '#FFFFFF', '#0DABA3', '#33B27A', '#FF8B5E', '#E8A93D',
   '#FF5E6C', '#7C5CFC', '#3B82F6', '#E879F9',
 ]
 
@@ -14,9 +13,6 @@ export default function ListMenu({ list }: { list: List }) {
   const [open, setOpen] = useState(false)
   const [assignee, setAssignee] = useState(list.assignee)
   const ref = useRef<HTMLDivElement>(null)
-
-  const bg = list.backgroundColor || '#FFFFFF'
-  const theme = useAdaptiveTheme(bg)
 
   useEffect(() => {
     if (!open) return
@@ -33,30 +29,31 @@ export default function ListMenu({ list }: { list: List }) {
         type="button"
         onClick={() => setOpen((o) => !o)}
         title="List actions"
-        className="flex h-6 w-6 items-center justify-center rounded-md transition"
+        aria-expanded={open}
+        className="flex h-6 w-6 items-center justify-center rounded-md transition-colors duration-150"
         style={{ color: 'var(--surface-text-muted)' }}
       >
         <MoreHorizontal size={15} />
       </button>
 
       {open && (
-        <div
-          className="glass-panel animate-in absolute right-0 top-8 z-20 w-56 p-1.5"
-          style={{ color: theme.foreground === '#FFFFFF' ? '#e0f0ef' : '#132A29' }}
-        >
-          <div className="glass-scrim rounded-lg p-0.5">
-          <button type="button" className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium transition hover:bg-white/10" onClick={() => {
-            toggleListCollapsed(list.id)
-            setOpen(false)
-          }}>
+        <div className="animate-in absolute right-0 top-8 z-20 w-56 rounded-lg border border-border-strong bg-surface-elevated p-1.5 shadow-subtle">
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm font-medium text-text-primary transition-colors duration-150 hover:bg-surface-alt"
+            onClick={() => {
+              toggleListCollapsed(list.id)
+              setOpen(false)
+            }}
+          >
             {list.collapsed ? <ChevronsRight size={15} className="opacity-60" /> : <ChevronsLeft size={15} className="opacity-60" />}
             {list.collapsed ? 'Expand list' : 'Collapse list'}
           </button>
 
-          <div className="my-1 h-px bg-white/10" />
+          <div className="my-1 h-px bg-border" />
 
           <div className="flex items-center gap-2 px-2.5 py-1.5">
-            <UserPlus size={15} className="shrink-0 opacity-60" />
+            <UserPlus size={15} className="shrink-0 text-text-secondary" />
             <input
               value={assignee}
               onChange={(e) => setAssignee(e.target.value)}
@@ -67,14 +64,14 @@ export default function ListMenu({ list }: { list: List }) {
                 }
               }}
               placeholder="Assignee"
-              className="w-full rounded-md bg-white/10 px-1 py-0.5 text-sm outline-none placeholder:text-white/40"
+              className="w-full rounded-md border border-border-strong bg-surface px-1.5 py-0.5 text-sm text-text-primary outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
-          <div className="my-1 h-px bg-white/10" />
+          <div className="my-1 h-px bg-border" />
 
           <div className="px-2.5 py-2">
-            <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider opacity-40">
+            <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
               <Palette size={12} />
               List color
             </div>
@@ -87,8 +84,8 @@ export default function ListMenu({ list }: { list: List }) {
                   onClick={() => {
                     setListBackgroundColor(list.id, color)
                   }}
-                  className={`h-6 rounded-md ring-2 ring-white transition hover:scale-110 active:scale-95 ${
-                    list.backgroundColor === color ? 'ring-brand ring-offset-1' : ''
+                  className={`h-6 rounded-md ring-2 ring-surface transition-transform duration-150 active:scale-[0.98] ${
+                    list.backgroundColor === color ? 'ring-offset-1 ring-primary' : ''
                   }`}
                   style={{ background: color || '#FFFFFF' }}
                 />
@@ -96,11 +93,11 @@ export default function ListMenu({ list }: { list: List }) {
             </div>
           </div>
 
-          <div className="my-1 h-px bg-white/10" />
+          <div className="my-1 h-px bg-border" />
 
           <button
             type="button"
-            className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium text-danger transition hover:bg-danger-light"
+            className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm font-medium text-danger-text transition-colors duration-150 hover:bg-danger-subtle"
             onClick={() => {
               if (window.confirm(`Delete the "${list.name}" list and all of its cards?`)) {
                 deleteList(list.id)
@@ -111,7 +108,6 @@ export default function ListMenu({ list }: { list: List }) {
             <Trash2 size={15} />
             Delete list
           </button>
-          </div>
         </div>
       )}
     </div>

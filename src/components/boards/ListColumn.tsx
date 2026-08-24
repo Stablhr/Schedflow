@@ -60,11 +60,11 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
             setEditing(false)
           }}
           title={list.name}
-          className="flex h-full cursor-pointer items-center justify-center rounded-xl py-3 shadow-sm transition-shadow hover:shadow-md"
-          style={{ ...vars, background: bg }}
+          className="flex h-full cursor-pointer items-center justify-center rounded-lg py-3 transition-colors duration-150"
+          style={{ ...vars, background: bg, border: `1px solid ${theme.border}` }}
         >
           <span
-            className="whitespace-nowrap font-display text-xs font-bold"
+            className="whitespace-nowrap text-xs font-semibold"
             style={{ color: 'var(--surface-text-muted)', writingMode: 'vertical-rl' }}
           >
             {list.name}
@@ -75,7 +75,10 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
   }
 
   return (
-    <div className="flex w-[272px] shrink-0 flex-col rounded-xl shadow-sm" style={{ ...vars, background: bg }}>
+    <div
+      className="flex w-[272px] shrink-0 flex-col rounded-xl"
+      style={{ ...vars, background: bg, border: `1px solid ${theme.border}` }}
+    >
       <div
         {...dragHandleProps}
         className="group flex cursor-grab items-center gap-1 px-2 pb-1 pt-2.5 active:cursor-grabbing"
@@ -95,14 +98,14 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
               }}
               onBlur={commitRename}
               autoFocus
-              className="w-32 rounded-md px-1 py-0.5 text-sm font-semibold outline-none ring-1 ring-brand"
+              className="w-32 rounded-md px-1 py-0.5 text-sm font-semibold outline-none ring-2 ring-primary/30"
               style={{ color: 'var(--surface-text)', background: 'var(--surface-bg-subtle)' }}
             />
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={commitRename}
-              className="flex h-6 w-6 items-center justify-center rounded-md bg-brand text-white hover:bg-brand-dark"
+              className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground transition-colors duration-150 hover:bg-primary-hover"
             >
               <Check size={13} />
             </button>
@@ -134,12 +137,10 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
             ref={droppableProvided.innerRef}
             {...droppableProvided.droppableProps}
             className={`scroll-slim flex max-h-[calc(100vh-220px)] min-h-2 flex-1 flex-col gap-1.5 overflow-y-auto rounded-b-xl px-2 pb-2 sm:max-h-[calc(100vh-180px)] ${
-              snapshot.isDraggingOver
-                ? 'bg-brand-light/60 ring-2 ring-inset ring-brand/20'
-                : ''
+              snapshot.isDraggingOver ? 'bg-black/[0.04] ring-2 ring-inset ring-primary dark:bg-white/[0.06]' : ''
             }`}
             style={{
-              transition: snapshot.isDraggingOver ? 'background-color 0.2s ease, box-shadow 0.2s ease' : 'background-color 0.3s ease',
+              transition: 'background-color 0.15s ease',
             }}
           >
             {cards.map((card, index) => (

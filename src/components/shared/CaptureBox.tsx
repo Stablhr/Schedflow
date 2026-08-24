@@ -15,13 +15,14 @@ export default function CaptureBox({ autoFocus = false, variant = 'sidebar' }: {
 
   return (
     <div
-      className={`flex items-center gap-1.5 rounded-xl glass-subtle shadow-sm transition focus-within:ring-2 focus-within:ring-brand ${variant === 'sidebar' ? 'p-2' : 'p-2 sm:p-2.5'}`}
+      className={`flex items-center gap-1 rounded-lg border bg-surface transition-colors duration-150 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 ${variant === 'sidebar' ? 'p-1.5' : 'p-2'}`}
+      style={{ borderColor: 'var(--surface-border)' }}
     >
       <button
         type="button"
         onClick={submit}
         title="Capture to Inbox"
-        className={`flex shrink-0 items-center justify-center rounded-lg text-brand transition hover:bg-brand-light hover-rotate active:scale-95 ${variant === 'sidebar' ? 'h-7 w-7' : 'h-8 w-8'}`}
+        className={`flex shrink-0 items-center justify-center rounded-md text-primary transition-colors duration-150 hover:bg-primary-subtle active:scale-[0.98] ${variant === 'sidebar' ? 'h-7 w-7' : 'h-8 w-8'}`}
       >
         <Plus size={16} />
       </button>
@@ -33,7 +34,7 @@ export default function CaptureBox({ autoFocus = false, variant = 'sidebar' }: {
         }}
         placeholder="Capture a task…"
         autoFocus={autoFocus}
-        className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-faint"
+        className="w-full bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted"
       />
     </div>
   )

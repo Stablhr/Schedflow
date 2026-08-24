@@ -8,13 +8,13 @@ export default function CardActivity({ card }: { card: Card }) {
     <section>
       <SectionLabel icon={<ListChecks size={14} />}>Activity</SectionLabel>
       {card.activity.length === 0 ? (
-        <p className="mt-2 text-xs text-ink-faint">No activity yet.</p>
+        <p className="mt-2 text-xs text-text-muted">No activity yet.</p>
       ) : (
         <ul className="mt-2 space-y-1">
           {card.activity.map((item) => (
             <li key={item.id} className="flex flex-wrap items-baseline gap-x-2">
-              <span className="min-w-0 break-words text-sm text-ink">{item.text}</span>
-              <span className="font-mono text-[10.5px] text-ink-faint">
+              <span className="min-w-0 break-words text-sm text-text-primary">{item.text}</span>
+              <span className="font-mono text-[10.5px] text-text-muted">
                 {formatDateTime(item.createdAt)}
               </span>
             </li>

@@ -16,18 +16,18 @@ export default function DayColumn({ date, isToday, cards }: DayColumnProps) {
   return (
     <div className="flex min-w-0 flex-1 flex-col">
       <div
-        className={`mb-2 rounded-lg px-2 py-1.5 text-center ${
-          isToday ? 'bg-brand text-white shadow-sm' : 'bg-surface shadow-sm'
+        className={`mb-2 rounded-md px-2 py-1.5 text-center ${
+          isToday ? 'bg-primary text-primary-foreground' : 'bg-surface-alt'
         }`}
       >
         <p
-          className={`text-[11px] font-bold uppercase tracking-wider ${
-            isToday ? 'text-white' : 'text-ink-muted'
+          className={`text-[11px] font-semibold uppercase tracking-[0.05em] ${
+            isToday ? 'text-primary-foreground' : 'text-text-secondary'
           }`}
         >
           {dayLabel}
         </p>
-        <p className={`font-display text-lg font-bold ${isToday ? 'text-white' : 'text-ink'}`}>
+        <p className={`font-mono text-lg font-semibold ${isToday ? 'text-primary-foreground' : 'text-text-primary'}`}>
           {dayNum}
         </p>
       </div>
@@ -37,20 +37,17 @@ export default function DayColumn({ date, isToday, cards }: DayColumnProps) {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`scroll-slim min-h-[120px] flex-1 rounded-xl p-1.5 ${
+            className={`scroll-slim min-h-[120px] flex-1 rounded-lg p-1.5 transition-colors duration-150 ${
               snapshot.isDraggingOver
-                ? 'bg-brand-light/70 ring-2 ring-inset ring-brand/20 shadow-[inset_0_0_0_1px_rgba(13,171,163,0.15)]'
-                : 'ring-1 ring-border/50'
+                ? 'bg-primary-subtle/60 ring-2 ring-inset ring-primary'
+                : 'ring-1 ring-border'
             }`}
-            style={{
-              transition: snapshot.isDraggingOver ? 'background-color 0.2s ease, box-shadow 0.2s ease' : 'background-color 0.3s ease',
-            }}
           >
             <div className="flex flex-col gap-1.5">
               {cards.map((card, i) => (
                 <PlannerCard key={card.id} card={card} index={i} />
               ))}
-              {cards.length === 0 && <p className="py-2 text-center text-xs text-ink-faint">—</p>}
+              {cards.length === 0 && <p className="py-2 text-center text-xs text-text-muted">—</p>}
             </div>
             {provided.placeholder}
           </div>

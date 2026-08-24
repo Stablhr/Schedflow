@@ -20,7 +20,7 @@ export default function AddListForm({ boardId }: { boardId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex w-[272px] shrink-0 items-center gap-2 rounded-xl bg-surface/70 px-3 py-2.5 text-sm font-semibold text-ink-muted transition hover:bg-brand-light hover:text-brand-dark hover-grow"
+        className="flex w-[272px] shrink-0 items-center gap-2 rounded-lg border border-dashed border-border-strong px-3 py-2.5 text-sm font-medium text-text-secondary transition-colors duration-150 hover:bg-surface hover:text-text-primary"
       >
         <Plus size={16} />
         Add another list
@@ -29,7 +29,7 @@ export default function AddListForm({ boardId }: { boardId: string }) {
   }
 
   return (
-    <div className="w-[272px] shrink-0 rounded-xl bg-surface p-2 shadow-sm">
+    <div className="w-[272px] shrink-0 rounded-lg border border-border bg-surface p-2">
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
@@ -39,13 +39,13 @@ export default function AddListForm({ boardId }: { boardId: string }) {
         }}
         placeholder="List name"
         autoFocus
-        className="w-full rounded-lg px-2 py-1.5 text-sm outline-none neu-input transition focus:neu-input-focus"
+        className="w-full rounded-md border border-border-strong bg-surface px-2 py-1.5 text-sm text-text-primary outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
       />
       <div className="mt-2 flex items-center gap-2">
         <button
           type="button"
           onClick={submit}
-          className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95"
+          className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:scale-[0.98]"
         >
           Add list
         </button>

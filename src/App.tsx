@@ -20,13 +20,14 @@ function ErrorToast() {
   const { error, dismissError } = useStore()
   if (!error) return null
   return (
-    <div className="glass-panel animate-in fixed bottom-4 left-1/2 z-[60] flex max-w-md -translate-x-1/2 items-center gap-2.5 glass-scrim px-4 py-2.5 text-sm font-medium text-ink">
-      <AlertTriangle size={16} className="shrink-0 text-warn" />
+    <div className="animate-in fixed bottom-4 left-1/2 z-[60] flex max-w-md -translate-x-1/2 items-center gap-2.5 rounded-lg border border-border-strong bg-surface-elevated px-4 py-2.5 text-sm font-medium text-text-primary shadow-medium">
+      <AlertTriangle size={16} className="shrink-0 text-warning-text" />
       <span className="flex-1">{error}</span>
       <button
         type="button"
         onClick={dismissError}
-        className="shrink-0 text-ink-muted transition hover:text-ink"
+        aria-label="Dismiss error"
+        className="shrink-0 rounded-md p-0.5 text-text-secondary transition-colors duration-150 hover:text-text-primary"
       >
         <X size={16} />
       </button>

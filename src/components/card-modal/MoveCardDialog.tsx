@@ -26,7 +26,7 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
   const [position, setPosition] = useState(targetCards.length)
 
   const inputClass =
-    'w-full rounded-lg px-2.5 py-1.5 text-sm text-ink outline-none neu-input transition focus:neu-input-focus'
+    'w-full rounded-md border border-border-strong bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20'
 
   const handleBoardMove = () => {
     if (!listId) return
@@ -51,15 +51,15 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
   }
 
   return (
-    <Modal open onClose={onClose} solid className="max-w-md rounded-2xl shadow-lg">
+    <Modal open onClose={onClose} className="max-w-md">
       <div className="p-6">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-light text-brand">
+          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary-subtle text-primary-hover">
             <ArrowRight size={18} />
           </span>
-          <h2 className="font-display text-xl font-bold text-ink">Move card</h2>
+          <h2 className="text-[17px] font-semibold text-text-primary">Move card</h2>
         </div>
-        <p className="mt-1.5 truncate text-sm text-ink-muted" title={card.title}>
+        <p className="mt-1.5 truncate text-sm text-text-secondary" title={card.title}>
           &ldquo;{card.title}&rdquo;
         </p>
 
@@ -68,10 +68,10 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
           <button
             type="button"
             onClick={() => setTab('board')}
-            className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+            className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors duration-150 ${
               tab === 'board'
-                ? 'bg-surface text-ink shadow-sm'
-                : 'text-ink-muted hover:text-ink'
+                ? 'bg-surface text-text-primary shadow-subtle'
+                : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             <FolderInput size={13} className="mr-1 inline" />
@@ -80,10 +80,10 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
           <button
             type="button"
             onClick={() => setTab('inbox')}
-            className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+            className={`flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors duration-150 ${
               tab === 'inbox'
-                ? 'bg-surface text-ink shadow-sm'
-                : 'text-ink-muted hover:text-ink'
+                ? 'bg-surface text-text-primary shadow-subtle'
+                : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             <Inbox size={13} className="mr-1 inline" />
@@ -95,7 +95,7 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
           <>
             <div className="mt-5 space-y-3">
               <div>
-                <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
                   Board
                 </label>
                 <select
@@ -118,7 +118,7 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
               </div>
 
               <div>
-                <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
                   List
                 </label>
                 <select
@@ -138,7 +138,7 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
               </div>
 
               <div>
-                <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
                   Position
                 </label>
                 <select
@@ -159,7 +159,7 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
               type="button"
               onClick={handleBoardMove}
               disabled={!listId}
-              className="mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95 disabled:opacity-40"
+              className="mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:scale-[0.98] disabled:opacity-40"
             >
               <ArrowRight size={15} />
               Move
@@ -169,12 +169,12 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
 
         {tab === 'inbox' && (
           <>
-            <div className="mt-5 rounded-xl bg-bg p-4">
-              <p className="text-sm text-ink-muted">
-                This will remove the card from <span className="font-semibold text-ink">{currentBoard?.name ?? 'its board'}</span> and
+            <div className="mt-5 rounded-md bg-surface-alt p-4">
+              <p className="text-sm text-text-secondary">
+                This will remove the card from <span className="font-semibold text-text-primary">{currentBoard?.name ?? 'its board'}</span> and
                 convert it to a plain Inbox item.
               </p>
-              <p className="mt-2 text-xs text-ink-faint">
+              <p className="mt-2 text-xs text-text-muted">
                 All labels, cover, attachments, comments, and reactions will be discarded.
                 {/* MVP: discards card data on demotion. Preserve for re-promotion in a future iteration. */}
               </p>
@@ -183,10 +183,10 @@ export default function MoveCardDialog({ card, onClose }: MoveCardDialogProps) {
             <button
               type="button"
               onClick={handleInboxMove}
-              className={`mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold shadow-sm transition active:scale-95 ${
+              className={`mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-md px-3.5 py-2 text-sm font-semibold transition-colors duration-150 active:scale-[0.98] ${
                 confirmInbox
-                  ? 'bg-danger text-white hover:bg-danger/90'
-                  : 'bg-warn text-ink hover:bg-warn/90'
+                  ? 'bg-danger-button text-white hover:bg-danger-button/90'
+                  : 'bg-warning-subtle text-warning-text hover:brightness-95 dark:hover:brightness-110'
               }`}
             >
               <Inbox size={15} />

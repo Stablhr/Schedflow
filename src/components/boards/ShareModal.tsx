@@ -95,19 +95,19 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
   }
 
   const inputClass =
-    'rounded-lg px-3 py-2 text-sm outline-none transition neu-input focus:neu-input-focus'
+    'rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text-primary outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20'
 
   return (
-    <Modal open onClose={onClose} solid className="max-w-lg !h-auto !max-h-[85dvh] rounded-2xl shadow-lg">
+    <Modal open onClose={onClose} className="max-w-lg !h-auto !max-h-[85dvh]">
       <div className="flex max-h-[85dvh] flex-col overflow-hidden">
         {/* ── Header ── */}
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h2 className="font-display text-lg font-bold text-ink">Share board</h2>
+          <h2 className="text-base font-semibold text-text-primary">Share board</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close share board"
-            className="rounded-lg p-1.5 text-ink-faint transition-colors duration-150 hover:bg-surface-alt hover:text-ink"
+            className="rounded-md p-1.5 text-text-secondary transition-colors duration-150 hover:bg-surface-alt hover:text-text-primary"
           >
             <X size={18} />
           </button>
@@ -130,7 +130,7 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
                   className={`w-full ${inputClass}`}
                 />
                 {errorMsg && (
-                  <p className="mt-1.5 text-xs text-danger">{errorMsg}</p>
+                  <p className="mt-1.5 text-xs text-danger-text">{errorMsg}</p>
                 )}
               </div>
               <div className="flex gap-2 sm:block">
@@ -149,7 +149,7 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
                   type="button"
                   onClick={add}
                   disabled={!name.trim()}
-                  className="flex h-10 items-center justify-center gap-1.5 rounded-lg bg-brand px-4 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-brand-dark active:scale-95 disabled:opacity-40 sm:h-[38px]"
+                  className="flex h-10 items-center justify-center gap-1.5 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 sm:h-[38px]"
                 >
                   <UserPlus size={15} />
                   Share
@@ -159,22 +159,22 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
           </div>
 
           {/* ── Share link ── */}
-          <div className="mx-5 rounded-xl border border-border bg-bg/50 p-3.5">
+          <div className="mx-5 rounded-lg border border-border bg-surface-alt p-3.5">
             <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-alt">
-                <Link2 size={16} className="text-ink-muted" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface">
+                <Link2 size={16} className="text-text-secondary" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-ink">Share this board with a link</p>
+                <p className="text-sm font-medium text-text-primary">Share this board with a link</p>
                 {board.shareLink?.enabled ? (
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="min-w-0 flex-1 truncate rounded-lg bg-surface px-2.5 py-1.5 font-mono text-xs text-ink-muted ring-1 ring-border">
+                    <span className="min-w-0 flex-1 truncate rounded-md border border-border bg-surface px-2.5 py-1.5 font-mono text-xs text-text-secondary">
                       {shareUrl}
                     </span>
                     <button
                       type="button"
                       onClick={copyShareLink}
-                      className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-surface px-2.5 text-xs font-medium text-ink transition-colors duration-150 hover:bg-surface-alt ring-1 ring-border"
+                      className="flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 text-xs font-medium text-text-primary transition-colors duration-150 hover:bg-surface-alt"
                     >
                       {linkCopied ? (
                         <>
@@ -193,7 +193,7 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
                   <button
                     type="button"
                     onClick={handleCreateLink}
-                    className="mt-1.5 text-sm font-medium text-brand transition-colors duration-150 hover:text-brand-dark"
+                    className="mt-1.5 text-sm font-medium text-primary-text transition-colors duration-150 hover:underline dark:text-primary-hover"
                   >
                     Create link
                   </button>
@@ -211,8 +211,8 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
               onClick={() => setActiveTab('members')}
               className={`px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
                 activeTab === 'members'
-                  ? 'border-b-2 border-brand text-brand'
-                  : 'text-ink-muted hover:text-ink'
+                  ? 'border-b-2 border-primary text-primary-text dark:text-primary-hover'
+                  : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               Board members ({shares.length})
@@ -224,8 +224,8 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
               onClick={() => setActiveTab('requests')}
               className={`px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
                 activeTab === 'requests'
-                  ? 'border-b-2 border-brand text-brand'
-                  : 'text-ink-muted hover:text-ink'
+                  ? 'border-b-2 border-primary text-primary-text dark:text-primary-hover'
+                  : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               Join requests
@@ -237,7 +237,7 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
             {activeTab === 'members' && (
               <>
                 {shares.length === 0 ? (
-                  <p className="py-6 text-center text-sm text-ink-faint">
+                  <p className="py-6 text-center text-sm text-text-secondary">
                     No members yet. Invite someone above to get started.
                   </p>
                 ) : (
@@ -258,11 +258,11 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
                             size={34}
                           />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-ink">
+                            <p className="truncate text-sm font-medium text-text-primary">
                               {share.name}
-                              {isYou && <span className="ml-1 text-xs text-ink-faint">(you)</span>}
+                              {isYou && <span className="ml-1 text-xs text-text-secondary">(you)</span>}
                             </p>
-                            <p className="text-xs text-ink-muted">
+                            <p className="text-xs text-text-secondary">
                               {ROLE_LABELS[share.role]}
                             </p>
                           </div>
@@ -270,22 +270,23 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
                             <button
                               type="button"
                               onClick={() => setOpenPermId(openPermId === share.id ? null : share.id)}
-                              className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-ink-muted transition-colors duration-150 hover:bg-surface-alt hover:text-ink"
+                              aria-expanded={openPermId === share.id}
+                              className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors duration-150 hover:bg-surface-alt hover:text-text-primary"
                             >
                               {ROLE_LABELS[share.role]}
                               <ChevronDown size={13} />
                             </button>
                             {openPermId === share.id && (
-                              <div className="glass-panel animate-in absolute right-0 top-full z-30 mt-1 w-36 p-1">
+                              <div className="animate-in absolute right-0 top-full z-30 mt-1 w-36 rounded-lg border border-border-strong bg-surface-elevated p-1 shadow-subtle">
                                 {ROLE_OPTIONS.map((r) => (
                                   <button
                                     key={r}
                                     type="button"
                                     onClick={() => handleRoleChange(share.id, r)}
-                                    className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-150 ${
+                                    className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors duration-150 ${
                                       share.role === r
-                                        ? 'font-semibold text-brand bg-brand/10'
-                                        : 'text-ink hover:bg-surface-alt'
+                                        ? 'font-semibold text-primary-hover bg-primary-subtle'
+                                        : 'text-text-primary hover:bg-surface-alt'
                                     }`}
                                   >
                                     {ROLE_LABELS[r]}
@@ -298,7 +299,7 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
                                     removeShare(board.id, share.id)
                                     setOpenPermId(null)
                                   }}
-                                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-danger transition-colors duration-150 hover:bg-danger-light"
+                                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-danger-text transition-colors duration-150 hover:bg-danger-subtle"
                                 >
                                   <Lock size={13} />
                                   Remove
@@ -315,7 +316,7 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
             )}
 
             {activeTab === 'requests' && (
-              <p className="py-6 text-center text-sm text-ink-faint">
+              <p className="py-6 text-center text-sm text-text-secondary">
                 No pending join requests.
               </p>
             )}
@@ -324,7 +325,7 @@ export default function ShareModal({ board, onClose }: { board: Board; onClose: 
 
         {/* ── Footer ── */}
         <div className="border-t border-border px-5 py-3">
-          <p className="text-xs leading-relaxed text-ink-faint">
+          <p className="text-xs leading-relaxed text-text-secondary">
             {ROLE_DESCRIPTIONS[role]} Collaborators are stored locally — real accounts and sync arrive
             with a future backend.
           </p>

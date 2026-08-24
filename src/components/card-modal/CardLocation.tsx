@@ -24,7 +24,7 @@ export default function CardLocation({ card }: { card: Card }) {
 
       {card.location && !editing ? (
         <div className="mt-2 flex items-center gap-1.5">
-          <span className="min-w-0 break-all rounded-lg bg-surface-alt px-2.5 py-1 text-xs font-medium text-ink-muted">
+          <span className="min-w-0 break-all rounded-md bg-surface-alt px-2.5 py-1 text-xs font-medium text-text-secondary">
             {card.location}
           </span>
           <button
@@ -34,18 +34,19 @@ export default function CardLocation({ card }: { card: Card }) {
               setValue(card.location)
               setEditing(true)
             }}
-            className="text-xs font-semibold text-brand hover:underline"
+            className="text-xs font-semibold text-primary-hover hover:underline"
           >
             Edit
           </button>
           <button
             type="button"
             title="Remove location"
+            aria-label="Remove location"
             onClick={() => {
               setValue('')
               save()
             }}
-            className="text-ink-faint transition hover:text-danger"
+            className="text-text-muted transition-colors duration-150 hover:text-danger-text"
           >
             <X size={14} />
           </button>
@@ -66,13 +67,13 @@ export default function CardLocation({ card }: { card: Card }) {
               onBlur={save}
               placeholder="e.g. Studio, client office, remote…"
               autoFocus
-              className="w-full rounded-lg px-2 py-1 text-xs text-ink outline-none neu-input transition focus:neu-input-focus"
+              className="w-full rounded-md border border-border-strong bg-surface px-2 py-1 text-xs text-text-primary outline-none transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           ) : (
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="mt-2 text-xs font-semibold text-brand hover:underline"
+              className="mt-2 text-xs font-semibold text-primary-hover hover:underline"
             >
               Add location
             </button>

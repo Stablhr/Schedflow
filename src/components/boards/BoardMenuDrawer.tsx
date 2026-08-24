@@ -46,7 +46,7 @@ export default function BoardMenuDrawer({
   ).length
 
   const menuItem =
-    'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-ink transition hover:bg-surface-alt'
+    'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-text-primary transition-colors duration-150 hover:bg-surface-alt'
 
   const handleReset = () => {
     if (
@@ -61,14 +61,15 @@ export default function BoardMenuDrawer({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm" onClick={onClose} />
-      <aside className="glass-panel animate-in fixed bottom-0 right-0 top-0 z-40 flex w-full flex-col sm:bottom-auto sm:w-72">
-        <div className="glass-scrim flex items-center justify-between border-b border-border px-4 py-3.5">
-          <h2 className="font-display text-lg font-bold text-ink">Menu</h2>
+      <div className="fixed inset-0 z-40 bg-[#0f1a19]/50" onClick={onClose} />
+      <aside className="animate-in fixed bottom-0 right-0 top-0 z-40 flex w-full flex-col border-l border-border bg-surface-elevated shadow-medium sm:bottom-auto sm:w-72">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <h2 className="text-base font-semibold text-text-primary">Menu</h2>
           <button
             type="button"
             onClick={onClose}
-            className="neu-compact rounded-[10px] p-1.5 text-ink-faint transition hover:bg-surface-alt hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
+            aria-label="Close menu"
+            className="rounded-md p-1.5 text-text-secondary transition-colors duration-150 hover:bg-surface-alt hover:text-text-primary focus-visible:outline-2 focus-visible:outline-brand"
           >
             <X size={16} />
           </button>
@@ -76,7 +77,7 @@ export default function BoardMenuDrawer({
 
         <div className="scroll-slim flex-1 overflow-y-auto p-4">
           <section>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">About</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">About</p>
             <textarea
               value={desc}
               onChange={(e) => {
@@ -85,37 +86,58 @@ export default function BoardMenuDrawer({
               }}
               rows={3}
               placeholder="Add a description…"
-              className="mt-2 w-full resize-none rounded-lg px-2.5 py-2 text-sm leading-relaxed text-ink outline-none neu-input transition placeholder:text-ink-faint focus:neu-input-focus"
+              className="mt-2 w-full resize-none rounded-md border border-border-strong bg-surface px-2.5 py-2 text-sm leading-relaxed text-text-primary outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </section>
 
           <section className="mt-5 space-y-0.5">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">Actions</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">Actions</p>
             <button type="button" className={menuItem} onClick={() => setModal('share')}>
-              <Share2 size={15} className="text-ink-muted" />
+              <Share2 size={15} className="text-text-secondary" />
               Share board
             </button>
             <button type="button" className={menuItem} onClick={() => setModal('visibility')}>
-              <Eye size={15} className="text-ink-muted" />
+              <Eye size={15} className="text-text-secondary" />
               Visibility
             </button>
             <button type="button" className={menuItem} onClick={() => setModal('labels')}>
-              <Tag size={15} className="text-ink-muted" />
+              <Tag size={15} className="text-text-secondary" />
               Labels
             </button>
             <button type="button" className={menuItem} onClick={() => setModal('archived')}>
-              <Archive size={15} className="text-ink-muted" />
+              <Archive size={15} className="text-text-secondary" />
               Archived items
-              <span className="ml-auto rounded-full bg-surface-alt px-1.5 py-0.5 font-mono text-[10.5px] text-ink-muted">
+              <span className="ml-auto rounded-full bg-surface-alt px-1.5 py-0.5 font-mono text-[10.5px] text-text-secondary">
                 {archivedCount}
               </span>
             </button>
           </section>
 
           <section className="mt-5">
-            <p className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+            <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
               <Palette size={12} />
-              Color Themes
+              Background Color
+            </p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {BOARD_BACKGROUNDS.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  title="Set background"
+                  onClick={() => setBoardBackground(board.id, color)}
+                  className={`h-6 w-6 rounded-md transition-colors duration-150 ${
+                    board.background === color ? 'ring-2 ring-ink' : 'ring-1 ring-border-strong'
+                  }`}
+                  style={{ background: color }}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section className="mt-5">
+            <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
+              <Palette size={12} />
+              Gradient Themes
             </p>
             <div className="mt-2 space-y-2">
               {COLOR_THEMES.map((theme) => {
@@ -128,38 +150,17 @@ export default function BoardMenuDrawer({
                     title={theme.name}
                     onClick={() => setBoardBackground(board.id, gradient)}
                     className={`flex w-full items-center gap-3 rounded-lg p-2 transition ${
-                      isActive ? 'ring-2 ring-brand' : 'ring-1 ring-border hover:ring-border'
+                      isActive ? 'ring-2 ring-primary' : 'ring-1 ring-border-strong hover:bg-surface-alt'
                     }`}
                   >
                     <div
-                      className="h-8 w-8 shrink-0 rounded-lg"
+                      className="h-8 w-8 shrink-0 rounded-md"
                       style={{ background: gradient }}
                     />
-                    <span className="text-sm font-medium text-ink">{theme.name}</span>
+                    <span className="text-sm font-medium text-text-primary">{theme.name}</span>
                   </button>
                 )
               })}
-            </div>
-          </section>
-
-          <section className="mt-5">
-            <p className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
-              <Palette size={12} />
-              Solid Background
-            </p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {BOARD_BACKGROUNDS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  title="Set background"
-                  onClick={() => setBoardBackground(board.id, color)}
-                  className={`h-6 w-6 rounded-md transition hover:scale-110 ${
-                    board.background === color ? 'ring-2 ring-ink' : 'ring-1 ring-border'
-                  }`}
-                  style={{ background: color }}
-                />
-              ))}
             </div>
           </section>
 
@@ -168,7 +169,7 @@ export default function BoardMenuDrawer({
           <button
             type="button"
             onClick={handleReset}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-danger transition hover:bg-danger-light"
+            className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-danger-text transition-colors duration-150 hover:bg-danger-subtle"
           >
             <Trash2 size={15} />
             Reset all data

@@ -11,8 +11,8 @@ export default function InboxView() {
 
   return (
     <div className="scroll-slim mx-auto h-full max-w-2xl overflow-y-auto p-4 sm:p-6 md:p-8">
-      <h1 className="font-display text-xl font-bold text-ink sm:text-2xl">Inbox</h1>
-      <p className="mt-1 text-sm text-ink-muted">
+      <h1 className="text-xl font-semibold text-text-primary sm:text-2xl">Inbox</h1>
+      <p className="mt-1 text-sm text-text-secondary">
         Quick captures land here until you move them to a board or schedule them.
       </p>
 
@@ -24,12 +24,12 @@ export default function InboxView() {
         {data.inbox.map((item) => (
           <li
             key={item.id}
-            className="animate-in flex items-center gap-2 rounded-xl glass-subtle px-3 py-2.5 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 sm:gap-3 sm:px-4 sm:py-3"
+            className="animate-in flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2.5 transition-colors duration-150 hover:border-border-strong sm:gap-3 sm:px-4 sm:py-3"
           >
-            <span className="min-w-0 flex-1 truncate text-sm text-ink" title={item.text}>
+            <span className="min-w-0 flex-1 truncate text-sm text-text-primary" title={item.text}>
               {item.text}
             </span>
-            <span className="hidden shrink-0 font-mono text-[10.5px] text-ink-faint sm:block">
+            <span className="hidden shrink-0 font-mono text-[10.5px] text-text-muted sm:block">
               {formatDateTime(item.createdAt)}
             </span>
             <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
@@ -37,7 +37,7 @@ export default function InboxView() {
                 type="button"
                 onClick={() => setAction({ itemId: item.id, mode: 'move' })}
                 title="Move to board"
-                className="rounded-lg p-1.5 text-ink-faint transition hover:bg-brand-light hover:text-brand-dark"
+                className="rounded-md p-1.5 text-text-secondary transition-colors duration-150 hover:bg-primary-subtle hover:text-primary-hover"
               >
                 <FolderInput size={15} />
               </button>
@@ -45,7 +45,7 @@ export default function InboxView() {
                 type="button"
                 onClick={() => setAction({ itemId: item.id, mode: 'schedule' })}
                 title="Schedule"
-                className="rounded-lg p-1.5 text-ink-faint transition hover:bg-brand-light hover:text-brand-dark"
+                className="rounded-md p-1.5 text-text-secondary transition-colors duration-150 hover:bg-primary-subtle hover:text-primary-hover"
               >
                 <CalendarPlus size={15} />
               </button>
@@ -53,7 +53,7 @@ export default function InboxView() {
                 type="button"
                 onClick={() => dismissInboxItem(item.id)}
                 title="Dismiss"
-                className="rounded-lg p-1.5 text-ink-faint transition hover:bg-danger-light hover:text-danger"
+                className="rounded-md p-1.5 text-text-secondary transition-colors duration-150 hover:bg-danger-subtle hover:text-danger-text"
               >
                 <Trash2 size={15} />
               </button>
@@ -61,7 +61,7 @@ export default function InboxView() {
           </li>
         ))}
         {data.inbox.length === 0 && (
-          <li className="rounded-xl border-2 border-dashed border-border p-8 text-center text-sm text-ink-faint sm:p-10">
+          <li className="rounded-lg border-2 border-dashed border-border p-8 text-center text-sm text-text-muted sm:p-10">
             Nothing captured yet — use the box above to jot a task, and it will land here.
           </li>
         )}

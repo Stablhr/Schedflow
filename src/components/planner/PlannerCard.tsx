@@ -14,16 +14,16 @@ export default function PlannerCard({ card, index }: { card: Card; index: number
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`cursor-grab rounded-lg p-2 shadow-sm ring-1 active:cursor-grabbing ${
+          className={`cursor-grab rounded-lg border border-border bg-surface p-2 active:cursor-grabbing ${
             snapshot.isDragging
-              ? 'z-50 rounded-xl shadow-[0_10px_32px_rgba(13,171,163,0.18),0_4px_12px_rgba(19,42,41,0.1)] ring-brand/30 opacity-95'
-              : 'hover:shadow-md hover:ring-border'
+              ? 'z-50 shadow-modal ring-2 ring-primary/40'
+              : 'transition-colors duration-150 hover:bg-surface-alt'
           }`}
-          style={{ ...provided.draggableProps.style, background: snapshot.isDragging ? 'var(--color-surface)' : 'var(--color-surface)', color: 'var(--color-ink)', borderColor: snapshot.isDragging ? undefined : 'var(--color-border)' }}
+          style={provided.draggableProps.style}
         >
-          <p className="truncate text-[13px] font-semibold leading-snug text-ink">{card.title}</p>
+          <p className="truncate text-[13px] font-medium leading-snug text-text-primary">{card.title}</p>
           <div className="mt-1 flex items-center gap-1.5">
-            <span className="min-w-0 flex-1 truncate text-[11px] text-ink-muted">
+            <span className="min-w-0 flex-1 truncate text-[11px] text-text-secondary">
               {board?.name}
             </span>
             {card.dueDate && <DueBadge due={card.dueDate} />}

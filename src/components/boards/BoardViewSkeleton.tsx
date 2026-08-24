@@ -4,7 +4,7 @@ export default function BoardViewSkeleton() {
   return (
     <div className="flex h-full flex-col">
       {/* Top bar skeleton */}
-      <div className="flex items-center gap-2 border-b border-border glass-subtle px-4 py-3">
+      <div className="flex items-center gap-2 border-b border-border bg-surface px-4 py-3">
         <Skeleton className="h-8 w-8 shrink-0 rounded-lg" />
         <Skeleton className="h-6 w-32" />
         <Skeleton className="h-8 w-8 shrink-0 rounded-lg" />
@@ -23,7 +23,7 @@ export default function BoardViewSkeleton() {
       <div className="flex h-full items-start gap-3 overflow-hidden p-4">
         {Array.from({ length: 4 }, (_, col) => (
           <div key={col} className="w-[272px] shrink-0">
-            <div className="rounded-xl shadow-sm backdrop-blur-xl" style={{ background: 'var(--color-surface)' }}>
+            <div className="rounded-xl border border-border bg-surface-alt" >
               {/* Column header */}
               <div className="flex items-center gap-1 px-2 pb-1 pt-2.5">
                 <Skeleton className="h-3.5 w-3.5" />
@@ -34,7 +34,7 @@ export default function BoardViewSkeleton() {
               {/* Cards */}
               <div className="flex flex-col gap-1.5 px-2 pb-2">
                 {Array.from({ length: 2 + (col % 2) }, (_, card) => (
-                  <div key={card} className="rounded-xl bg-white/50 p-2.5 shadow-sm">
+                  <div key={card} className="rounded-xl border border-border bg-surface p-2.5">
                     {card === 0 && <Skeleton className="mb-2 h-16 rounded-lg" />}
                     <Skeleton className="h-3 w-3/4" />
                     <Skeleton className="mt-1.5 h-2.5 w-1/2" />

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { X, Eye, EyeOff, Trash2, Archive, Check, RotateCcw, MoreHorizontal, ArrowRight, Palette, ImageIcon } from 'lucide-react'
 import { BOARD_BACKGROUNDS } from '../../store/schema'
-import { blendTwoStop } from '../../utils/color'
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
 import CardDescription from './CardDescription'
@@ -85,14 +84,15 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
   }
 
   return (
-    <Modal open onClose={onClose} className="max-w-2xl max-h-[85vh] sm:max-h-[80vh] h-full rounded-2xl">
-      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl">
+    <Modal open onClose={onClose} className="max-w-2xl max-h-[85vh] sm:max-h-[80vh] h-full">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden">
         {/* Close button */}
         <button
           type="button"
           onClick={onClose}
           title="Close"
-          className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full glass-subtle text-ink-muted shadow-md transition hover:text-ink hover-rotate active:scale-95 sm:right-4 sm:top-4"
+          aria-label="Close card"
+          className="absolute right-3 top-3 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-surface text-text-secondary shadow-subtle transition-colors duration-150 hover:bg-surface-alt hover:text-text-primary active:scale-[0.98] sm:right-4 sm:top-4"
         >
           <X size={18} />
         </button>
@@ -104,7 +104,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
               {typeof card.cover === 'string' ? (
                 <div
                   className="h-full w-full"
-                  style={{ background: blendTwoStop(card.cover as string, '#0A8981') }}
+                  style={{ background: card.cover as string }}
                 />
               ) : (
                 <img src={card.cover.dataUrl} alt="" className="h-full w-full object-cover" />
@@ -128,7 +128,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                     }}
                     onBlur={commitTitle}
                     autoFocus
-                    className="w-full rounded-lg px-2 py-1 font-display text-[20px] font-bold text-ink outline-none ring-2 ring-brand"
+                    className="w-full rounded-md px-2 py-1 text-[20px] font-semibold leading-snug text-text-primary outline-none ring-2 ring-primary/30"
                   />
                 ) : (
                   <h2
@@ -137,14 +137,14 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                       setEditingTitle(true)
                     }}
                     title="Click to rename"
-                    className="cursor-text break-words rounded-lg px-2 py-1 font-display text-[20px] font-bold leading-snug text-ink transition hover:bg-surface-alt"
+                    className="cursor-text break-words rounded-md px-2 py-1 text-[20px] font-semibold leading-snug text-text-primary transition-colors duration-150 hover:bg-surface-alt"
                   >
                     {card.title}
                   </h2>
                 )}
-                <p className="mt-0.5 px-2 text-xs text-ink-muted">
+                <p className="mt-0.5 px-2 text-xs text-text-secondary">
                   in list{' '}
-                  <span className="font-semibold text-brand-dark">{list.name}</span>
+                  <span className="font-medium text-primary-hover">{list.name}</span>
                 </p>
               </div>
 
@@ -152,10 +152,10 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                 type="button"
                 onClick={() => toggleDone(card.id)}
                 title={card.done ? 'Mark as not done' : 'Mark as done'}
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition active:scale-95 sm:px-2.5 ${
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors duration-150 active:scale-[0.98] sm:px-2.5 ${
                   card.done
                     ? 'bg-success text-white'
-                    : 'bg-surface-alt text-ink-muted hover:bg-success-light hover:text-success'
+                    : 'bg-surface-alt text-text-secondary hover:bg-success-subtle hover:text-success-text'
                 }`}
               >
                 {card.done ? <RotateCcw size={14} /> : <Check size={14} />}
@@ -165,10 +165,10 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
               <button
                 type="button"
                 onClick={toggleWatch}
-                className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-semibold transition active:scale-95 sm:px-2.5 ${
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors duration-150 active:scale-[0.98] sm:px-2.5 ${
                   card.watching
-                    ? 'bg-brand-light text-brand-dark'
-                    : 'bg-surface-alt text-ink-muted hover:bg-brand-light hover:text-brand-dark'
+                    ? 'bg-primary-subtle text-primary-hover'
+                    : 'bg-surface-alt text-text-secondary hover:bg-primary-subtle hover:text-primary-hover'
                 }`}
               >
                 {card.watching ? <Eye size={14} /> : <EyeOff size={14} />}
@@ -181,36 +181,37 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                   type="button"
                   onClick={() => setOverflowOpen((o) => !o)}
                   title="More actions"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-ink-muted transition hover:bg-surface-alt active:scale-95"
+                  aria-expanded={overflowOpen}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary transition-colors duration-150 hover:bg-surface-alt hover:text-text-primary active:scale-[0.98]"
                 >
                   <MoreHorizontal size={16} />
                 </button>
                 {overflowOpen && (
-                  <div className="glass-panel absolute right-0 top-9 z-30 w-52 py-1 animate-in">
-                    <div className="glass-scrim px-1 py-0.5">
+                  <div className="animate-in absolute right-0 top-9 z-30 w-52 rounded-lg border border-border-strong bg-surface-elevated py-1 shadow-subtle">
+                    <div className="px-1 py-0.5">
                     <button
                       type="button"
                       onClick={() => {
                         setOverflowOpen(false)
                         setMoveDialogOpen(true)
                       }}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-alt"
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-text-primary transition-colors duration-150 hover:bg-surface-alt"
                     >
-                      <ArrowRight size={14} className="text-ink-muted" />
+                      <ArrowRight size={14} className="text-text-secondary" />
                       Move
                     </button>
                     <button
                       type="button"
                       onClick={handleArchive}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-alt"
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-text-primary transition-colors duration-150 hover:bg-surface-alt"
                     >
-                      <Archive size={14} className="text-ink-muted" />
+                      <Archive size={14} className="text-text-secondary" />
                       Archive
                     </button>
                     </div>
                     <div className="my-1 h-px bg-border" />
                     <div className="px-3 py-2">
-                      <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+                      <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
                         <Palette size={12} />
                         Board background
                       </div>
@@ -224,8 +225,8 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                               setBoardBackground(board.id, color)
                               setOverflowOpen(false)
                             }}
-                            className={`h-6 rounded-md transition hover:scale-110 active:scale-95 ${
-                              board.background === color ? 'ring-2 ring-ink ring-offset-1' : ''
+                            className={`h-6 rounded-md transition-shadow duration-150 active:scale-[0.98] ${
+                              board.background === color ? 'ring-2 ring-ink ring-offset-1' : 'ring-1 ring-border-strong'
                             }`}
                             style={{ background: color }}
                           />
@@ -234,7 +235,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                       <button
                         type="button"
                         onClick={() => bgFileRef.current?.click()}
-                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-2.5 py-1.5 text-[11px] font-semibold text-ink-muted transition hover:bg-brand-light hover:text-brand-dark active:scale-95"
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-surface-alt px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary transition-colors duration-150 hover:bg-primary-subtle hover:text-primary-hover active:scale-[0.98]"
                       >
                         <ImageIcon size={12} />
                         Upload image
@@ -280,7 +281,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
               <button
                 type="button"
                 onClick={handleDelete}
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger-light hover-grow active:scale-95"
+                className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-danger-text transition-colors duration-150 hover:bg-danger-subtle active:scale-[0.98]"
               >
                 <Trash2 size={14} />
                 Delete card

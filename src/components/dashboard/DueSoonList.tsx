@@ -12,10 +12,10 @@ export default function DueSoonList({ limit = 8 }: { limit?: number }) {
     .slice(0, limit)
 
   return (
-    <div className="rounded-xl glass-subtle p-3 shadow-sm sm:p-4">
+    <div className="rounded-lg border border-border bg-surface p-3 sm:p-4">
       <div className="flex items-center gap-1.5">
-        <AlarmClock size={14} className="text-accent" />
-        <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink">
+        <AlarmClock size={14} className="text-warning-text" />
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
           Due soon
         </h2>
       </div>
@@ -27,12 +27,12 @@ export default function DueSoonList({ limit = 8 }: { limit?: number }) {
             <li key={card.id}>
               <Link
                 to={`/boards/${card.boardId}`}
-                className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition hover:bg-surface-alt hover-slide-right"
+                className="group flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors duration-150 hover:bg-surface-alt"
               >
-                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
+                <span className="min-w-0 flex-1 truncate text-sm font-medium text-text-primary">
                   {card.title}
                 </span>
-                <span className="hidden max-w-32 truncate text-[11px] font-medium text-ink-muted sm:block">
+                <span className="hidden max-w-32 truncate text-[11px] font-medium text-text-muted sm:block">
                   {board?.name}
                 </span>
                 <DueBadge due={card.dueDate!} />
@@ -41,7 +41,7 @@ export default function DueSoonList({ limit = 8 }: { limit?: number }) {
           )
         })}
         {cards.length === 0 && (
-          <li className="rounded-lg px-2 py-3 text-center text-xs font-medium text-ink-muted">
+          <li className="rounded-md px-2 py-3 text-center text-xs font-medium text-text-secondary">
             Nothing due soon.
           </li>
         )}

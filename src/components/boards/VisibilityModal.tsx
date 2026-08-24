@@ -13,17 +13,18 @@ export default function VisibilityModal({ board, onClose }: { board: Board; onCl
   const setBoardVisibility = useStore().setBoardVisibility
 
   return (
-    <Modal open onClose={onClose} solid className="max-w-md rounded-2xl shadow-lg">
+    <Modal open onClose={onClose} className="max-w-md">
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="font-display text-xl font-bold text-ink">Board visibility</h2>
-            <p className="mt-0.5 text-sm text-ink-muted">{board.name}</p>
+            <h2 className="text-[17px] font-semibold text-text-primary">Board visibility</h2>
+            <p className="mt-0.5 text-sm text-text-secondary">{board.name}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-ink-faint transition hover:bg-surface-alt hover:text-ink"
+            aria-label="Close visibility"
+            className="rounded-md p-1.5 text-text-secondary transition-colors duration-150 hover:bg-surface-alt hover:text-text-primary"
           >
             <X size={16} />
           </button>
@@ -40,17 +41,18 @@ export default function VisibilityModal({ board, onClose }: { board: Board; onCl
                   setBoardVisibility(board.id, option.value)
                   onClose()
                 }}
-                className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left ring-1 transition ${
-                  active ? 'bg-brand-light ring-brand' : 'ring-border hover:bg-surface-alt'
+                aria-pressed={active}
+                className={`flex w-full items-center gap-3 rounded-lg px-3.5 py-3 text-left ring-1 transition-colors duration-150 ${
+                  active ? 'bg-primary-subtle ring-primary' : 'ring-border-strong hover:bg-surface-alt'
                 }`}
               >
                 <span className="flex-1">
-                  <span className={`block text-sm font-semibold ${active ? 'text-brand-dark' : 'text-ink'}`}>
+                  <span className={`block text-sm font-semibold ${active ? 'text-primary-hover' : 'text-text-primary'}`}>
                     {option.label}
                   </span>
-                  <span className="mt-0.5 block text-xs text-ink-muted">{option.description}</span>
+                  <span className="mt-0.5 block text-xs text-text-secondary">{option.description}</span>
                 </span>
-                {active && <Check size={16} className="text-brand-dark" />}
+                {active && <Check size={16} className="text-primary-hover" />}
               </button>
             )
           })}

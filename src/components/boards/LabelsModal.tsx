@@ -20,20 +20,21 @@ export default function LabelsModal({ board, onClose }: { board: Board; onClose:
   }
 
   const inputClass =
-    'w-full rounded-lg px-2 py-1 text-sm text-ink outline-none neu-input transition focus:neu-input-focus'
+    'w-full rounded-md border border-border-strong bg-surface px-2 py-1.5 text-sm text-text-primary outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20'
 
   return (
-    <Modal open onClose={onClose} solid className="max-w-md rounded-2xl shadow-lg">
+    <Modal open onClose={onClose} className="max-w-md">
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="font-display text-xl font-bold text-ink">Labels</h2>
-            <p className="mt-0.5 text-sm text-ink-muted">{board.name}</p>
+            <h2 className="text-[17px] font-semibold text-text-primary">Labels</h2>
+            <p className="mt-0.5 text-sm text-text-secondary">{board.name}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-ink-faint transition hover:bg-surface-alt hover:text-ink"
+            aria-label="Close labels"
+            className="rounded-md p-1.5 text-text-secondary transition-colors duration-150 hover:bg-surface-alt hover:text-text-primary"
           >
             <X size={16} />
           </button>
@@ -41,7 +42,7 @@ export default function LabelsModal({ board, onClose }: { board: Board; onClose:
 
         <div className="mt-5 space-y-2">
           {labels.length === 0 && (
-            <p className="rounded-lg bg-bg px-3 py-2.5 text-xs text-ink-faint">
+            <p className="rounded-md bg-surface-alt px-3 py-2.5 text-xs text-text-secondary">
               No labels yet — add your first one below.
             </p>
           )}
@@ -71,7 +72,7 @@ export default function LabelsModal({ board, onClose }: { board: Board; onClose:
                   if (window.confirm(`Delete the "${label.name}" label?`)) deleteLabel(board.id, label.id)
                 }}
                 title="Delete label"
-                className="shrink-0 rounded-lg p-1.5 text-ink-faint transition hover:bg-danger-light hover:text-danger"
+                className="shrink-0 rounded-md p-1.5 text-text-secondary transition-colors duration-150 hover:bg-danger-subtle hover:text-danger-text"
               >
                 <Trash2 size={14} />
               </button>
@@ -80,7 +81,7 @@ export default function LabelsModal({ board, onClose }: { board: Board; onClose:
         </div>
 
         <div className="mt-5 border-t border-border pt-4">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
             Add a label
           </p>
           <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-end">
@@ -100,8 +101,8 @@ export default function LabelsModal({ board, onClose }: { board: Board; onClose:
                   type="button"
                   title={s.name}
                   onClick={() => setNewColor(s.color)}
-                  className={`h-6 w-6 rounded-md transition hover:scale-110 ${
-                    newColor === s.color ? 'ring-2 ring-ink' : ''
+                  className={`h-6 w-6 rounded-md transition-shadow duration-150 ${
+                    newColor === s.color ? 'ring-2 ring-ink ring-offset-1 ring-offset-surface' : 'ring-1 ring-border-strong'
                   }`}
                   style={{ background: s.color }}
                 />
@@ -111,7 +112,7 @@ export default function LabelsModal({ board, onClose }: { board: Board; onClose:
               type="button"
               onClick={add}
               disabled={!newName.trim()}
-              className="flex h-9 items-center gap-1 rounded-lg bg-brand px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95 disabled:opacity-40"
+              className="flex h-9 items-center gap-1 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
             >
               <Plus size={14} />
               Add

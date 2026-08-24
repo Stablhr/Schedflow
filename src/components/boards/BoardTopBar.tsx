@@ -126,16 +126,20 @@ export default function BoardTopBar({
       title={title}
       aria-label={title}
       onClick={onClick}
-      className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand active:scale-95 disabled:opacity-40 ${
+      className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand active:scale-[0.98] disabled:opacity-40 ${
         accent
           ? active
-            ? 'text-warn'
-            : 'text-ink-faint hover:text-warn hover:bg-surface-alt'
+            ? 'text-warning'
+            : 'hover:text-warning hover:bg-surface-alt'
           : active
-            ? 'bg-brand/15 text-brand'
-            : 'text-ink-faint hover:text-ink hover:bg-surface-alt'
+            ? 'bg-primary text-primary-foreground'
+            : 'hover:text-text-primary hover:bg-surface-alt'
       } ${className}`}
-      style={accent ? undefined : { color: active ? undefined : 'var(--surface-text-faint, inherit)' }}
+      style={
+        accent
+          ? { color: active ? undefined : 'var(--surface-text-muted)' }
+          : { color: active ? undefined : 'var(--surface-text-muted)' }
+      }
     >
       {children}
     </button>
@@ -199,10 +203,10 @@ export default function BoardTopBar({
           <div className="relative shrink-0">
             <Avatar member={currentUser} size={34} />
             <span
-              className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 sm:h-3 sm:w-3"
+              className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full sm:h-3 sm:w-3"
               style={{
                 background: 'var(--color-success, #33B27A)',
-                ringColor: 'var(--surface-bg-subtle, #FFFFFF)',
+                boxShadow: '0 0 0 2px var(--surface-bg-subtle, #FFFFFF)',
               }}
             />
           </div>
@@ -223,14 +227,14 @@ export default function BoardTopBar({
               }}
               onBlur={commitRename}
               autoFocus
-              className="w-24 rounded-lg px-2 py-1 font-display text-sm font-bold outline-none neu-input sm:w-auto sm:text-base"
-              style={{ color: 'var(--surface-text)', background: 'transparent' }}
+              className="w-24 rounded-md border border-transparent bg-transparent px-2 py-1 text-sm font-semibold outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-primary focus:bg-surface focus:ring-2 focus:ring-primary/20 sm:w-auto sm:text-base"
+              style={{ color: 'var(--surface-text)' }}
             />
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={commitRename}
-              className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-white hover:bg-brand-dark"
+              className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground transition-colors duration-150 hover:bg-primary-hover"
             >
               <Check size={14} />
             </button>
@@ -242,7 +246,7 @@ export default function BoardTopBar({
               setEditing(true)
             }}
             title="Click to rename"
-            className="ml-0.5 cursor-text truncate rounded-lg px-1.5 py-1 font-display text-sm font-bold transition-colors duration-150 hover:bg-surface-alt sm:ml-1 sm:text-base"
+            className="ml-0.5 cursor-text truncate rounded-md px-1.5 py-1 text-sm font-semibold transition-colors duration-150 hover:bg-surface-alt sm:ml-1 sm:text-base"
             style={{ color: 'var(--surface-text)' }}
           >
             {board.name}
@@ -265,15 +269,15 @@ export default function BoardTopBar({
             <Zap size={17} className={quickOpen ? 'fill-current' : ''} />
           </TB>
           {quickOpen && (
-            <div className="glass-panel animate-in absolute right-0 top-12 z-30 w-52 p-1.5">
+            <div className="animate-in absolute right-0 top-12 z-30 w-52 rounded-lg border border-border-strong bg-surface-elevated p-1.5 shadow-subtle">
               <button
                 type="button"
                 onClick={() => {
                   setQuickOpen(false)
                 }}
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink transition-colors duration-150 hover:bg-surface-alt"
+                className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-text-primary transition-colors duration-150 hover:bg-surface-alt"
               >
-                <Zap size={15} className="text-brand" />
+                <Zap size={15} className="text-primary-hover" />
                 Automations
               </button>
               <button
@@ -281,9 +285,9 @@ export default function BoardTopBar({
                 onClick={() => {
                   setQuickOpen(false)
                 }}
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink transition-colors duration-150 hover:bg-surface-alt"
+                className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-text-primary transition-colors duration-150 hover:bg-surface-alt"
               >
-                <LayoutGrid size={15} className="text-brand" />
+                <LayoutGrid size={15} className="text-primary-hover" />
                 Board templates
               </button>
             </div>
@@ -320,10 +324,7 @@ export default function BoardTopBar({
             <SlidersHorizontal size={17} />
           </TB>
           {filterActive && (
-            <span
-              className="absolute right-1 top-1 h-2 w-2 rounded-full"
-              style={{ background: 'var(--color-brand, #0DABA3)' }}
-            />
+            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" />
           )}
           <FilterPanel
             board={board}
@@ -384,12 +385,7 @@ export default function BoardTopBar({
           type="button"
           title="Share board"
           onClick={() => setShareOpen(true)}
-          className="ml-1 hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-150 hover:bg-surface-alt active:scale-95 sm:inline-flex"
-          style={{
-            background: 'var(--surface-bg-subtle, rgba(255,255,255,0.08))',
-            color: 'var(--surface-text, #FFFFFF)',
-            border: `1px solid ${theme.border}`,
-          }}
+          className="ml-1 hidden items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:scale-[0.98] sm:inline-flex"
         >
           <UserPlus size={15} />
           <span className="hidden md:inline">Share</span>
@@ -407,7 +403,7 @@ export default function BoardTopBar({
             <MoreHorizontal size={17} />
           </TB>
           {moreOpen && (
-            <div className="glass-panel animate-in absolute right-0 top-12 z-30 w-52 p-1.5">
+            <div className="animate-in absolute right-0 top-12 z-30 w-52 rounded-lg border border-border-strong bg-surface-elevated p-1.5 shadow-subtle">
               {moreItems.map((item) => {
                 const Icon = item.icon
                 return (
@@ -418,13 +414,13 @@ export default function BoardTopBar({
                       item.action()
                       setMoreOpen(false)
                     }}
-                    className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors duration-150 ${
+                    className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors duration-150 ${
                       item.danger
-                        ? 'text-danger hover:bg-danger-light hover:text-danger'
-                        : 'text-ink hover:bg-surface-alt'
+                        ? 'text-danger-text hover:bg-danger-subtle'
+                        : 'text-text-primary hover:bg-surface-alt'
                     }`}
                   >
-                    <Icon size={15} className={item.danger ? 'text-danger' : 'text-ink-muted'} />
+                    <Icon size={15} className={item.danger ? 'text-danger-text' : 'text-text-secondary'} />
                     {item.label}
                   </button>
                 )
@@ -437,7 +433,7 @@ export default function BoardTopBar({
       {/* ── Mobile search bar ── */}
       {searchOpen && (
         <div
-          className="absolute left-0 right-0 top-full z-30 flex items-center gap-2 border-b px-3 py-2 backdrop-blur-2xl sm:hidden"
+          className="absolute left-0 right-0 top-full z-30 flex items-center gap-2 border-b px-3 py-2 sm:hidden"
           style={{ ...vars, background: 'var(--surface-bg-subtle)', borderColor: theme.border }}
         >
           <Search size={14} style={{ color: 'var(--surface-text-faint)' }} />
@@ -446,7 +442,7 @@ export default function BoardTopBar({
             onChange={(e) => onSearch(e.target.value)}
             placeholder="Search this board"
             autoFocus
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-ink-faint"
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-text-muted"
             style={{ color: 'var(--surface-text)' }}
           />
           <button

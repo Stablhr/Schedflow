@@ -29,7 +29,7 @@ export default function CardMembers({ card }: { card: Card }) {
 
       <div className="mt-2 flex flex-wrap gap-1">
         {assigned.length === 0 ? (
-          <span className="text-xs text-ink-faint">No members</span>
+          <span className="text-xs text-text-muted">No members</span>
         ) : (
           assigned.map((m) => <Avatar key={m.id} member={m} size={22} />)
         )}
@@ -38,13 +38,13 @@ export default function CardMembers({ card }: { card: Card }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="mt-2 text-xs font-semibold text-brand hover:underline"
+        className="mt-2 text-xs font-semibold text-primary-hover hover:underline"
       >
         {open ? 'Done' : 'Assign members'}
       </button>
 
       {open && (
-        <div className="animate-in mt-2 space-y-0.5 rounded-xl glass-subtle p-1.5">
+        <div className="animate-in mt-2 space-y-0.5 rounded-lg border border-border-strong bg-surface-elevated p-1.5 shadow-subtle">
           {store.members.map((member) => {
             const active = card.memberIds.includes(member.id)
             return (
@@ -52,13 +52,13 @@ export default function CardMembers({ card }: { card: Card }) {
                 key={member.id}
                 type="button"
                 onClick={() => toggle(member.id)}
-                className="flex w-full items-center justify-between rounded-lg px-1.5 py-1 hover:bg-surface"
+                className="flex w-full items-center justify-between rounded-md px-1.5 py-1 transition-colors duration-150 hover:bg-surface-alt"
               >
                 <span className="flex items-center gap-2">
                   <Avatar member={member} size={20} />
-                  <span className="text-sm font-medium text-ink">{member.name}</span>
+                  <span className="text-sm font-medium text-text-primary">{member.name}</span>
                 </span>
-                {active && <Check size={14} className="text-brand" />}
+                {active && <Check size={14} className="text-primary-hover" />}
               </button>
             )
           })}

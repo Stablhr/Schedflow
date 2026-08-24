@@ -7,9 +7,9 @@ import PlannerPreview from './PlannerPreview'
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl glass-subtle p-3 shadow-sm sm:p-4">
-      <p className="font-display text-2xl font-bold text-ink sm:text-3xl">{value}</p>
-      <p className="mt-1 text-[11px] font-extrabold uppercase tracking-wider text-ink">{label}</p>
+    <div className="rounded-lg border border-border bg-surface p-3 sm:p-4">
+      <p className="text-2xl font-semibold text-text-primary sm:text-3xl">{value}</p>
+      <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">{label}</p>
     </div>
   )
 }
@@ -26,8 +26,8 @@ export default function DashboardView() {
 
   return (
     <div className="scroll-slim h-full overflow-y-auto p-4 sm:p-6 md:p-8">
-      <h1 className="font-display text-xl font-extrabold text-ink sm:text-2xl">Dashboard</h1>
-      <p className="mt-1 text-sm font-medium text-ink">Welcome back — here's what needs attention.</p>
+      <h1 className="text-xl font-semibold text-text-primary sm:text-2xl">Dashboard</h1>
+      <p className="mt-1 text-sm text-text-secondary">Welcome back — here's what needs attention.</p>
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-4 md:grid-cols-4">
         <StatCard label="Boards" value={boardCount} />

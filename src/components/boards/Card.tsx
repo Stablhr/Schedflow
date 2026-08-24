@@ -69,10 +69,10 @@ function DoneToggle({ card }: { card: Card }) {
         e.stopPropagation()
         toggleDone(card.id)
       }}
-      className={`absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full shadow-sm ring-1 transition active:scale-90 hover:scale-110 ${
+      className={`absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full transition-colors duration-150 active:scale-[0.98] ${
         card.done
-          ? 'bg-success text-white ring-success'
-          : 'text-ink-faint ring-ink-faint/40 hover:bg-brand-light hover:text-brand-dark hover:ring-brand'
+          ? 'bg-success text-white'
+          : 'text-text-muted ring-1 ring-border-strong hover:bg-primary-subtle hover:text-primary-hover'
       }`}
       style={!card.done ? { background: 'var(--color-surface)' } : undefined}
     >
@@ -100,10 +100,10 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={() => !snapshot.isDragging && onOpenCard(card.id)}
-          className={`relative cursor-pointer rounded-xl p-2.5 shadow-sm ring-1 transition-shadow ${
+          className={`relative cursor-pointer rounded-xl p-2.5 ring-1 transition-shadow duration-150 ${
             snapshot.isDragging
-              ? 'z-50 rounded-2xl shadow-[0_12px_40px_rgba(13,171,163,0.2),0_4px_16px_rgba(19,42,41,0.12)] ring-brand/40 opacity-95 dark:shadow-[0_12px_40px_rgba(13,171,163,0.15),0_4px_16px_rgba(0,0,0,0.3)]'
-              : 'hover:shadow-lg hover:ring-border'
+              ? 'z-50 opacity-95 ring-primary shadow-medium'
+              : 'ring-[var(--color-border)] hover:shadow-subtle hover:ring-border-strong'
           }`}
           style={{ ...provided.draggableProps.style, background: 'var(--color-surface)', color: 'var(--color-ink)', borderColor: snapshot.isDragging ? undefined : 'var(--color-border)' }}
         >
@@ -116,7 +116,7 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
                 <LabelChip key={label.id} label={label} />
               ))}
               {extraLabels > 0 && (
-                <span className="rounded-full bg-surface-alt px-1.5 py-0.5 font-mono text-[10px] font-medium text-ink-muted">
+                <span className="rounded-full bg-surface-alt px-1.5 py-0.5 font-mono text-[10px] font-medium text-text-secondary">
                   +{extraLabels}
                 </span>
               )}
@@ -125,7 +125,7 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
 
           <p
             className={`mt-1 text-[14px] font-semibold leading-snug ${
-              card.done ? 'text-ink-muted line-through decoration-ink-faint' : 'text-ink'
+              card.done ? 'text-text-muted line-through decoration-border-strong' : 'text-text-primary'
             }`}
           >
             {card.title}
@@ -136,7 +136,7 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
             card.comments.length > 0 ||
             card.watching ||
             members.length > 0) && (
-            <div className="mt-2 flex items-center gap-1.5 text-ink-muted">
+            <div className="mt-2 flex items-center gap-1.5 text-text-secondary">
               {card.dueDate && <DueBadge due={card.dueDate} />}
               {card.files.length > 0 && (
                 <span className="inline-flex items-center gap-1 font-mono text-[11px]">
@@ -150,7 +150,7 @@ export default function CardFace({ card, index, onOpenCard }: CardFaceProps) {
                   {card.comments.length}
                 </span>
               )}
-              {card.watching && <Eye size={12} className="text-brand" />}
+              {card.watching && <Eye size={12} className="text-primary-hover" />}
               <span className="ml-auto flex -space-x-1">
                 {members.slice(0, 4).map((m) => (
                   <Avatar key={m.id} member={m} stacked />

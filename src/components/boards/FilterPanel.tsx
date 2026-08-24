@@ -54,15 +54,15 @@ export default function FilterPanel({ board, filter, onChange, open, onClose }: 
   return (
     <div
       ref={ref}
-      className="glass-panel animate-in absolute right-0 top-11 z-30 w-56 p-3 sm:w-64"
+      className="animate-in absolute right-0 top-11 z-30 w-56 rounded-lg border border-border-strong bg-surface-elevated p-3 shadow-subtle sm:w-64"
     >
-      <div className="glass-scrim flex items-center justify-between rounded-lg px-2 py-1">
-        <p className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">Filter</p>
+      <div className="flex items-center justify-between px-1 py-0.5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">Filter</p>
         {isActive && (
           <button
             type="button"
             onClick={clear}
-            className="text-xs font-semibold text-brand hover:underline"
+            className="text-xs font-semibold text-primary-text hover:underline dark:text-primary-hover"
           >
             Clear
           </button>
@@ -70,12 +70,12 @@ export default function FilterPanel({ board, filter, onChange, open, onClose }: 
       </div>
 
       <div className="mt-2">
-        <p className="flex items-center gap-1 text-[11px] font-semibold text-ink-muted">
+        <p className="flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
           <Tag size={12} />
           Labels
         </p>
         <div className="mt-1.5 flex flex-wrap gap-1">
-          {labels.length === 0 && <span className="text-xs text-ink-faint">No labels on this board.</span>}
+          {labels.length === 0 && <span className="text-xs text-text-muted">No labels on this board.</span>}
           {labels.map((label) => {
             const active = filter.labelIds.includes(label.id)
             return (
@@ -96,7 +96,7 @@ export default function FilterPanel({ board, filter, onChange, open, onClose }: 
       </div>
 
       <div className="mt-3">
-        <p className="flex items-center gap-1 text-[11px] font-semibold text-ink-muted">
+        <p className="flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
           <Users size={12} />
           Members
         </p>
@@ -108,8 +108,8 @@ export default function FilterPanel({ board, filter, onChange, open, onClose }: 
                 key={member.id}
                 type="button"
                 onClick={() => toggleMember(member.id)}
-                className={`flex w-full items-center gap-2 rounded-lg px-2 py-1 text-left text-sm transition hover:bg-surface-alt ${
-                  active ? 'bg-brand-light font-semibold text-brand-dark' : 'font-medium text-ink'
+                className={`flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm transition-colors duration-150 hover:bg-surface-alt ${
+                  active ? 'bg-primary-subtle font-semibold text-primary-hover' : 'font-medium text-text-primary'
                 }`}
               >
                 <span

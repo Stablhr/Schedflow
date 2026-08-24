@@ -45,7 +45,7 @@ export default function CardAttachments({ card }: { card: Card }) {
   }
 
   const ghostClass =
-    'inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-2.5 py-1.5 text-xs font-semibold text-ink-muted transition hover:bg-brand-light hover:text-brand-dark active:scale-95'
+    'inline-flex items-center gap-1.5 rounded-md bg-surface-alt px-2.5 py-1.5 text-xs font-semibold text-text-secondary transition-colors duration-150 hover:bg-primary-subtle hover:text-primary-hover active:scale-[0.98]'
 
   return (
     <section>
@@ -59,30 +59,30 @@ export default function CardAttachments({ card }: { card: Card }) {
             card.cover.type === 'image' &&
             card.cover.dataUrl === attachment.dataUrl
           return (
-          <div key={attachment.id} className="flex items-center gap-3 rounded-xl bg-bg px-3 py-2">
+          <div key={attachment.id} className="flex items-center gap-3 rounded-md bg-surface-alt px-3 py-2">
             {attachment.type === 'image' ? (
               <img
                 src={attachment.dataUrl}
                 alt={attachment.name}
-                className="h-11 w-11 shrink-0 rounded-lg object-cover"
+                className="h-11 w-11 shrink-0 rounded-md object-cover"
               />
             ) : (
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface-alt text-ink-muted">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-surface-elevated text-text-secondary">
                 <FileText size={18} />
               </span>
             )}
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <p className="truncate text-sm font-medium text-ink" title={attachment.name}>
+                <p className="truncate text-sm font-medium text-text-primary" title={attachment.name}>
                   {attachment.name}
                 </p>
                 {isCover && (
-                  <span className="shrink-0 rounded-full bg-brand-light px-1.5 py-0.5 text-[10px] font-bold text-brand-dark">
+                  <span className="shrink-0 rounded-full bg-primary-subtle px-1.5 py-0.5 text-[10px] font-bold text-primary-hover">
                     Cover
                   </span>
                 )}
               </div>
-              <p className="font-mono text-[11px] text-ink-faint">
+              <p className="font-mono text-[11px] text-text-muted">
                 {formatSize(attachment.size)}
               </p>
             </div>
@@ -90,7 +90,8 @@ export default function CardAttachments({ card }: { card: Card }) {
               type="button"
               onClick={() => remove(attachment.id)}
               title="Remove attachment"
-              className="rounded-lg p-1.5 text-ink-faint transition hover:bg-danger-light hover:text-danger"
+              aria-label={`Remove ${attachment.name}`}
+              className="rounded-md p-1.5 text-text-muted transition-colors duration-150 hover:bg-danger-subtle hover:text-danger-text"
             >
               <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
                 <path d="M6 6l12 12M18 6L6 18" />
@@ -101,14 +102,14 @@ export default function CardAttachments({ card }: { card: Card }) {
         })}
 
         {error && (
-          <p className="animate-in flex items-center gap-1.5 break-words rounded-lg bg-danger-light px-3 py-2 text-xs font-medium text-danger">
+          <p className="animate-in flex items-center gap-1.5 break-words rounded-md bg-danger-subtle px-3 py-2 text-xs font-medium text-danger-text">
             <AlertTriangle size={14} className="shrink-0" />
             {error}
           </p>
         )}
 
         {store.error && (
-          <p className="animate-in flex items-center gap-1.5 break-words rounded-lg bg-warn-light px-3 py-2 text-xs font-medium text-warn">
+          <p className="animate-in flex items-center gap-1.5 break-words rounded-md bg-warning-subtle px-3 py-2 text-xs font-medium text-warning-text">
             <AlertTriangle size={14} className="shrink-0" />
             {store.error}
           </p>
@@ -144,7 +145,7 @@ export default function CardAttachments({ card }: { card: Card }) {
           />
         </div>
 
-        <p className="text-[11px] leading-snug text-ink-faint">
+        <p className="text-[11px] leading-snug text-text-muted">
           Files are stored in your browser's local storage — keep uploads under ~2 MB. They won't
           sync across devices yet.
         </p>

@@ -3,7 +3,6 @@ import { X, ImageIcon, AlertTriangle } from 'lucide-react'
 import type { Card, FileAttachment } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 import { uid } from '../../utils/id'
-import { blendGradient } from '../../utils/color'
 import { formatSize } from '../../utils/format'
 import { MAX_FILE_SIZE } from './CardAttachments'
 
@@ -83,18 +82,19 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
   }
 
   const sectionTitle =
-    'text-[11px] font-bold uppercase tracking-wider text-ink-faint'
+    'text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary'
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm" onClick={onClose} />
-      <aside className="glass-panel animate-in fixed bottom-0 right-0 top-0 z-40 flex w-full flex-col sm:bottom-auto sm:w-80">
-        <div className="glass-scrim flex items-center justify-between border-b border-border px-4 py-3.5">
-          <h2 className="font-display text-lg font-bold text-ink">Cover</h2>
+      <div className="fixed inset-0 z-40 bg-[#0f1a19]/50" onClick={onClose} />
+      <aside className="animate-in fixed bottom-0 right-0 top-0 z-40 flex w-full flex-col border-l border-border bg-surface-elevated shadow-medium sm:bottom-auto sm:w-80">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <h2 className="text-base font-semibold text-text-primary">Cover</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-ink-faint transition hover:bg-surface-alt hover:text-ink"
+            aria-label="Close cover panel"
+            className="rounded-md p-1.5 text-text-secondary transition-colors duration-150 hover:bg-surface-alt hover:text-text-primary"
           >
             <X size={16} />
           </button>
@@ -108,10 +108,10 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
               <button
                 type="button"
                 onClick={() => setCoverSize('large')}
-                className={`flex flex-col items-center gap-1.5 rounded-xl p-2.5 transition active:scale-95 ${
+                className={`flex flex-col items-center gap-1.5 rounded-lg p-2.5 transition-colors duration-150 active:scale-[0.98] ${
                   card.coverSize === 'large'
-                    ? 'ring-2 ring-brand bg-brand-light'
-                    : 'ring-1 ring-border hover:ring-brand/40'
+                    ? 'bg-primary-subtle ring-2 ring-primary'
+                    : 'ring-1 ring-border hover:ring-primary'
                 }`}
               >
                 <div className="h-16 w-12 rounded-lg bg-surface-alt overflow-hidden">
@@ -120,19 +120,19 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
                   ) : (
                     <div
                       className="h-full w-full"
-                      style={{ background: activeColor ?? blendGradient('#0DABA3') }}
+                      style={{ background: activeColor ?? '#0DABA3' }}
                     />
                   )}
                 </div>
-                <span className="text-[11px] font-semibold text-ink-muted">Large</span>
+                <span className="text-[11px] font-semibold text-text-secondary">Large</span>
               </button>
               <button
                 type="button"
                 onClick={() => setCoverSize('small')}
-                className={`flex flex-col items-center gap-1.5 rounded-xl p-2.5 transition active:scale-95 ${
+                className={`flex flex-col items-center gap-1.5 rounded-lg p-2.5 transition-colors duration-150 active:scale-[0.98] ${
                   card.coverSize === 'small'
-                    ? 'ring-2 ring-brand bg-brand-light'
-                    : 'ring-1 ring-border hover:ring-brand/40'
+                    ? 'bg-primary-subtle ring-2 ring-primary'
+                    : 'ring-1 ring-border hover:ring-primary'
                 }`}
               >
                 <div className="h-4 w-12 rounded-lg overflow-hidden">
@@ -145,7 +145,7 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
                     />
                   )}
                 </div>
-                <span className="text-[11px] font-semibold text-ink-muted">Small</span>
+                <span className="text-[11px] font-semibold text-text-secondary">Small</span>
               </button>
             </div>
           </section>
@@ -155,7 +155,7 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
             <button
               type="button"
               onClick={removeCover}
-              className="flex items-center gap-1.5 text-xs font-semibold text-ink-faint transition hover:text-danger"
+              className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary transition-colors duration-150 hover:text-danger-text"
             >
               <X size={12} />
               Remove cover
@@ -205,7 +205,7 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
           <section>
             <p className={sectionTitle}>Upload a cover image</p>
             {error && (
-              <p className="animate-in mt-2 flex items-center gap-1.5 rounded-lg bg-danger-light px-3 py-2 text-xs font-medium text-danger">
+              <p className="animate-in mt-2 flex items-center gap-1.5 rounded-md bg-danger-subtle px-3 py-2 text-xs font-medium text-danger-text">
                 <AlertTriangle size={14} className="shrink-0" />
                 {error}
               </p>
@@ -214,7 +214,7 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-surface-alt px-2.5 py-1.5 text-xs font-semibold text-ink-muted transition hover:bg-brand-light hover:text-brand-dark active:scale-95 disabled:opacity-40"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-surface-alt px-2.5 py-1.5 text-xs font-semibold text-text-secondary transition-colors duration-150 hover:bg-primary-subtle hover:text-primary-hover active:scale-[0.98] disabled:opacity-40"
             >
               <ImageIcon size={13} />
               {uploading ? 'Uploading…' : 'Upload image'}

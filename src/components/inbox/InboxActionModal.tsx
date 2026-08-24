@@ -24,7 +24,7 @@ export default function InboxActionModal({ itemId, mode, onClose }: InboxActionM
   if (!item) return null
 
   const inputClass =
-    'w-full rounded-lg px-2.5 py-1.5 text-sm text-ink outline-none neu-input transition focus:neu-input-focus'
+    'w-full rounded-md border border-border-strong bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors duration-150 focus:border-primary focus:ring-2 focus:ring-primary/20'
 
   const confirm = () => {
     if (mode === 'move') moveInboxToBoard(item.id, boardId, listId)
@@ -33,29 +33,29 @@ export default function InboxActionModal({ itemId, mode, onClose }: InboxActionM
   }
 
   return (
-    <Modal open onClose={onClose} className="max-w-md rounded-2xl shadow-lg">
+    <Modal open onClose={onClose} className="max-w-md">
       <div className="p-6">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-light text-brand">
+          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary-subtle text-primary-hover">
             {mode === 'move' ? <FolderInput size={18} /> : <CalendarPlus size={18} />}
           </span>
-          <h2 className="font-display text-xl font-bold text-ink">
+          <h2 className="text-[17px] font-semibold text-text-primary">
             {mode === 'move' ? 'Move to board' : 'Schedule'}
           </h2>
         </div>
-        <p className="mt-1.5 truncate text-sm text-ink-muted" title={item.text}>
+        <p className="mt-1.5 truncate text-sm text-text-secondary" title={item.text}>
           "{item.text}"
         </p>
 
         {boards.length === 0 ? (
-          <div className="mt-5 rounded-xl bg-bg p-6 text-center">
-            <p className="text-sm text-ink-muted">
+          <div className="mt-5 rounded-md bg-surface-alt p-6 text-center">
+            <p className="text-sm text-text-secondary">
               No boards yet — create one to move this capture into.
             </p>
             <Link
               to="/boards"
               onClick={onClose}
-              className="mt-3 inline-block text-sm font-semibold text-brand hover:underline"
+              className="mt-3 inline-block text-sm font-semibold text-primary-hover hover:underline"
             >
               Go to Boards
             </Link>
@@ -64,7 +64,7 @@ export default function InboxActionModal({ itemId, mode, onClose }: InboxActionM
           <>
             <div className="mt-5 space-y-3">
               <div>
-                <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+                <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
                   Board
                 </label>
                 <select
@@ -87,7 +87,7 @@ export default function InboxActionModal({ itemId, mode, onClose }: InboxActionM
 
               {mode === 'move' && (
                 <div>
-                  <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+                  <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
                     List
                   </label>
                   <select
@@ -106,7 +106,7 @@ export default function InboxActionModal({ itemId, mode, onClose }: InboxActionM
 
               {mode === 'schedule' && (
                 <div>
-                  <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">
+                  <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
                     Due date
                   </label>
                   <input
@@ -123,7 +123,7 @@ export default function InboxActionModal({ itemId, mode, onClose }: InboxActionM
               type="button"
               onClick={confirm}
               disabled={!boardId || (mode === 'move' && !listId)}
-              className="mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95 disabled:opacity-40"
+              className="mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:scale-[0.98] disabled:opacity-40"
             >
               {mode === 'move' ? <FolderInput size={15} /> : <CalendarPlus size={15} />}
               {mode === 'move' ? 'Move to board' : 'Schedule'}

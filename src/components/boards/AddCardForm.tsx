@@ -30,7 +30,7 @@ export default function AddCardForm({ listId }: { listId: string }) {
   }
 
   return (
-    <div className="mt-1 rounded-xl p-1.5 ring-1" style={{ background: 'var(--surface-bg-subtle)', borderColor: 'var(--surface-border)' }}>
+    <div className="mt-1 rounded-lg border p-1.5" style={{ background: 'var(--surface-bg-subtle)', borderColor: 'var(--surface-border)' }}>
       <textarea
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -44,14 +44,14 @@ export default function AddCardForm({ listId }: { listId: string }) {
         placeholder="Card title…"
         autoFocus
         rows={2}
-        className="w-full resize-none rounded-lg px-2.5 py-1.5 text-sm outline-none placeholder:text-ink-faint"
+        className="w-full resize-none rounded-md px-2.5 py-1.5 text-sm outline-none placeholder:text-text-muted"
         style={{ color: 'var(--surface-text)', background: 'transparent' }}
       />
       <div className="mt-1 flex items-center gap-2">
         <button
           type="button"
           onClick={submit}
-          className="rounded-lg bg-brand px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-dark active:scale-95"
+          className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:scale-[0.98]"
         >
           Add card
         </button>

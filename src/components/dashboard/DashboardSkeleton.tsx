@@ -8,7 +8,7 @@ export default function DashboardSkeleton() {
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         {Array.from({ length: 4 }, (_, i) => (
-          <div key={i} className="rounded-xl glass-subtle p-4 shadow-sm">
+          <div key={i} className="rounded-lg border border-border bg-surface p-4">
             <Skeleton className="h-8 w-12" />
             <Skeleton className="mt-2 h-3 w-16" />
           </div>
@@ -20,14 +20,14 @@ export default function DashboardSkeleton() {
       <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
         <div className="space-y-4">
           {/* DueSoonList skeleton */}
-          <div className="rounded-xl glass-subtle p-4 shadow-sm">
+          <div className="rounded-lg border border-border bg-surface p-4">
             <div className="flex items-center gap-1.5">
               <Skeleton className="h-4 w-4 rounded-full" />
               <Skeleton className="h-3 w-20" />
             </div>
             <div className="mt-3 space-y-2">
               {Array.from({ length: 4 }, (_, i) => (
-                <div key={i} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
+                <div key={i} className="flex items-center gap-2 rounded-md px-2 py-1.5">
                   <Skeleton className="h-3.5 flex-1" />
                   <Skeleton className="h-3.5 w-20" />
                   <Skeleton className="h-5 w-12 rounded-full" />
@@ -37,7 +37,7 @@ export default function DashboardSkeleton() {
           </div>
 
           {/* RecentBoardsList skeleton */}
-          <div className="rounded-xl glass-subtle p-4 shadow-sm">
+          <div className="rounded-lg border border-border bg-surface p-4">
             <div className="flex items-center gap-1.5">
               <Skeleton className="h-4 w-4 rounded-full" />
               <Skeleton className="h-3 w-24" />
@@ -51,7 +51,7 @@ export default function DashboardSkeleton() {
         </div>
 
         {/* PlannerPreview skeleton */}
-        <div className="rounded-xl glass-subtle p-4 shadow-sm">
+        <div className="rounded-lg border border-border bg-surface p-4">
           <div className="flex items-center gap-1.5">
             <Skeleton className="h-4 w-4 rounded-full" />
             <Skeleton className="h-3 w-20" />

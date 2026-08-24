@@ -102,8 +102,8 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-border glass-subtle px-3 py-2.5 sm:px-4">
-        <h2 className="font-display text-lg font-bold text-ink sm:text-xl">Timeline</h2>
+      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-surface px-3 py-2.5 sm:px-4">
+        <h2 className="text-lg font-semibold text-text-primary sm:text-xl">Timeline</h2>
 
         <div className="ml-2 flex items-center gap-1 rounded-lg bg-surface-alt p-0.5">
           {(['day', 'week', 'month'] as ZoomLevel[]).map((z) => (
@@ -111,10 +111,11 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
               key={z}
               type="button"
               onClick={() => setZoom(z)}
-              className={`rounded-md px-2 py-1 text-[11px] font-semibold transition ${
+              aria-pressed={zoom === z}
+              className={`rounded-md px-2 py-1 text-[11px] font-semibold transition-colors duration-150 ${
                 zoom === z
-                  ? 'bg-brand text-white'
-                  : 'text-ink-muted hover:text-ink'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               {ZOOM_CONFIG[z].label}
@@ -122,7 +123,7 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
           ))}
         </div>
 
-        <span className="ml-1 font-mono text-[11px] text-ink-muted">
+        <span className="ml-1 font-mono text-[11px] text-text-secondary">
           {formatDate(toISODate(startDate))} – {formatDate(toISODate(addDays(startDate, config.columns - 1)))}
         </span>
       </div>
@@ -130,8 +131,8 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
       <div className="scroll-slim flex-1 overflow-auto">
         <div className="min-w-[600px]">
           {/* Time header */}
-          <div className="sticky top-0 z-10 flex border-b border-border bg-surface-alt/80 backdrop-blur-sm">
-            <div className="w-[140px] shrink-0 border-r border-border px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-ink-faint">
+          <div className="sticky top-0 z-10 flex border-b border-border bg-surface-elevated">
+            <div className="w-[140px] shrink-0 border-r border-border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
               List
             </div>
             <div className="relative flex-1 overflow-hidden" style={{ height: 40 }}>
@@ -142,7 +143,7 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
                     <div
                       key={i}
                       className={`shrink-0 border-r border-border px-2 py-2 text-[10px] font-medium ${
-                        isToday ? 'bg-brand-light text-brand-dark font-bold' : 'text-ink-muted'
+                        isToday ? 'bg-primary-subtle font-semibold text-primary-hover' : 'font-mono text-text-secondary'
                       }`}
                       style={{ width: config.columnWidth }}
                     >
@@ -153,7 +154,7 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
               </div>
               {/* Today line */}
               <div
-                className="absolute top-0 bottom-0 w-0.5 bg-brand z-10"
+                className="absolute top-0 bottom-0 z-10 w-0.5 bg-primary"
                 style={{ left: todayOffset }}
               />
             </div>
@@ -165,8 +166,8 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
             return (
               <div key={list.id} className="flex border-b border-border">
                 <div className="w-[140px] shrink-0 border-r border-border px-3 py-2.5">
-                  <span className="truncate text-xs font-semibold text-ink">{list.name}</span>
-                  <span className="ml-1 font-mono text-[10px] text-ink-faint">{listCards.length}</span>
+                  <span className="truncate text-xs font-semibold text-text-primary">{list.name}</span>
+                  <span className="ml-1 font-mono text-[10px] text-text-muted">{listCards.length}</span>
                 </div>
                 <div className="relative flex-1 overflow-hidden" style={{ height: Math.max(44, listCards.length * 28 + 16) }}>
                   <div className="flex" style={{ width: totalWidth }}>
@@ -180,7 +181,7 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
                   </div>
                   {/* Today line */}
                   <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-brand/30 z-5"
+                    className="absolute top-0 bottom-0 z-5 w-0.5 bg-primary/40"
                     style={{ left: todayOffset }}
                   />
                   {/* Cards */}
@@ -195,7 +196,7 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
                         type="button"
                         onClick={() => onOpenCard(card.id)}
                         title={card.title}
-                        className={`absolute flex items-center rounded-md px-2 py-1 text-[10px] font-semibold text-white shadow-sm transition hover:shadow-md hover:scale-[1.02] active:scale-[0.98] ${
+                        className={`absolute flex items-center rounded-md px-2 py-1 text-[10px] font-semibold text-white transition-[filter,transform] duration-150 hover:brightness-110 active:scale-[0.98] ${
                           card.done ? 'opacity-60' : ''
                         }`}
                         style={{
@@ -204,6 +205,7 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
                           top: ci * 28 + 8,
                           background: label ? label.color : '#0DABA3',
                           height: 22,
+                          textShadow: '0 1px 2px rgb(0 0 0 / 0.35)',
                         }}
                       >
                         <span className="truncate">{card.title}</span>
@@ -219,8 +221,8 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
           {unscheduledCards.length > 0 && (
             <div className="flex border-b border-border bg-surface-alt/30">
               <div className="w-[140px] shrink-0 border-r border-border px-3 py-2.5">
-                <span className="truncate text-xs font-semibold text-ink-faint">Unscheduled</span>
-                <span className="ml-1 font-mono text-[10px] text-ink-faint">{unscheduledCards.length}</span>
+                <span className="truncate text-xs font-semibold text-text-secondary">Unscheduled</span>
+                <span className="ml-1 font-mono text-[10px] text-text-muted">{unscheduledCards.length}</span>
               </div>
               <div className="flex-1 px-3 py-2">
                 <div className="flex flex-wrap gap-1">
@@ -229,13 +231,13 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
                       key={card.id}
                       type="button"
                       onClick={() => onOpenCard(card.id)}
-                      className="rounded-md bg-surface px-2 py-1 text-[10px] font-medium text-ink ring-1 ring-border transition hover:ring-brand/40 active:scale-[0.98]"
+                      className="rounded-md bg-surface px-2 py-1 text-[10px] font-medium text-text-primary ring-1 ring-border transition-shadow duration-150 hover:ring-primary active:scale-[0.98]"
                     >
                       {card.title}
                     </button>
                   ))}
                   {unscheduledCards.length > 8 && (
-                    <span className="px-2 py-1 text-[10px] text-ink-faint">
+                    <span className="px-2 py-1 text-[10px] text-text-muted">
                       +{unscheduledCards.length - 8} more
                     </span>
                   )}
