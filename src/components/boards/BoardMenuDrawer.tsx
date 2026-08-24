@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { X, Share2, Eye, Tag, Archive, Palette, Trash2 } from 'lucide-react'
+import { X, Share2, Eye, Tag, Archive, Trash2 } from 'lucide-react'
 import type { Board } from '../../store/schema'
-import { BOARD_BACKGROUNDS, COLOR_THEMES } from '../../store/schema'
-import { blendTwoStop } from '../../utils/color'
 import { useStore } from '../../store/useStore'
 import ShareModal from './ShareModal'
 import VisibilityModal from './VisibilityModal'
@@ -21,7 +19,7 @@ export default function BoardMenuDrawer({
   open: boolean
   onClose: () => void
 }) {
-  const { data, setBoardBackground, setBoardDescription, resetAll, deleteBoard } = useStore()
+  const { data, setBoardDescription, resetAll, deleteBoard } = useStore()
   const navigate = useNavigate()
   const [modal, setModal] = useState<DrawerModal>(null)
   const [desc, setDesc] = useState(board.description)
@@ -118,57 +116,6 @@ export default function BoardMenuDrawer({
                 {archivedCount}
               </span>
             </button>
-          </section>
-
-          <section className="mt-5">
-            <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
-              <Palette size={12} />
-              Background Color
-            </p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {BOARD_BACKGROUNDS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  title="Set background"
-                  onClick={() => setBoardBackground(board.id, color)}
-                  className={`h-6 w-6 rounded-md transition-colors duration-150 ${
-                    board.background === color ? 'ring-2 ring-ink' : 'ring-1 ring-border-strong'
-                  }`}
-                  style={{ background: color }}
-                />
-              ))}
-            </div>
-          </section>
-
-          <section className="mt-5">
-            <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
-              <Palette size={12} />
-              Gradient Themes
-            </p>
-            <div className="mt-2 space-y-2">
-              {COLOR_THEMES.map((theme) => {
-                const gradient = blendTwoStop(theme.primary, theme.secondary)
-                const isActive = board.background === gradient
-                return (
-                  <button
-                    key={theme.id}
-                    type="button"
-                    title={theme.name}
-                    onClick={() => setBoardBackground(board.id, gradient)}
-                    className={`flex w-full items-center gap-3 rounded-lg p-2 transition ${
-                      isActive ? 'ring-2 ring-primary' : 'ring-1 ring-border-strong hover:bg-surface-alt'
-                    }`}
-                  >
-                    <div
-                      className="h-8 w-8 shrink-0 rounded-md"
-                      style={{ background: gradient }}
-                    />
-                    <span className="text-sm font-medium text-text-primary">{theme.name}</span>
-                  </button>
-                )
-              })}
-            </div>
           </section>
 
           <div className="my-5 h-px bg-border" />

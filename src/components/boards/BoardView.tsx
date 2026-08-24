@@ -78,14 +78,7 @@ export default function BoardView() {
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="scroll-slim flex h-full items-start gap-3 overflow-x-auto p-4"
-                style={{
-                  background: board.background.startsWith('data:')
-                    ? `url(${board.background}) center/cover no-repeat`
-                    : board.background
-                      ? `${board.background}`
-                      : undefined,
-                }}
+                className="scroll-slim flex h-full items-start gap-3 overflow-x-auto bg-board-canvas p-4"
               >
                 {lists.map((list, index) => (
                   <Draggable key={list.id} draggableId={list.id} index={index}>

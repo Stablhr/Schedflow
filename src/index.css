@@ -43,8 +43,13 @@
   --color-info-text: #1d5fbf;
   --color-danger-button: #d93b49;
 
+  /* ── Board page canvas (theme-independent) ──
+     Fixed kanban workspace + default list container colors. */
+  --color-board-canvas: #1f2a44;
+  --color-list-default: #111409;
+
   /* ── Typography (Design.md §4): Inter for all UI text,
-     JetBrains Mono for dates/counters. No display font. ── */
+      JetBrains Mono for dates/counters. No display font. ── */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 

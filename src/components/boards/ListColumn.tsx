@@ -23,8 +23,10 @@ export default function ListColumn({ list, dragHandleProps, search, filter, onOp
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(list.name)
 
-  const bg = list.backgroundColor || '#FFFFFF'
-  const theme = useAdaptiveTheme(bg)
+  // Default list container color — mirrors --color-list-default (src/index.css).
+  // The literal hex is needed for the contrast engine, which can't parse CSS vars.
+  const bg = list.backgroundColor || 'var(--color-list-default)'
+  const theme = useAdaptiveTheme(list.backgroundColor || '#111409')
   const vars = adaptiveVars(theme)
 
   const allCards = ((data.lists[list.id]?.cardOrder ?? [])
