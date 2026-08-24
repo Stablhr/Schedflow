@@ -52,7 +52,8 @@ export default function AddListForm({ boardId }: { boardId: string }) {
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-ink-muted transition hover:text-ink"
+          aria-label="Cancel adding list"
+          className="rounded-md text-text-secondary transition-colors duration-150 hover:text-text-primary"
         >
           <X size={18} />
         </button>

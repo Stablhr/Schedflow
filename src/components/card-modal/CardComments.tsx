@@ -121,7 +121,8 @@ export default function CardComments({ card }: { card: Card }) {
                   <button
                     type="button"
                     onClick={() => setActivePicker(pickerOpen ? null : comment.id)}
-                    className="inline-flex items-center gap-1 rounded-lg p-1 text-ink-faint transition hover:bg-surface-alt hover:text-ink-muted"
+                    aria-label="Add reaction"
+                    className="inline-flex items-center gap-1 rounded-md p-1 text-text-muted transition-colors duration-150 hover:bg-surface-alt hover:text-text-secondary"
                     title="Add reaction"
                   >
                     <SmilePlus size={14} />

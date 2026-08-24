@@ -166,7 +166,7 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
           <section>
             <p className={sectionTitle}>Attachments</p>
             {imageAttachments.length === 0 ? (
-              <p className="mt-2 text-xs text-ink-faint">No image attachments yet.</p>
+              <p className="mt-2 text-xs text-text-muted">No image attachments yet.</p>
             ) : (
               <div className="mt-2 grid grid-cols-3 gap-2">
                 {imageAttachments.map((att) => {
@@ -178,10 +178,10 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
                       type="button"
                       title={att.name}
                       onClick={() => setImageCover(att)}
-                      className={`relative aspect-square overflow-hidden rounded-lg transition active:scale-95 ${
+                      className={`relative aspect-square overflow-hidden rounded-lg transition-transform duration-150 active:scale-[0.98] ${
                         isActiveCover
-                          ? 'ring-2 ring-brand ring-offset-1'
-                          : 'ring-1 ring-border hover:ring-brand/40'
+                          ? 'ring-2 ring-primary ring-offset-1'
+                          : 'ring-1 ring-border hover:ring-primary'
                       }`}
                     >
                       <img
@@ -190,7 +190,7 @@ export default function CoverPanel({ card, open, onClose }: CoverPanelProps) {
                         className="h-full w-full object-cover"
                       />
                       {isActiveCover && (
-                        <span className="absolute bottom-0.5 left-0.5 rounded bg-brand px-1 py-0.5 text-[9px] font-bold text-white">
+                        <span className="absolute bottom-0.5 left-0.5 rounded bg-primary px-1 py-0.5 text-[9px] font-bold text-primary-foreground">
                           Cover
                         </span>
                       )}

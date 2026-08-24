@@ -37,7 +37,7 @@ export default function BoardsHome() {
 
       {boards.length === 0 ? (
         <div className="mt-10 rounded-2xl border-2 border-dashed border-border p-8 text-center sm:p-12">
-          <p className="text-sm font-medium text-ink-muted">
+          <p className="text-sm font-medium text-text-secondary">
             No boards yet — create one from a template to get started.
           </p>
         </div>

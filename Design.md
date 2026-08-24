@@ -508,6 +508,7 @@ Migration notes:
 - `hover-lift`/`hover-grow`/`hover-slide-right`/`hover-rotate`: replace usages with plain color transitions; delete utilities.
 - `font-display` class usages remap to `font-sans` (Space Grotesk dropped; update Google Fonts link in `index.html` accordingly).
 - Remove `backdrop-blur` classes from `Modal.tsx`, `Sidebar.tsx`, `BoardMenuDrawer.tsx`, `BoardViewSkeleton.tsx`, `TimelineView.tsx`, `CoverPanel.tsx`.
+- **Implementation note (radius):** the shipped `index.css` intentionally does NOT define custom `--radius-*` tokens. Tailwind v4's default radius scale (rounded-md = 6px, rounded-lg = 8px) already falls within the §6 ranges (sm 6px / md 10px / lg 14px), so components use `rounded-md`/`rounded-lg` directly and modals/drawers use `rounded-[14px]`. §6's named tokens are treated as guidance values, not literal CSS vars.
 
 ---
 
