@@ -6,8 +6,6 @@ interface ModalProps {
   onClose: () => void
   children: ReactNode
   className?: string
-  /** Deprecated: all modals are solid under the v2 design system. Accepted as a no-op for API compatibility. */
-  solid?: boolean
 }
 
 export default function Modal({ open, onClose, children, className = '' }: ModalProps) {

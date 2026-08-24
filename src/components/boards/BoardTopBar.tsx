@@ -13,13 +13,6 @@ import {
   Globe,
   Users,
   UserPlus,
-  Settings,
-  Pencil,
-  Palette,
-  Copy,
-  Download,
-  Archive,
-  Trash2,
 } from 'lucide-react'
 import type { Board } from '../../store/schema'
 import { useStore } from '../../store/useStore'
@@ -61,14 +54,13 @@ export default function BoardTopBar({
   onFilterChange,
   onOpenMenu,
 }: BoardTopBarProps) {
-  const { renameBoard, toggleStar, members, deleteBoard, setBoardBackground } = useStore()
+  const { renameBoard, toggleStar, members } = useStore()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(board.name)
   const [searchOpen, setSearchOpen] = useState(false)
   const [quickOpen, setQuickOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [visOpen, setVisOpen] = useState(false)
-  const [moreOpen, setMoreOpen] = useState(false)
 
   const bg = board.background || '#FFFFFF'
   const theme = useAdaptiveTheme(bg.startsWith('data:') ? '#FFFFFF' : bg)
@@ -93,18 +85,17 @@ export default function BoardTopBar({
 
   const closeAll = useCallback(() => {
     setQuickOpen(false)
-    setMoreOpen(false)
   }, [])
 
   useEffect(() => {
-    if (!quickOpen && !moreOpen) return
+    if (!quickOpen) return
     const handler = (e: MouseEvent) => {
       const t = e.target as Node
       if (!(t as HTMLElement).closest('[data-toolbar-menu]')) closeAll()
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [quickOpen, moreOpen, closeAll])
+  }, [quickOpen, closeAll])
 
   const TB = ({
     children,
@@ -144,38 +135,6 @@ export default function BoardTopBar({
       {children}
     </button>
   )
-
-  const moreItems = [
-    { icon: Settings, label: 'Board settings', action: onOpenMenu },
-    {
-      icon: Pencil,
-      label: 'Rename board',
-      action: () => {
-        setName(board.name)
-        setEditing(true)
-      },
-    },
-    {
-      icon: Palette,
-      label: 'Change background',
-      action: () => {
-        const colors = ['#0DABA3', '#4AA8FF', '#8B7CF6', '#FF8B5E', '#33B27A', '#132A29']
-        const next = colors[Math.floor(Math.random() * colors.length)]
-        setBoardBackground(board.id, next)
-      },
-    },
-    { icon: Copy, label: 'Duplicate board', action: () => {} },
-    { icon: Download, label: 'Export board', action: () => {} },
-    { icon: Archive, label: 'Archive board', action: () => {} },
-    {
-      icon: Trash2,
-      label: 'Delete board',
-      action: () => {
-        if (window.confirm('Delete this board? This cannot be undone.')) deleteBoard(board.id)
-      },
-      danger: true,
-    },
-  ]
 
   return (
     <div
@@ -262,7 +221,6 @@ export default function BoardTopBar({
             title="Quick actions"
             active={quickOpen}
             onClick={() => {
-              setMoreOpen(false)
               setQuickOpen((o) => !o)
             }}
           >
@@ -301,7 +259,6 @@ export default function BoardTopBar({
             active={viewsOpen}
             onClick={() => {
               setQuickOpen(false)
-              setMoreOpen(false)
               onOpenViews()
             }}
           >
@@ -317,7 +274,6 @@ export default function BoardTopBar({
             active={filterOpen}
             onClick={() => {
               setQuickOpen(false)
-              setMoreOpen(false)
               onOpenFilter()
             }}
           >
@@ -358,7 +314,7 @@ export default function BoardTopBar({
           </TB>
         </div>
 
-        {/* ── Mobile: Search + More only ── */}
+        {/* ── Mobile: Search + More ── */}
         <TB
           title="Search board"
           active={searchOpen}
@@ -370,43 +326,16 @@ export default function BoardTopBar({
 
         <TB
           title="More options"
-          active={moreOpen}
           onClick={() => {
             setQuickOpen(false)
-            setMoreOpen((o) => !o)
+            setSearchOpen(false)
+            onSearch('')
+            onOpenMenu()
           }}
           className="sm:hidden"
         >
           <MoreHorizontal size={17} />
         </TB>
-        {moreOpen && (
-          <div
-            data-toolbar-menu
-            className="animate-in absolute right-2 top-12 z-30 w-52 rounded-lg border border-border-strong bg-surface-elevated p-1.5 shadow-subtle sm:hidden"
-          >
-            {moreItems.map((item) => {
-              const Icon = item.icon
-              return (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={() => {
-                    item.action()
-                    setMoreOpen(false)
-                  }}
-                  className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors duration-150 ${
-                    item.danger
-                      ? 'text-danger-text hover:bg-danger-subtle'
-                      : 'text-text-primary hover:bg-surface-alt'
-                  }`}
-                >
-                  <Icon size={15} className={item.danger ? 'text-danger-text' : 'text-text-secondary'} />
-                  {item.label}
-                </button>
-              )
-            })}
-          </div>
-        )}
 
         {/* ── Desktop: Share + More ── */}
         <button
@@ -422,39 +351,13 @@ export default function BoardTopBar({
         <div className="relative hidden sm:block" data-toolbar-menu>
           <TB
             title="More options"
-            active={moreOpen}
             onClick={() => {
               setQuickOpen(false)
-              setMoreOpen((o) => !o)
+              onOpenMenu()
             }}
           >
             <MoreHorizontal size={17} />
           </TB>
-          {moreOpen && (
-            <div className="animate-in absolute right-0 top-12 z-30 w-52 rounded-lg border border-border-strong bg-surface-elevated p-1.5 shadow-subtle">
-              {moreItems.map((item) => {
-                const Icon = item.icon
-                return (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => {
-                      item.action()
-                      setMoreOpen(false)
-                    }}
-                    className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors duration-150 ${
-                      item.danger
-                        ? 'text-danger-text hover:bg-danger-subtle'
-                        : 'text-text-primary hover:bg-surface-alt'
-                    }`}
-                  >
-                    <Icon size={15} className={item.danger ? 'text-danger-text' : 'text-text-secondary'} />
-                    {item.label}
-                  </button>
-                )
-              })}
-            </div>
-          )}
         </div>
       </div>
 

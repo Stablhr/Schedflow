@@ -19,7 +19,7 @@ const ZOOM_CONFIG = {
 export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps) {
   const { data } = useStore()
   const board = data.boards[boardId]
-  const today = new Date()
+  const [today] = useState(() => new Date())
   const [zoom, setZoom] = useState<ZoomLevel>('week')
 
   const config = ZOOM_CONFIG[zoom]
@@ -28,7 +28,7 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
     const d = new Date(today)
     d.setDate(d.getDate() - Math.floor(config.columns / 3))
     return d
-  }, [config.columns])
+  }, [today, config.columns])
 
   const timeColumns = useMemo(() => {
     const cols: Date[] = []
@@ -78,7 +78,7 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
     const diffMs = today.getTime() - startDate.getTime()
     const diffDays = diffMs / (1000 * 60 * 60 * 24)
     return diffDays * config.columnWidth
-  }, [startDate, config.columnWidth])
+  }, [today, startDate, config.columnWidth])
 
   const getCardPosition = (card: Card) => {
     const start = card.startDate ? new Date(card.startDate) : null

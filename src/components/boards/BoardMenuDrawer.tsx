@@ -21,7 +21,7 @@ export default function BoardMenuDrawer({
   open: boolean
   onClose: () => void
 }) {
-  const { data, setBoardBackground, setBoardDescription, resetAll } = useStore()
+  const { data, setBoardBackground, setBoardDescription, resetAll, deleteBoard } = useStore()
   const navigate = useNavigate()
   const [modal, setModal] = useState<DrawerModal>(null)
   const [desc, setDesc] = useState(board.description)
@@ -47,6 +47,13 @@ export default function BoardMenuDrawer({
 
   const menuItem =
     'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-text-primary transition-colors duration-150 hover:bg-surface-alt'
+
+  const handleDeleteBoard = () => {
+    if (window.confirm(`Delete "${board.name}"? All lists and cards on it will be removed. This cannot be undone.`)) {
+      deleteBoard(board.id)
+      navigate('/boards')
+    }
+  }
 
   const handleReset = () => {
     if (
@@ -168,8 +175,17 @@ export default function BoardMenuDrawer({
 
           <button
             type="button"
-            onClick={handleReset}
+            onClick={handleDeleteBoard}
             className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-danger-text transition-colors duration-150 hover:bg-danger-subtle"
+          >
+            <Trash2 size={15} />
+            Delete board
+          </button>
+
+          <button
+            type="button"
+            onClick={handleReset}
+            className="mt-0.5 flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-danger-text transition-colors duration-150 hover:bg-danger-subtle"
           >
             <Trash2 size={15} />
             Reset all data
