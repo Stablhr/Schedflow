@@ -187,7 +187,7 @@ export default function BoardTopBar({
         minHeight: 52,
       }}
     >
-      <div className="flex flex-1 items-center gap-1 overflow-hidden sm:gap-1.5">
+      <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-1.5">
         {/* ── Back ── */}
         <Link
           to="/boards"
@@ -246,7 +246,7 @@ export default function BoardTopBar({
               setEditing(true)
             }}
             title="Click to rename"
-            className="ml-0.5 cursor-text truncate rounded-md px-1.5 py-1 text-sm font-semibold transition-colors duration-150 hover:bg-surface-alt sm:ml-1 sm:text-base"
+            className="ml-0.5 min-w-0 cursor-text truncate rounded-md px-1.5 py-1 text-sm font-semibold transition-colors duration-150 hover:bg-surface-alt sm:ml-1 sm:text-base"
             style={{ color: 'var(--surface-text)' }}
           >
             {board.name}
@@ -379,6 +379,34 @@ export default function BoardTopBar({
         >
           <MoreHorizontal size={17} />
         </TB>
+        {moreOpen && (
+          <div
+            data-toolbar-menu
+            className="animate-in absolute right-2 top-12 z-30 w-52 rounded-lg border border-border-strong bg-surface-elevated p-1.5 shadow-subtle sm:hidden"
+          >
+            {moreItems.map((item) => {
+              const Icon = item.icon
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => {
+                    item.action()
+                    setMoreOpen(false)
+                  }}
+                  className={`flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors duration-150 ${
+                    item.danger
+                      ? 'text-danger-text hover:bg-danger-subtle'
+                      : 'text-text-primary hover:bg-surface-alt'
+                  }`}
+                >
+                  <Icon size={15} className={item.danger ? 'text-danger-text' : 'text-text-secondary'} />
+                  {item.label}
+                </button>
+              )
+            })}
+          </div>
+        )}
 
         {/* ── Desktop: Share + More ── */}
         <button
