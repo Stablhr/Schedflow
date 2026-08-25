@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { MoreHorizontal, ChevronsLeft, ChevronsRight, Trash2, UserPlus, Palette } from 'lucide-react'
+import { MoreHorizontal, ChevronsLeft, ChevronsRight, Archive, UserPlus, Palette } from 'lucide-react'
 import type { List } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 
@@ -9,7 +9,7 @@ const LIST_COLORS = [
 ]
 
 export default function ListMenu({ list }: { list: List }) {
-  const { toggleListCollapsed, deleteList, setListAssignee, setListBackgroundColor } = useStore()
+  const { toggleListCollapsed, archiveList, setListAssignee, setListBackgroundColor } = useStore()
   const [open, setOpen] = useState(false)
   const [assignee, setAssignee] = useState(list.assignee)
   const ref = useRef<HTMLDivElement>(null)
@@ -97,16 +97,16 @@ export default function ListMenu({ list }: { list: List }) {
 
           <button
             type="button"
-            className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm font-medium text-danger-text transition-colors duration-150 hover:bg-danger-subtle"
+            className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm font-medium text-text-primary transition-colors duration-150 hover:bg-surface-alt"
             onClick={() => {
-              if (window.confirm(`Delete the "${list.name}" list and all of its cards?`)) {
-                deleteList(list.id)
+              if (window.confirm(`Archive the "${list.name}" list and all of its cards?`)) {
+                archiveList(list.id)
               }
               setOpen(false)
             }}
           >
-            <Trash2 size={15} />
-            Delete list
+            <Archive size={15} />
+            Archive list
           </button>
         </div>
       )}

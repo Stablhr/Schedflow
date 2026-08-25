@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ChevronLeft,
@@ -8,7 +8,6 @@ import {
   LayoutGrid,
   MoreHorizontal,
   Check,
-  Zap,
   Lock,
   Globe,
   Users,
@@ -57,7 +56,6 @@ export default function BoardTopBar({
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(board.name)
   const [searchOpen, setSearchOpen] = useState(false)
-  const [quickOpen, setQuickOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [visOpen, setVisOpen] = useState(false)
 
@@ -77,20 +75,6 @@ export default function BoardTopBar({
   }
 
   const filterActive = filter.labelIds.length > 0 || filter.memberIds.length > 0
-
-  const closeAll = useCallback(() => {
-    setQuickOpen(false)
-  }, [])
-
-  useEffect(() => {
-    if (!quickOpen) return
-    const handler = (e: MouseEvent) => {
-      const t = e.target as Node
-      if (!(t as HTMLElement).closest('[data-toolbar-menu]')) closeAll()
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [quickOpen, closeAll])
 
   const TB = ({
     children,
@@ -198,50 +182,12 @@ export default function BoardTopBar({
         {/* ── Spacer ── */}
         <div className="min-w-2 flex-1 sm:min-w-4" />
 
-        {/* ── Quick actions ── */}
-        <div className="relative hidden sm:block" data-toolbar-menu>
-          <TB
-            title="Quick actions"
-            active={quickOpen}
-            onClick={() => {
-              setQuickOpen((o) => !o)
-            }}
-          >
-            <Zap size={17} className={quickOpen ? 'fill-current' : ''} />
-          </TB>
-          {quickOpen && (
-            <div className="animate-in absolute right-0 top-12 z-30 w-52 rounded-lg border border-border-strong bg-surface-elevated p-1.5 shadow-subtle">
-              <button
-                type="button"
-                onClick={() => {
-                  setQuickOpen(false)
-                }}
-                className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-text-primary transition-colors duration-150 hover:bg-surface-alt"
-              >
-                <Zap size={15} className="text-primary-hover" />
-                Automations
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setQuickOpen(false)
-                }}
-                className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-text-primary transition-colors duration-150 hover:bg-surface-alt"
-              >
-                <LayoutGrid size={15} className="text-primary-hover" />
-                Board templates
-              </button>
-            </div>
-          )}
-        </div>
-
         {/* ── Views ── */}
         <div className="relative hidden sm:block" data-toolbar-menu>
           <TB
             title="Views"
             active={viewsOpen}
             onClick={() => {
-              setQuickOpen(false)
               onOpenViews()
             }}
           >
@@ -256,7 +202,6 @@ export default function BoardTopBar({
             title="Filter board"
             active={filterOpen}
             onClick={() => {
-              setQuickOpen(false)
               onOpenFilter()
             }}
           >
@@ -310,7 +255,6 @@ export default function BoardTopBar({
         <TB
           title="More options"
           onClick={() => {
-            setQuickOpen(false)
             setSearchOpen(false)
             onSearch('')
             onOpenMenu()
@@ -335,7 +279,6 @@ export default function BoardTopBar({
           <TB
             title="More options"
             onClick={() => {
-              setQuickOpen(false)
               onOpenMenu()
             }}
           >

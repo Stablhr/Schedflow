@@ -133,6 +133,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       listOrder,
       labels,
       shares: [],
+      settings: { commentPermission: 'members', selfJoin: false },
+      activity: [],
+      archivedLists: [],
     }
     mutate((prev) => ({
       ...prev,
@@ -196,13 +199,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return {
         ...prev,
         lists: { ...prev.lists, [id]: list },
-        boards: { ...prev.boards, [boardId]: { ...board, listOrder: [...board.listOrder, id], updatedAt: now() } },
+        boards: {
+          ...prev.boards,
+          [boardId]: {
+            ...board,
+            listOrder: [...board.listOrder, id],
+            activity: [{ id: uid(), text: `Created list '${name}'`, createdAt: now() }, ...board.activity],
+            updatedAt: now(),
+          },
+        },
       }
     })
   }
 
   const renameList = (id: string, name: string) =>
-    mutate((prev) => ({ ...prev, lists: patchRecord(prev.lists, id, { name }) }))
+    mutate((prev) => {
+      const list = prev.lists[id]
+      if (!list) return prev
+      const board = prev.boards[list.boardId]
+      return {
+        ...prev,
+        lists: patchRecord(prev.lists, id, { name }),
+        boards: board
+          ? {
+              ...prev.boards,
+              [list.boardId]: {
+                ...board,
+                activity: [{ id: uid(), text: `Renamed list to '${name}'`, createdAt: now() }, ...board.activity],
+                updatedAt: now(),
+              },
+            }
+          : prev.boards,
+      }
+    })
 
   const setListAssignee = (id: string, name: string) =>
     mutate((prev) => ({ ...prev, lists: patchRecord(prev.lists, id, { assignee: name }) }))
@@ -217,26 +246,68 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       return { ...prev, lists: patchRecord(prev.lists, id, { collapsed: !list.collapsed }) }
     })
 
-  const deleteList = (id: string) => {
+  const archiveList = (id: string) => {
     mutate((prev) => {
       const list = prev.lists[id]
       if (!list) return prev
+      const board = prev.boards[list.boardId]
+      if (!board) return prev
       const cardIds = new Set(list.cardOrder)
+      const archivedCards: Card[] = list.cardOrder
+        .map((cid) => prev.cards[cid])
+        .filter((c): c is Card => Boolean(c))
+      const archivedEntry = { list: { ...list }, cards: archivedCards }
       const cards: Record<string, Card> = {}
       for (const [k, v] of Object.entries(prev.cards)) {
         if (!cardIds.has(k)) cards[k] = v
       }
       const lists = { ...prev.lists }
       delete lists[id]
-      const board = prev.boards[list.boardId]
-      if (!board) return { ...prev, lists, cards }
+      const boardActivity = [{ id: uid(), text: `Archived list '${list.name}'`, createdAt: now() }, ...board.activity]
       return {
         ...prev,
         lists,
         cards,
         boards: {
           ...prev.boards,
-          [list.boardId]: { ...board, listOrder: board.listOrder.filter((x) => x !== id), updatedAt: now() },
+          [list.boardId]: {
+            ...board,
+            listOrder: board.listOrder.filter((x) => x !== id),
+            archivedLists: [...board.archivedLists, archivedEntry],
+            activity: boardActivity,
+            updatedAt: now(),
+          },
+        },
+      }
+    })
+  }
+
+  const restoreList = (boardId: string, archivedIndex: number) => {
+    mutate((prev) => {
+      const board = prev.boards[boardId]
+      if (!board) return prev
+      const entry = board.archivedLists[archivedIndex]
+      if (!entry) return prev
+      const { list, cards: archivedCards } = entry
+      const newLists = { ...prev.lists, [list.id]: list }
+      const newCards = { ...prev.cards }
+      for (const c of archivedCards) {
+        newCards[c.id] = c
+      }
+      const boardActivity = [{ id: uid(), text: `Restored list '${list.name}'`, createdAt: now() }, ...board.activity]
+      return {
+        ...prev,
+        lists: newLists,
+        cards: newCards,
+        boards: {
+          ...prev.boards,
+          [boardId]: {
+            ...board,
+            listOrder: [...board.listOrder, list.id],
+            archivedLists: board.archivedLists.filter((_, i) => i !== archivedIndex),
+            activity: boardActivity,
+            updatedAt: now(),
+          },
         },
       }
     })
@@ -259,7 +330,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     mutate((prev) => {
       const list = prev.lists[listId]
       if (!list) return prev
-      return withCardAdded(prev, makeCard(list, title, { id }))
+      const board = prev.boards[list.boardId]
+      const card = makeCard(list, title, { id })
+      const base = withCardAdded(prev, card)
+      return board
+        ? {
+            ...base,
+            boards: {
+              ...base.boards,
+              [list.boardId]: {
+                ...base.boards[list.boardId],
+                activity: [{ id: uid(), text: `Created card '${title}'`, createdAt: now() }, ...(base.boards[list.boardId]?.activity ?? [])],
+              },
+            },
+          }
+        : base
     })
     return id
   }
@@ -283,7 +368,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const updateCard = (id: string, patch: Partial<Card>) =>
     mutate((prev) => ({ ...prev, cards: patchRecord(prev.cards, id, { ...patch, updatedAt: now() }) }))
 
-  const moveCard = (cardId: string, destListId: string, destIndex: number) => {    mutate((prev) => {
+  const moveCard = (cardId: string, destListId: string, destIndex: number) => {
+    mutate((prev) => {
       const card = prev.cards[cardId]
       if (!card) return prev
       const srcListId = card.listId
@@ -298,6 +384,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         srcListId === destListId
           ? 'moved this card within the list'
           : `moved this card to ${dest.name}`
+      const board = prev.boards[card.boardId]
+      const boardActivity = board && srcListId !== destListId
+        ? [{ id: uid(), text: `Moved '${card.title}' from ${src.name} to ${dest.name}`, createdAt: now() }, ...board.activity]
+        : board?.activity ?? []
       return {
         ...prev,
         lists: {
@@ -314,6 +404,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             activity: [{ id: uid(), text: movedText, createdAt: now() }, ...card.activity],
           },
         },
+        boards: board
+          ? { ...prev.boards, [card.boardId]: { ...board, activity: boardActivity, updatedAt: now() } }
+          : prev.boards,
       }
     })
   }
@@ -346,6 +439,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     mutate((prev) => {
       const card = prev.cards[id]
       if (!card || card.archived) return prev
+      const board = prev.boards[card.boardId]
       return {
         ...prev,
         cards: {
@@ -357,6 +451,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             activity: [{ id: uid(), text: 'archived this card', createdAt: now() }, ...card.activity],
           },
         },
+        boards: board
+          ? {
+              ...prev.boards,
+              [card.boardId]: {
+                ...board,
+                activity: [{ id: uid(), text: `Archived card '${card.title}'`, createdAt: now() }, ...board.activity],
+                updatedAt: now(),
+              },
+            }
+          : prev.boards,
       }
     })
 
@@ -364,6 +468,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     mutate((prev) => {
       const card = prev.cards[id]
       if (!card || !card.archived) return prev
+      let listId = card.listId
+      let listName = prev.lists[listId]?.name
+      if (!prev.lists[listId]) {
+        const board = prev.boards[card.boardId]
+        listId = board?.listOrder[0] ?? card.listId
+        listName = prev.lists[listId]?.name ?? 'a list'
+      }
+      const board = prev.boards[card.boardId]
+      const boardActivity = board
+        ? [{ id: uid(), text: `Restored card '${card.title}' to ${listName}`, createdAt: now() }, ...board.activity]
+        : board?.activity ?? []
       return {
         ...prev,
         cards: {
@@ -371,10 +486,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           [id]: {
             ...card,
             archived: false,
+            listId,
             updatedAt: now(),
             activity: [{ id: uid(), text: 'restored this card', createdAt: now() }, ...card.activity],
           },
         },
+        boards: board
+          ? { ...prev.boards, [card.boardId]: { ...board, activity: boardActivity, updatedAt: now() } }
+          : prev.boards,
       }
     })
 
@@ -401,22 +520,129 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     })
 
   const setBoardVisibility = (id: string, visibility: Board['visibility']) =>
-    mutate((prev) => ({
-      ...prev,
-      boards: patchRecord(prev.boards, id, { visibility, updatedAt: now() }),
-    }))
+    mutate((prev) => {
+      const board = prev.boards[id]
+      if (!board) return prev
+      return {
+        ...prev,
+        boards: {
+          ...prev.boards,
+          [id]: {
+            ...board,
+            visibility,
+            activity: [{ id: uid(), text: `Changed visibility to ${visibility}`, createdAt: now() }, ...board.activity],
+            updatedAt: now(),
+          },
+        },
+      }
+    })
 
   const setBoardBackground = (id: string, background: string) =>
-    mutate((prev) => ({
-      ...prev,
-      boards: patchRecord(prev.boards, id, { background, updatedAt: now() }),
-    }))
+    mutate((prev) => {
+      const board = prev.boards[id]
+      if (!board) return prev
+      return {
+        ...prev,
+        boards: {
+          ...prev.boards,
+          [id]: {
+            ...board,
+            background,
+            activity: [{ id: uid(), text: 'Changed board background', createdAt: now() }, ...board.activity],
+            updatedAt: now(),
+          },
+        },
+      }
+    })
 
   const setBoardDescription = (id: string, description: string) =>
     mutate((prev) => ({
       ...prev,
       boards: patchRecord(prev.boards, id, { description, updatedAt: now() }),
     }))
+
+  const addBoardActivity = (boardId: string, text: string) =>
+    mutate((prev) => {
+      const board = prev.boards[boardId]
+      if (!board) return prev
+      return {
+        ...prev,
+        boards: {
+          ...prev.boards,
+          [boardId]: { ...board, activity: [{ id: uid(), text, createdAt: now() }, ...board.activity], updatedAt: now() },
+        },
+      }
+    })
+
+  const setBoardSettings = (boardId: string, patch: Partial<Board['settings']>) =>
+    mutate((prev) => {
+      const board = prev.boards[boardId]
+      if (!board) return prev
+      const newSettings = { ...board.settings, ...patch }
+      const changed: string[] = []
+      if (patch.commentPermission && patch.commentPermission !== board.settings.commentPermission) {
+        changed.push(`comments to ${patch.commentPermission === 'members' ? 'board members' : 'anyone'}`)
+      }
+      if (patch.selfJoin !== undefined && patch.selfJoin !== board.settings.selfJoin) {
+        changed.push(`self-join ${patch.selfJoin ? 'enabled' : 'disabled'}`)
+      }
+      const activityText = changed.length > 0 ? `Updated settings: ${changed.join(', ')}` : 'Updated board settings'
+      return {
+        ...prev,
+        boards: {
+          ...prev.boards,
+          [boardId]: {
+            ...board,
+            settings: newSettings,
+            activity: [{ id: uid(), text: activityText, createdAt: now() }, ...board.activity],
+            updatedAt: now(),
+          },
+        },
+      }
+    })
+
+  const makeTemplate = (boardId: string): string => {
+    const srcBoard = data.boards[boardId]
+    if (!srcBoard) return ''
+    const newBoardId = uid()
+    const labels: Record<string, Label> = {}
+    Object.values(srcBoard.labels).forEach((l) => {
+      const id = uid()
+      labels[id] = { id, name: l.name, color: l.color }
+    })
+    const newLists: Record<string, List> = {}
+    const listOrder: string[] = []
+    srcBoard.listOrder.forEach((listId) => {
+      const src = data.lists[listId]
+      if (!src) return
+      const newId = uid()
+      newLists[newId] = { ...src, id: newId, boardId: newBoardId, cardOrder: [] }
+      listOrder.push(newId)
+    })
+    const newBoard: Board = {
+      id: newBoardId,
+      name: `${srcBoard.name} (template)`,
+      description: srcBoard.description,
+      visibility: 'private',
+      starred: false,
+      background: srcBoard.background,
+      createdAt: now(),
+      updatedAt: now(),
+      listOrder,
+      labels,
+      shares: [],
+      settings: { commentPermission: 'members', selfJoin: false },
+      activity: [{ id: uid(), text: `Created template from '${srcBoard.name}'`, createdAt: now() }],
+      archivedLists: [],
+    }
+    mutate((prev) => ({
+      ...prev,
+      boards: { ...prev.boards, [newBoardId]: newBoard },
+      lists: { ...prev.lists, ...newLists },
+      ui: { ...prev.ui, lastVisitedBoardId: newBoardId },
+    }))
+    return newBoardId
+  }
 
   const addLabel = (boardId: string, name: string, color: string): string => {
     const id = uid()
@@ -428,7 +654,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ...prev,
         boards: {
           ...prev.boards,
-          [boardId]: { ...board, labels: { ...board.labels, [id]: label }, updatedAt: now() },
+          [boardId]: {
+            ...board,
+            labels: { ...board.labels, [id]: label },
+            activity: [{ id: uid(), text: `Created label '${name}'`, createdAt: now() }, ...board.activity],
+            updatedAt: now(),
+          },
         },
       }
     })
@@ -457,6 +688,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     mutate((prev) => {
       const board = prev.boards[boardId]
       if (!board || !board.labels[labelId]) return prev
+      const labelName = board.labels[labelId].name
       const labels = { ...board.labels }
       delete labels[labelId]
       const cards: Record<string, Card> = {}
@@ -468,7 +700,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       return {
         ...prev,
-        boards: { ...prev.boards, [boardId]: { ...board, labels, updatedAt: now() } },
+        boards: {
+          ...prev.boards,
+          [boardId]: {
+            ...board,
+            labels,
+            activity: [{ id: uid(), text: `Deleted label '${labelName}'`, createdAt: now() }, ...board.activity],
+            updatedAt: now(),
+          },
+        },
         cards,
       }
     })
@@ -603,13 +843,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setListAssignee,
     setListBackgroundColor,
     toggleListCollapsed,
-    deleteList,
+    archiveList,
+    restoreList,
     moveList,
     addCard,
     deleteCard,
     updateCard,
     moveCard,
     addActivity,
+    addBoardActivity,
+    setBoardSettings,
+    makeTemplate,
     addInboxItem,
     dismissInboxItem,
     moveInboxToBoard,

@@ -53,6 +53,16 @@ export type Reactions = Record<string, number>
 
 export type Cover = string | { type: 'image'; dataUrl: string } | null
 
+export interface BoardSettings {
+  commentPermission: 'members' | 'anyone'
+  selfJoin: boolean
+}
+
+export interface ArchivedList {
+  list: List
+  cards: Card[]
+}
+
 export interface Board {
   id: string
   name: string
@@ -66,6 +76,9 @@ export interface Board {
   labels: Record<string, Label>
   shares: Share[]
   shareLink?: ShareLink
+  settings: BoardSettings
+  activity: ActivityItem[]
+  archivedLists: ArchivedList[]
 }
 
 export interface List {

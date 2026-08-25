@@ -180,3 +180,52 @@
 [data-rfd-placeholder-context] {
   transition: height 0.25s ease;
 }
+
+/* ── Print Styles ──────────────────────────────────────────── */
+
+@media print {
+  aside,
+  nav,
+  [data-topbar],
+  .no-print,
+  .fixed {
+    display: none !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body,
+  html {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  .bg-board-canvas {
+    background: #fff !important;
+  }
+
+  [class*="flex"][class*="h-full"][class*="items-start"][class*="gap-"] {
+    gap: 8px !important;
+    padding: 8px !important;
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+  }
+
+  [class*="rounded-xl"],
+  [class*="rounded-lg"] {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}
