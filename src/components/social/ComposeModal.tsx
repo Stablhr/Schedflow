@@ -229,9 +229,10 @@ export default function ComposeModal({ post, onClose }: { post: SocialPost | nul
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-3 pt-8 sm:pt-16">
-      <div className="absolute inset-0 bg-[#0f1a19]/50" onClick={handleClose} />
-      <div className="animate-in relative z-10 flex w-full max-w-2xl flex-col rounded-[14px] border border-border bg-surface shadow-modal">
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-[#0f1a19]/50 backdrop-blur-sm" onClick={handleClose} />
+      <div className="relative z-10 flex h-full items-start justify-center overflow-y-auto p-3 pt-8 sm:pt-16">
+      <div className="animate-in flex w-full max-w-2xl flex-col rounded-[14px] border border-border bg-surface shadow-modal">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <h2 className="text-base font-semibold text-text-primary">
@@ -377,6 +378,7 @@ export default function ComposeModal({ post, onClose }: { post: SocialPost | nul
           <Button variant="secondary" onClick={() => handleSave('draft')}>Save Draft</Button>
           <Button variant="primary" onClick={() => handleSave('scheduled')}>Schedule</Button>
         </div>
+      </div>
       </div>
     </div>
   )
