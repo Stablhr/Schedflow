@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { Plus, Search, Share2, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Plus, Search, Share2, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle, CalendarDays } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import type { SocialPost, SocialPostStatus } from '../../store/schema'
 import { PLATFORM_COLORS } from '../../store/schema'
 import Button from '../shared/Button'
 import ComposeModal from './ComposeModal'
+import DeepLinkButton from './DeepLinkButton'
 
 const STATUS_CONFIG: Record<SocialPostStatus, { label: string; color: string; icon: typeof Clock }> = {
   draft: { label: 'Draft', color: 'text-text-muted', icon: FileText },
@@ -61,6 +63,17 @@ function PostRow({ post, onEdit, onDelete, onDuplicate }: {
         </span>
       )}
 
+      {(post.status === 'posted' || post.status === 'scheduled') && (
+        <div className="hidden items-center gap-1 sm:flex">
+          {enabledPlatforms.slice(0, 2).map((p) => (
+            <DeepLinkButton key={p.platform} platform={p.platform} className="text-[10px] px-1.5 py-0.5" />
+          ))}
+          {enabledPlatforms.length > 2 && (
+            <span className="text-[10px] text-text-muted">+{enabledPlatforms.length - 2}</span>
+          )}
+        </div>
+      )}
+
       <span className={`shrink-0 text-[11px] font-semibold ${status.color}`}>
         {status.label}
       </span>
@@ -89,6 +102,7 @@ function PostRow({ post, onEdit, onDelete, onDuplicate }: {
 
 export default function SocialDashboard() {
   const { socialPosts, deleteSocialPost, duplicateSocialPost } = useStore()
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<SocialPostStatus | 'all'>('all')
   const [composeOpen, setComposeOpen] = useState(false)
@@ -133,6 +147,14 @@ export default function SocialDashboard() {
           <h1 className="text-xl font-semibold text-text-primary sm:text-2xl">Social Scheduler</h1>
           <p className="mt-0.5 text-sm text-text-secondary">Compose, schedule, and track posts across platforms.</p>
         </div>
+        <button
+          type="button"
+          onClick={() => navigate('/social/calendar')}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
+        >
+          <CalendarDays size={14} />
+          Calendar View
+        </button>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2 sm:mt-6">

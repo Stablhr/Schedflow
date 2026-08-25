@@ -95,7 +95,7 @@ function PlatformOverridePanel({ platform, postPlatform, onChange }: {
   )
 }
 
-export default function ComposeModal({ post, onClose }: { post: SocialPost | null; onClose: () => void }) {
+export default function ComposeModal({ post, initialDate, initialCardId, onClose }: { post: SocialPost | null; initialDate?: string; initialCardId?: string; onClose: () => void }) {
   const { addSocialPost, updateSocialPost, removeMediaFromPost } = useStore()
 
   const [title, setTitle] = useState(post?.title ?? '')
@@ -106,7 +106,7 @@ export default function ComposeModal({ post, onClose }: { post: SocialPost | nul
   const [platformOverrides, setPlatformOverrides] = useState<Map<Platform, SocialPostPlatform>>(
     new Map(post?.platforms.map((p) => [p.platform, p]) ?? [])
   )
-  const [scheduledDate, setScheduledDate] = useState(post?.scheduledDate ?? '')
+  const [scheduledDate, setScheduledDate] = useState(post?.scheduledDate ?? initialDate ?? '')
   const [scheduledTime, setScheduledTime] = useState(post?.scheduledTime ?? '')
   const [tags, setTags] = useState(post?.tags.join(', ') ?? '')
   const [media, setMedia] = useState<SocialMediaAttachment[]>(post?.media ?? [])
@@ -213,6 +213,7 @@ export default function ComposeModal({ post, onClose }: { post: SocialPost | nul
       caption,
       platforms,
       media,
+      cardId: isEditing ? post?.cardId : initialCardId,
       scheduledDate: status === 'scheduled' ? scheduledDate || undefined : undefined,
       scheduledTime: status === 'scheduled' ? scheduledTime || undefined : undefined,
       status,

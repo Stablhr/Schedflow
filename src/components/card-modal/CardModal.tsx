@@ -13,6 +13,7 @@ import CardComments from './CardComments'
 import CardActivity from './CardActivity'
 import CoverPanel from './CoverPanel'
 import MoveCardDialog from './MoveCardDialog'
+import CardSocialPosts from '../social/CardSocialPosts'
 
 interface CardModalProps {
   cardId: string
@@ -216,6 +217,7 @@ export default function CardModal({ cardId, onClose }: CardModalProps) {
                 <CardDueDate card={card} />
                 <CardLocation card={card} />
                 <CardCover card={card} onOpenPanel={() => setCoverPanelOpen(true)} />
+                <CardSocialPosts cardId={card.id} />
               </aside>
             </div>
 
