@@ -32,7 +32,7 @@ export default function ExportPrintModal({ board, onClose }: { board: Board; onC
   }
 
   const menuItem =
-    'flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-text-primary transition-colors duration-150 hover:bg-surface-alt'
+    'flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm font-medium text-text-primary transition-colors duration-150 hover:bg-surface-alt'
 
   return (
     <Modal open onClose={onClose} className="max-w-sm">

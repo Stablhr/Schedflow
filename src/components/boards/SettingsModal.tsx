@@ -71,8 +71,8 @@ export default function SettingsModal({ board, onClose }: { board: Board; onClos
         <div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-text-primary">Self-join</p>
-              <p className="text-xs text-text-muted">
+              <p className="text-left text-sm font-medium text-text-primary">Self-join</p>
+              <p className="text-left text-xs text-text-muted">
                 {board.visibility !== 'public'
                   ? 'Only available when board is public'
                   : 'Allow anyone with the link to join'}
