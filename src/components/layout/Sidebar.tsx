@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, Inbox, Columns3, CalendarDays, PanelLeftClose, PanelLeft, Sun, Moon } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
@@ -40,29 +40,22 @@ interface SidebarProps {
 
 export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { data, members, setDarkMode } = useStore()
-  const location = useLocation()
   const inboxCount = data.inbox.length
   const you = members.find((m) => m.name === 'You') ?? members[0]
 
-  const boardMatch = location.pathname.match(/^\/boards\/([^/]+)$/)
-  const boardId = boardMatch?.[1]
-  const board = boardId ? data.boards[boardId] : null
-  const bg = board?.background || ''
-  const isBoard = !!(board && bg && !bg.startsWith('data:'))
-
   const resolved = useThemeMode()
   const mode = data.ui.darkMode ?? 'light'
-  const theme = useAdaptiveTheme(isBoard ? bg : (resolved === 'dark' ? '#1A2B2A' : '#EDF2F2'))
+  const theme = useAdaptiveTheme(resolved === 'dark' ? '#1A2B2A' : '#EDF2F2')
   const sidebarVars = adaptiveVars(theme)
 
   return (
     <>
       {/* Desktop sidebar */}
       <aside
-        className={`hidden shrink-0 flex-col border-r transition-[width] duration-200 md:flex ${
-          isBoard ? '' : 'bg-surface-alt'
-        } ${collapsed ? 'w-[52px]' : 'w-[236px]'}`}
-        style={{ ...sidebarVars, background: isBoard ? bg : undefined, borderColor: theme.border }}
+        className={`hidden shrink-0 flex-col border-r transition-[width] duration-200 md:flex bg-surface-alt ${
+          collapsed ? 'w-[52px]' : 'w-[236px]'
+        }`}
+        style={{ ...sidebarVars, borderColor: theme.border }}
       >
         <div className="flex items-center px-2 py-2">
           {!collapsed && <Logo collapsed={collapsed} />}
@@ -177,10 +170,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       {/* Mobile bottom nav */}
       <nav
-        className={`fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t px-2 py-1.5 md:hidden ${
-          isBoard ? '' : 'bg-surface-alt'
-        }`}
-        style={{ ...sidebarVars, background: isBoard ? bg : undefined, borderColor: theme.border }}
+        className={`fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t px-2 py-1.5 md:hidden bg-surface-alt`}
+        style={{ ...sidebarVars, borderColor: theme.border }}
       >
         {NAV.map((item) => {
           const Icon = item.icon

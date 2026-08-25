@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import type { Board } from '../../store/schema'
 import { useStore } from '../../store/useStore'
-import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
 import ViewsMenu from './ViewsMenu'
 import FilterPanel from './FilterPanel'
 import type { BoardFilter } from './FilterPanel'
@@ -61,10 +60,6 @@ export default function BoardTopBar({
   const [quickOpen, setQuickOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [visOpen, setVisOpen] = useState(false)
-
-  const bg = board.background || '#FFFFFF'
-  const theme = useAdaptiveTheme(bg.startsWith('data:') ? '#FFFFFF' : bg)
-  const vars = adaptiveVars(theme)
 
   const currentUser = members.find((m) => m.name === 'You') ?? members[0]
 
@@ -126,11 +121,7 @@ export default function BoardTopBar({
             ? 'bg-primary text-primary-foreground'
             : 'hover:text-text-primary hover:bg-surface-alt'
       } ${className}`}
-      style={
-        accent
-          ? { color: active ? undefined : 'var(--surface-text-muted)' }
-          : { color: active ? undefined : 'var(--surface-text-muted)' }
-      }
+      style={!active ? { color: 'var(--surface-text-muted)' } : undefined}
     >
       {children}
     </button>
@@ -138,21 +129,15 @@ export default function BoardTopBar({
 
   return (
     <div
-      className="relative flex items-center border-b px-2 py-2 sm:px-4 sm:py-2.5"
-      style={{
-        ...vars,
-        background: 'var(--surface-bg-subtle)',
-        borderColor: theme.border,
-        minHeight: 52,
-      }}
+      className="relative flex items-center border-b border-border bg-surface px-2 py-2 sm:px-4 sm:py-2.5"
+      style={{ minHeight: 52 }}
     >
       <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-1.5">
         {/* ── Back ── */}
         <Link
           to="/boards"
           title="Back to boards"
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-150 hover:bg-surface-alt"
-          style={{ color: 'var(--surface-text-muted)' }}
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-text-muted transition-colors duration-150 hover:bg-surface-alt"
         >
           <ChevronLeft size={18} />
         </Link>
@@ -186,8 +171,7 @@ export default function BoardTopBar({
               }}
               onBlur={commitRename}
               autoFocus
-              className="w-24 rounded-md border border-transparent bg-transparent px-2 py-1 text-sm font-semibold outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-primary focus:bg-surface focus:ring-2 focus:ring-primary/20 sm:w-auto sm:text-base"
-              style={{ color: 'var(--surface-text)' }}
+              className="w-24 rounded-md border border-transparent bg-transparent px-2 py-1 text-sm font-semibold text-text-primary outline-none transition-colors duration-150 placeholder:text-text-muted focus:border-primary focus:bg-surface focus:ring-2 focus:ring-primary/20 sm:w-auto sm:text-base"
             />
             <button
               type="button"
@@ -205,8 +189,7 @@ export default function BoardTopBar({
               setEditing(true)
             }}
             title="Click to rename"
-            className="ml-0.5 min-w-0 cursor-text truncate rounded-md px-1.5 py-1 text-sm font-semibold transition-colors duration-150 hover:bg-surface-alt sm:ml-1 sm:text-base"
-            style={{ color: 'var(--surface-text)' }}
+            className="ml-0.5 min-w-0 cursor-text truncate rounded-md px-1.5 py-1 text-sm font-semibold text-text-primary transition-colors duration-150 hover:bg-surface-alt sm:ml-1 sm:text-base"
           >
             {board.name}
           </h2>
@@ -364,17 +347,15 @@ export default function BoardTopBar({
       {/* ── Mobile search bar ── */}
       {searchOpen && (
         <div
-          className="absolute left-0 right-0 top-full z-30 flex items-center gap-2 border-b px-3 py-2 sm:hidden"
-          style={{ ...vars, background: 'var(--surface-bg-subtle)', borderColor: theme.border }}
+          className="absolute left-0 right-0 top-full z-30 flex items-center gap-2 border-b border-border bg-surface px-3 py-2 sm:hidden"
         >
-          <Search size={14} style={{ color: 'var(--surface-text-faint)' }} />
+          <Search size={14} className="text-text-muted" />
           <input
             value={search}
             onChange={(e) => onSearch(e.target.value)}
             placeholder="Search this board"
             autoFocus
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-text-muted"
-            style={{ color: 'var(--surface-text)' }}
+            className="flex-1 bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted"
           />
           <button
             type="button"
@@ -382,8 +363,7 @@ export default function BoardTopBar({
               setSearchOpen(false)
               onSearch('')
             }}
-            className="text-xs font-semibold"
-            style={{ color: 'var(--surface-text-muted)' }}
+            className="text-xs font-semibold text-text-muted"
           >
             Cancel
           </button>
