@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Search, Share2, Calendar, BarChart3, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
+import { Plus, Search, Share2, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import type { SocialPost, SocialPostStatus } from '../../store/schema'
 import { PLATFORM_COLORS } from '../../store/schema'

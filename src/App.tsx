@@ -15,6 +15,8 @@ import BoardView from './components/boards/BoardView'
 import BoardViewSkeleton from './components/boards/BoardViewSkeleton'
 import PlannerView from './components/planner/PlannerView'
 import PlannerViewSkeleton from './components/planner/PlannerViewSkeleton'
+import SocialDashboard from './components/social/SocialDashboard'
+import SocialDashboardSkeleton from './components/social/SocialDashboardSkeleton'
 import ContrastTestPage from './components/dev/ContrastTestPage'
 
 function ErrorToast() {
@@ -80,6 +82,14 @@ export default function App() {
                 element={
                   <LazyLoad skeleton={<PlannerViewSkeleton />}>
                     <PlannerView />
+                  </LazyLoad>
+                }
+              />
+              <Route
+                path="/social"
+                element={
+                  <LazyLoad skeleton={<SocialDashboardSkeleton />}>
+                    <SocialDashboard />
                   </LazyLoad>
                 }
               />

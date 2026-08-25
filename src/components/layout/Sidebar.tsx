@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Inbox, Columns3, CalendarDays, PanelLeftClose, PanelLeft, Sun, Moon } from 'lucide-react'
+import { LayoutDashboard, Inbox, Columns3, CalendarDays, Share2, PanelLeftClose, PanelLeft, Sun, Moon } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
 import { useThemeMode } from '../../hooks/useThemeMode'
@@ -11,6 +11,7 @@ const NAV = [
   { to: '/inbox', label: 'Inbox', icon: Inbox },
   { to: '/boards', label: 'Boards', icon: Columns3 },
   { to: '/planner', label: 'Planner', icon: CalendarDays },
+  { to: '/social', label: 'Social', icon: Share2 },
 ]
 
 function Logo({ collapsed }: { collapsed: boolean }) {
