@@ -121,6 +121,107 @@ export interface InboxItem {
   createdAt: string
 }
 
+/* ── Social Media Scheduler types ────────────────────────────── */
+
+export type Platform = 'youtube' | 'facebook' | 'tiktok' | 'instagram'
+
+export type SocialPostStatus = 'draft' | 'scheduled' | 'publishing' | 'posted' | 'failed'
+
+export type PlatformStatus = 'pending' | 'scheduled' | 'publishing' | 'posted' | 'failed'
+
+export type RepeatFrequency = 'none' | 'daily' | 'weekdays' | 'weekly' | 'biweekly' | 'monthly'
+
+export type MediaType = 'image' | 'video' | 'audio'
+
+export interface SocialPostPlatform {
+  platform: Platform
+  enabled: boolean
+  status: PlatformStatus
+  caption: string
+  hashtags: string[]
+  mentions: string[]
+  location?: string
+  altText?: string
+  visibility: 'public' | 'private' | 'friends' | 'unlisted'
+  deepLink?: string
+  publishedUrl?: string
+  platformPostId?: string
+  error?: string
+  publishedAt?: string
+}
+
+export interface SocialMediaAttachment {
+  id: string
+  type: MediaType
+  name: string
+  dataUrl: string
+  size: number
+  thumbnail?: string
+  duration?: number
+  platformCompat: Platform[]
+}
+
+export interface SocialAnalytics {
+  platform: Platform
+  reach: number
+  likes: number
+  comments: number
+  shares: number
+  clicks: number
+  impressions: number
+  engagementRate: number
+  fetchedAt: string
+  isDemo: boolean
+}
+
+export interface AIGenerationMeta {
+  model: string
+  prompt: string
+  tokensUsed: number
+  generatedAt: string
+  version: number
+}
+
+export interface SocialPost {
+  id: string
+  title: string
+  caption: string
+  platforms: SocialPostPlatform[]
+  media: SocialMediaAttachment[]
+  cardId?: string
+  scheduledDate?: string
+  scheduledTime?: string
+  status: SocialPostStatus
+  repeat: RepeatFrequency
+  repeatUntil?: string
+  analytics?: SocialAnalytics[]
+  aiGeneration?: AIGenerationMeta
+  tags: string[]
+  createdAt: string
+  updatedAt: string
+}
+
+export const PLATFORM_DEFAULTS: Record<Platform, Partial<SocialPostPlatform>> = {
+  youtube: { caption: '', visibility: 'public', hashtags: [] },
+  facebook: { caption: '', visibility: 'public', hashtags: [] },
+  tiktok: { caption: '', visibility: 'public', hashtags: [] },
+  instagram: { caption: '', visibility: 'public', hashtags: [] },
+}
+
+export const PLATFORM_LIMITS: Record<Platform, { maxCaption: number; maxHashtags: number; supportedMedia: MediaType[] }> = {
+  youtube: { maxCaption: 5000, maxHashtags: 15, supportedMedia: ['image', 'video'] },
+  facebook: { maxCaption: 63206, maxHashtags: 30, supportedMedia: ['image', 'video', 'audio'] },
+  tiktok: { maxCaption: 2200, maxHashtags: 30, supportedMedia: ['video', 'image'] },
+  instagram: { maxCaption: 2200, maxHashtags: 30, supportedMedia: ['image', 'video'] },
+}
+
+export const PLATFORM_COLORS: Record<Platform, string> = {
+  youtube: '#FF0000',
+  facebook: '#1877F2',
+  tiktok: '#000000',
+  instagram: '#E4405F',
+}
+
 export type ThemeMode = 'light' | 'dark'
 
 export interface AppData {

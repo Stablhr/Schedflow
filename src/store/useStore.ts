@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { AppData, Board, Card, Label, List, Member, Share, ThemeMode } from './schema'
+import type { AppData, Board, Card, Label, List, Member, Share, SocialPost, SocialPostPlatform, SocialMediaAttachment, SocialAnalytics, Platform, ThemeMode } from './schema'
 
 export interface Store {
   data: AppData
@@ -50,6 +50,24 @@ export interface Store {
   createShareLink: (boardId: string) => void
   setDarkMode: (mode: ThemeMode) => void
   resetAll: () => void
+  // Social Posts
+  socialPosts: SocialPost[]
+  addSocialPost: (post: Omit<SocialPost, 'id' | 'createdAt' | 'updatedAt'>) => SocialPost
+  updateSocialPost: (id: string, patch: Partial<SocialPost>) => void
+  deleteSocialPost: (id: string) => void
+  duplicateSocialPost: (id: string) => SocialPost | null
+  moveSocialPost: (id: string, newDate: string, newTime?: string) => void
+  getSocialPostsByDate: (date: string) => SocialPost[]
+  getSocialPostsByPlatform: (platform: Platform) => SocialPost[]
+  getSocialPostsByStatus: (status: SocialPost['status']) => SocialPost[]
+  getSocialPostsByCard: (cardId: string) => SocialPost[]
+  getUnscheduledPosts: () => SocialPost[]
+  addPlatformToPost: (postId: string, platform: Platform) => void
+  removePlatformFromPost: (postId: string, platform: Platform) => void
+  updatePostPlatform: (postId: string, platform: Platform, patch: Partial<SocialPostPlatform>) => void
+  addMediaToPost: (postId: string, media: Omit<SocialMediaAttachment, 'id'>) => void
+  removeMediaFromPost: (postId: string, mediaId: string) => void
+  updatePostAnalytics: (postId: string, platform: Platform, analytics: SocialAnalytics) => void
 }
 
 export const StoreContext = createContext<Store | null>(null)

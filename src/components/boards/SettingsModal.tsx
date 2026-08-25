@@ -4,9 +4,12 @@ import type { Board } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 import Modal from '../shared/Modal'
 
+const DEFAULT_SETTINGS = { commentPermission: 'members' as const, selfJoin: false }
+
 export default function SettingsModal({ board, onClose }: { board: Board; onClose: () => void }) {
   const { renameBoard, setBoardSettings } = useStore()
   const [name, setName] = useState(board.name)
+  const settings = board.settings ?? DEFAULT_SETTINGS
 
   const commitName = () => {
     const trimmed = name.trim()
@@ -55,7 +58,7 @@ export default function SettingsModal({ board, onClose }: { board: Board; onClos
           </label>
           <select
             id="settings-comments"
-            value={board.settings.commentPermission}
+            value={settings.commentPermission}
             onChange={(e) =>
               setBoardSettings(board.id, {
                 commentPermission: e.target.value as 'members' | 'anyone',
@@ -81,16 +84,16 @@ export default function SettingsModal({ board, onClose }: { board: Board; onClos
             <button
               type="button"
               role="switch"
-              aria-checked={board.settings.selfJoin}
+              aria-checked={settings.selfJoin}
               disabled={board.visibility !== 'public'}
-              onClick={() => setBoardSettings(board.id, { selfJoin: !board.settings.selfJoin })}
+              onClick={() => setBoardSettings(board.id, { selfJoin: !settings.selfJoin })}
               className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-150 ${
-                board.settings.selfJoin ? 'bg-primary' : 'bg-border-strong'
+                settings.selfJoin ? 'bg-primary' : 'bg-border-strong'
               } ${board.visibility !== 'public' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               <span
                 className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-150 ${
-                  board.settings.selfJoin ? 'translate-x-6' : 'translate-x-1'
+                  settings.selfJoin ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
             </button>
