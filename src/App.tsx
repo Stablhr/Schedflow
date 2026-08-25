@@ -19,6 +19,8 @@ import SocialDashboard from './components/social/SocialDashboard'
 import SocialDashboardSkeleton from './components/social/SocialDashboardSkeleton'
 import SocialCalendarView from './components/social/SocialCalendarView'
 import SocialCalendarSkeleton from './components/social/SocialCalendarSkeleton'
+import AnalyticsView from './components/social/AnalyticsView'
+import AnalyticsSkeleton from './components/social/AnalyticsSkeleton'
 import ContrastTestPage from './components/dev/ContrastTestPage'
 
 function ErrorToast() {
@@ -100,6 +102,14 @@ export default function App() {
                 element={
                   <LazyLoad skeleton={<SocialCalendarSkeleton />}>
                     <SocialCalendarView />
+                  </LazyLoad>
+                }
+              />
+              <Route
+                path="/social/analytics"
+                element={
+                  <LazyLoad skeleton={<AnalyticsSkeleton />}>
+                    <AnalyticsView />
                   </LazyLoad>
                 }
               />

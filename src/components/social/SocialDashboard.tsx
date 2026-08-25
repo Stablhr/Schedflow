@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, Share2, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle, CalendarDays } from 'lucide-react'
+import { Plus, Search, Share2, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle, CalendarDays, BarChart3, Download } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import type { SocialPost, SocialPostStatus } from '../../store/schema'
 import { PLATFORM_COLORS } from '../../store/schema'
 import Button from '../shared/Button'
 import ComposeModal from './ComposeModal'
 import DeepLinkButton from './DeepLinkButton'
+import ImportExportPanel from './ImportExportPanel'
 
 const STATUS_CONFIG: Record<SocialPostStatus, { label: string; color: string; icon: typeof Clock }> = {
   draft: { label: 'Draft', color: 'text-text-muted', icon: FileText },
@@ -107,6 +108,7 @@ export default function SocialDashboard() {
   const [statusFilter, setStatusFilter] = useState<SocialPostStatus | 'all'>('all')
   const [composeOpen, setComposeOpen] = useState(false)
   const [editingPost, setEditingPost] = useState<SocialPost | null>(null)
+  const [importExportOpen, setImportExportOpen] = useState(false)
 
   const filtered = socialPosts.filter((p) => {
     if (statusFilter !== 'all' && p.status !== statusFilter) return false
@@ -147,14 +149,32 @@ export default function SocialDashboard() {
           <h1 className="text-xl font-semibold text-text-primary sm:text-2xl">Social Scheduler</h1>
           <p className="mt-0.5 text-sm text-text-secondary">Compose, schedule, and track posts across platforms.</p>
         </div>
-        <button
-          type="button"
-          onClick={() => navigate('/social/calendar')}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
-        >
-          <CalendarDays size={14} />
-          Calendar View
-        </button>
+        <div className="ml-auto flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => navigate('/social/calendar')}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
+          >
+            <CalendarDays size={14} />
+            Calendar
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/social/analytics')}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
+          >
+            <BarChart3 size={14} />
+            Analytics
+          </button>
+          <button
+            type="button"
+            onClick={() => setImportExportOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
+          >
+            <Download size={14} />
+            Import/Export
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2 sm:mt-6">
@@ -227,6 +247,10 @@ export default function SocialDashboard() {
 
       {composeOpen && (
         <ComposeModal post={editingPost} onClose={handleCloseCompose} />
+      )}
+
+      {importExportOpen && (
+        <ImportExportPanel onClose={() => setImportExportOpen(false)} />
       )}
     </div>
   )

@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
-import { X, Plus, Calendar, Tag } from 'lucide-react'
+import { X, Plus, Calendar, Tag, Sparkles } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import type { SocialPost, SocialPostPlatform, SocialMediaAttachment, Platform } from '../../store/schema'
 import { PLATFORM_COLORS, PLATFORM_DEFAULTS, PLATFORM_LIMITS } from '../../store/schema'
 import Button from '../shared/Button'
 import { Input, Textarea } from '../shared/Input'
 import SectionLabel from '../shared/SectionLabel'
+import AIGenerateModal from './AIGenerateModal'
 
 const ALL_PLATFORMS: Platform[] = ['youtube', 'facebook', 'tiktok', 'instagram']
 
@@ -89,7 +90,7 @@ function PlatformOverridePanel({ platform, postPlatform, onChange }: {
             <option value="friends">Friends</option>
             <option value="unlisted">Unlisted</option>
           </select>
-        </div>
+      </div>
       </div>
     </div>
   )
@@ -110,6 +111,7 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
   const [scheduledTime, setScheduledTime] = useState(post?.scheduledTime ?? '')
   const [tags, setTags] = useState(post?.tags.join(', ') ?? '')
   const [media, setMedia] = useState<SocialMediaAttachment[]>(post?.media ?? [])
+  const [aiOpen, setAiOpen] = useState(false)
 
   const isEditing = !!post
 
@@ -278,7 +280,17 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
 
           {/* Caption */}
           <div>
-            <SectionLabel>Default Caption</SectionLabel>
+            <div className="flex items-center justify-between">
+              <SectionLabel>Default Caption</SectionLabel>
+              <button
+                type="button"
+                onClick={() => setAiOpen(true)}
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary-subtle"
+              >
+                <Sparkles size={12} />
+                AI Generate
+              </button>
+            </div>
             <Textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
@@ -381,6 +393,13 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
         </div>
       </div>
       </div>
+
+      {aiOpen && (
+        <AIGenerateModal
+          onUse={(generated) => setCaption(generated)}
+          onClose={() => setAiOpen(false)}
+        />
+      )}
     </div>
   )
 }
