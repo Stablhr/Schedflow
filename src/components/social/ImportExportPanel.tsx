@@ -95,12 +95,12 @@ export default function ImportExportPanel({ onClose }: { onClose: () => void }) 
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3" role="dialog" aria-modal="true" aria-labelledby="import-export-title">
       <div className="absolute inset-0 bg-[#0f1a19]/50" onClick={onClose} />
       <div className="animate-in relative z-10 w-full max-w-md rounded-[14px] border border-border bg-surface shadow-modal">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="text-sm font-semibold text-text-primary">Import / Export</h2>
-          <button type="button" onClick={onClose} className="rounded p-1 text-text-muted hover:text-text-primary">
+          <h2 id="import-export-title" className="text-sm font-semibold text-text-primary">Import / Export</h2>
+          <button type="button" onClick={onClose} aria-label="Close import/export panel" className="rounded p-1 text-text-muted hover:text-text-primary">
             <X size={16} />
           </button>
         </div>
@@ -143,6 +143,7 @@ export default function ImportExportPanel({ onClose }: { onClose: () => void }) 
                 accept=".json"
                 onChange={handleImport}
                 className="hidden"
+                aria-label="Import JSON file"
               />
               <Button
                 variant="secondary"
@@ -161,11 +162,11 @@ export default function ImportExportPanel({ onClose }: { onClose: () => void }) 
           {/* Import Result */}
           {importResult && (
             <div className={`rounded-lg border p-3 ${
-              importResult.errors.length > 0 ? 'border-warning bg-warning-subtle' : 'border-success bg-success-subtle'
-            }`}>
+              importResult.errors.length > 0 ? 'border-danger bg-danger-subtle' : 'border-success bg-success-subtle'
+            }`} role="alert" aria-live="assertive">
               <div className="flex items-center gap-2">
                 {importResult.errors.length > 0 ? (
-                  <XCircle size={14} className="text-warning-text" />
+                  <XCircle size={14} className="text-danger-text" />
                 ) : (
                   <CheckCircle2 size={14} className="text-success-text" />
                 )}

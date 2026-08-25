@@ -15,7 +15,8 @@ export default function SocialUnscheduledPool({ posts, onPostClick }: SocialUnsc
         <div
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className={`flex w-[180px] shrink-0 flex-col rounded-lg p-2 sm:w-[230px] sm:p-3 ${
+          aria-label="Unscheduled posts pool"
+          className={`flex w-[150px] shrink-0 flex-col rounded-lg p-2 sm:w-[180px] lg:w-[230px] sm:p-3 ${
             snapshot.isDraggingOver
               ? 'bg-primary-subtle/60 ring-2 ring-inset ring-primary'
               : 'ring-1 ring-border'
@@ -33,7 +34,7 @@ export default function SocialUnscheduledPool({ posts, onPostClick }: SocialUnsc
               <SocialPostCard key={post.id} post={post} index={i} onClick={() => onPostClick(post)} />
             ))}
             {posts.length === 0 && (
-              <p className="px-1 py-3 text-center text-xs text-text-muted">All posts scheduled</p>
+              <p className="px-1 py-3 text-center text-xs text-text-muted" role="status">All posts scheduled</p>
             )}
           </div>
           {provided.placeholder}

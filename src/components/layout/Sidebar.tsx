@@ -5,6 +5,7 @@ import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
 import { useThemeMode } from '../../hooks/useThemeMode'
 import CaptureBox from '../shared/CaptureBox'
 import Avatar from '../shared/Avatar'
+import StorageMeter from '../shared/StorageMeter'
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -132,6 +133,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 </button>
               ))}
             </div>
+            <StorageMeter collapsed />
           </div>
         ) : (
           <div className="space-y-3 p-3">
@@ -165,6 +167,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 </button>
               ))}
             </div>
+            <StorageMeter />
           </div>
         )}
       </aside>

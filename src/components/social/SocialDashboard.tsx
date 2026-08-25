@@ -5,6 +5,7 @@ import { useStore } from '../../store/useStore'
 import type { SocialPost, SocialPostStatus } from '../../store/schema'
 import { PLATFORM_COLORS } from '../../store/schema'
 import Button from '../shared/Button'
+import { useToast } from '../shared/useToastState'
 import ComposeModal from './ComposeModal'
 import DeepLinkButton from './DeepLinkButton'
 import ImportExportPanel from './ImportExportPanel'
@@ -32,6 +33,7 @@ function PostRow({ post, onEdit, onDelete, onDuplicate }: {
       className="group flex items-center gap-3 rounded-lg border border-border bg-surface p-3 transition-colors hover:bg-surface-alt sm:gap-4"
       role="button"
       tabIndex={0}
+      aria-label={`Edit post: ${post.title || 'Untitled'}`}
       onClick={onEdit}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEdit() } }}
     >
@@ -45,13 +47,12 @@ function PostRow({ post, onEdit, onDelete, onDuplicate }: {
         </div>
       </div>
 
-      <div className="hidden items-center gap-1.5 sm:flex">
+      <div className="hidden items-center gap-1.5 sm:flex" aria-hidden="true">
         {enabledPlatforms.map((p) => (
           <span
             key={p.platform}
             className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white"
             style={{ background: PLATFORM_COLORS[p.platform] }}
-            title={p.platform}
           >
             {p.platform[0].toUpperCase()}
           </span>
@@ -83,16 +84,16 @@ function PostRow({ post, onEdit, onDelete, onDuplicate }: {
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onDuplicate() }}
+          aria-label="Duplicate post"
           className="rounded p-1 text-text-muted transition-colors hover:bg-surface-alt hover:text-text-primary"
-          title="Duplicate"
         >
           <Copy size={14} />
         </button>
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onDelete() }}
+          aria-label="Delete post"
           className="rounded p-1 text-text-muted transition-colors hover:bg-danger-subtle hover:text-danger-text"
-          title="Delete"
         >
           <Trash2 size={14} />
         </button>
@@ -103,6 +104,7 @@ function PostRow({ post, onEdit, onDelete, onDuplicate }: {
 
 export default function SocialDashboard() {
   const { socialPosts, deleteSocialPost, duplicateSocialPost } = useStore()
+  const { toast } = useToast()
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<SocialPostStatus | 'all'>('all')
@@ -141,38 +143,51 @@ export default function SocialDashboard() {
     setEditingPost(null)
   }
 
+  const handleDelete = (id: string) => {
+    deleteSocialPost(id)
+    toast('Post deleted', 'success')
+  }
+
+  const handleDuplicate = (id: string) => {
+    duplicateSocialPost(id)
+    toast('Post duplicated', 'success')
+  }
+
   return (
     <div className="scroll-slim h-full overflow-y-auto p-4 sm:p-6 md:p-8">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Share2 size={22} className="shrink-0 text-primary" />
         <div>
           <h1 className="text-xl font-semibold text-text-primary sm:text-2xl">Social Scheduler</h1>
           <p className="mt-0.5 text-sm text-text-secondary">Compose, schedule, and track posts across platforms.</p>
         </div>
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex flex-wrap items-center gap-1.5">
           <button
             type="button"
             onClick={() => navigate('/social/calendar')}
+            aria-label="Open calendar view"
             className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
           >
             <CalendarDays size={14} />
-            Calendar
+            <span className="hidden sm:inline">Calendar</span>
           </button>
           <button
             type="button"
             onClick={() => navigate('/social/analytics')}
+            aria-label="Open analytics view"
             className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
           >
             <BarChart3 size={14} />
-            Analytics
+            <span className="hidden sm:inline">Analytics</span>
           </button>
           <button
             type="button"
             onClick={() => setImportExportOpen(true)}
+            aria-label="Open import/export panel"
             className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
           >
             <Download size={14} />
-            Import/Export
+            <span className="hidden sm:inline">Import/Export</span>
           </button>
         </div>
       </div>
@@ -183,6 +198,7 @@ export default function SocialDashboard() {
           <input
             type="text"
             placeholder="Search posts..."
+            aria-label="Search social posts"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-md border border-border-strong bg-surface py-1.5 pl-8 pr-3 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
@@ -195,6 +211,7 @@ export default function SocialDashboard() {
               key={s}
               type="button"
               onClick={() => setStatusFilter(s)}
+              aria-pressed={statusFilter === s}
               className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
                 statusFilter === s
                   ? 'bg-primary text-primary-foreground'
@@ -238,8 +255,8 @@ export default function SocialDashboard() {
               key={post.id}
               post={post}
               onEdit={() => handleEdit(post)}
-              onDelete={() => deleteSocialPost(post.id)}
-              onDuplicate={() => duplicateSocialPost(post.id)}
+              onDelete={() => handleDelete(post.id)}
+              onDuplicate={() => handleDuplicate(post.id)}
             />
           ))
         )}

@@ -19,6 +19,8 @@ function PlatformChip({ platform, enabled, onToggle }: {
     <button
       type="button"
       onClick={onToggle}
+      aria-pressed={enabled}
+      aria-label={`${platform.charAt(0).toUpperCase() + platform.slice(1)}: ${enabled ? 'enabled' : 'disabled'}`}
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold transition-all ${
         enabled
           ? 'border-transparent text-white shadow-subtle'
@@ -232,18 +234,19 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
   }
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-labelledby="compose-modal-title">
       <div className="absolute inset-0 bg-[#0f1a19]/50 backdrop-blur-sm" onClick={handleClose} />
       <div className="relative z-10 flex h-full items-start justify-center overflow-y-auto p-3 pt-8 sm:pt-16">
       <div className="animate-in flex w-full max-w-2xl flex-col rounded-[14px] border border-border bg-surface shadow-modal">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="text-base font-semibold text-text-primary">
+          <h2 id="compose-modal-title" className="text-base font-semibold text-text-primary">
             {isEditing ? 'Edit Social Post' : 'Compose Social Post'}
           </h2>
           <button
             type="button"
             onClick={handleClose}
+            aria-label="Close compose dialog"
             className="rounded-md p-1 text-text-muted transition-colors hover:bg-surface-alt hover:text-text-primary"
           >
             <X size={18} />
@@ -285,6 +288,7 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
               <button
                 type="button"
                 onClick={() => setAiOpen(true)}
+                aria-label="Generate caption with AI"
                 className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary-subtle"
               >
                 <Sparkles size={12} />
@@ -317,6 +321,7 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
                   <button
                     type="button"
                     onClick={() => removeMediaFromPost(post?.id ?? '', m.id)}
+                    aria-label={`Remove ${m.name}`}
                     className="absolute right-0.5 top-0.5 rounded-full bg-danger p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
                   >
                     <X size={10} />
@@ -324,7 +329,7 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
                 </div>
               ))}
               <label className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-border-strong bg-surface-alt transition-colors hover:border-primary">
-                <input type="file" accept="image/*,video/*,audio/*" multiple onChange={handleMediaUpload} className="hidden" />
+                <input type="file" accept="image/*,video/*,audio/*" multiple onChange={handleMediaUpload} className="hidden" aria-label="Upload media file" />
                 <Plus size={20} className="text-text-muted" />
               </label>
             </div>
@@ -386,7 +391,7 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-border px-4 py-3">
+        <div className="flex flex-col-reverse gap-2 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
           <Button variant="ghost" onClick={handleClose}>Cancel</Button>
           <Button variant="secondary" onClick={() => handleSave('draft')}>Save Draft</Button>
           <Button variant="primary" onClick={() => handleSave('scheduled')}>Schedule</Button>

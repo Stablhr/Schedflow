@@ -85,6 +85,7 @@ export default function SocialCalendarView() {
             type="button"
             className={navButtonClass}
             title="Previous week"
+            aria-label="Go to previous week"
             onClick={() => setWeekStart((w) => addDays(w, -DAY_COUNT))}
           >
             <ChevronLeft size={16} />
@@ -92,6 +93,7 @@ export default function SocialCalendarView() {
           <button
             type="button"
             onClick={() => setWeekStart(startOfWeek())}
+            aria-label="Go to current week"
             className="rounded-md px-2 py-1 text-xs font-semibold text-primary-hover transition-colors duration-150 hover:bg-primary-subtle active:scale-[0.98]"
           >
             Today
@@ -100,6 +102,7 @@ export default function SocialCalendarView() {
             type="button"
             className={navButtonClass}
             title="Next week"
+            aria-label="Go to next week"
             onClick={() => setWeekStart((w) => addDays(w, DAY_COUNT))}
           >
             <ChevronRight size={16} />
@@ -111,6 +114,7 @@ export default function SocialCalendarView() {
         <button
           type="button"
           onClick={() => { setEditingPost(null); setComposeDate(undefined); setComposeOpen(true) }}
+          aria-label="Create new social post"
           className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-primary px-2.5 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary-hover active:scale-[0.98]"
         >
           <Plus size={14} />

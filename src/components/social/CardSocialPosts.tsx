@@ -49,6 +49,7 @@ function LinkedPostRow({ post, onUnlink }: { post: SocialPost; onUnlink: () => v
       <button
         type="button"
         onClick={onUnlink}
+        aria-label="Unlink post"
         className="shrink-0 rounded p-0.5 text-text-muted transition-colors hover:bg-danger-subtle hover:text-danger-text"
         title="Unlink post"
       >
@@ -90,10 +91,11 @@ export default function CardSocialPosts({ cardId }: { cardId: string }) {
           <LinkedPostRow key={post.id} post={post} onUnlink={() => handleUnlink(post.id)} />
         ))}
 
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
           <button
             type="button"
             onClick={() => setComposeOpen(true)}
+            aria-label="Create new social post for this card"
             className="inline-flex items-center gap-1 rounded-md border border-dashed border-border-strong px-2 py-1.5 text-[11px] font-medium text-text-secondary transition-colors hover:border-primary hover:text-primary"
           >
             <Plus size={12} />
@@ -102,6 +104,7 @@ export default function CardSocialPosts({ cardId }: { cardId: string }) {
           <button
             type="button"
             onClick={() => setLinkModalOpen(true)}
+            aria-label="Link existing social post to this card"
             className="inline-flex items-center gap-1 rounded-md border border-dashed border-border-strong px-2 py-1.5 text-[11px] font-medium text-text-secondary transition-colors hover:border-primary hover:text-primary"
           >
             <Share2 size={12} />
@@ -119,20 +122,21 @@ export default function CardSocialPosts({ cardId }: { cardId: string }) {
       )}
 
       {linkModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-3">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-3" role="dialog" aria-modal="true" aria-labelledby="link-social-post-title">
           <div className="absolute inset-0 bg-[#0f1a19]/50" onClick={() => setLinkModalOpen(false)} />
           <div className="animate-in relative z-10 w-full max-w-sm rounded-[14px] border border-border bg-surface shadow-modal">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <h3 className="text-sm font-semibold text-text-primary">Link Social Post</h3>
+              <h3 id="link-social-post-title" className="text-sm font-semibold text-text-primary">Link Social Post</h3>
               <button
                 type="button"
                 onClick={() => setLinkModalOpen(false)}
+                aria-label="Close link modal"
                 className="rounded p-1 text-text-muted hover:text-text-primary"
               >
                 <X size={16} />
               </button>
             </div>
-            <div className="max-h-60 overflow-y-auto p-3">
+            <div className="max-h-60 overflow-y-auto p-3" aria-label="Available social posts to link">
               {unlinkedPosts.length === 0 ? (
                 <p className="py-4 text-center text-xs text-text-muted">No unlinked posts available.</p>
               ) : (

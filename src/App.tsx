@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AlertTriangle, X } from 'lucide-react'
 import { StoreProvider } from './store/StoreProvider'
+import ToastProvider from './components/shared/Toast'
 import { useStore } from './store/useStore'
 import AppShell from './components/layout/AppShell'
 import ErrorBoundary from './components/shared/ErrorBoundary'
@@ -46,6 +47,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <StoreProvider>
+        <ToastProvider>
         <AppShell>
           <ErrorBoundary>
             <Routes>
@@ -119,6 +121,7 @@ export default function App() {
           </ErrorBoundary>
         </AppShell>
         <ErrorToast />
+        </ToastProvider>
       </StoreProvider>
     </BrowserRouter>
   )

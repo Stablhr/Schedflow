@@ -39,6 +39,8 @@ export default function SocialPostCard({ post, index, onClick }: {
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
           tabIndex={0}
           role="button"
+          aria-label={`Social post: ${post.title || 'Untitled'}`}
+          aria-roledescription="draggable"
           className={`cursor-grab rounded-lg border border-border bg-surface p-2 active:cursor-grabbing ${
             snapshot.isDragging
               ? 'z-50 shadow-modal ring-2 ring-primary/40'
@@ -57,13 +59,12 @@ export default function SocialPostCard({ post, index, onClick }: {
               {post.caption.slice(0, 60)}{post.caption.length > 60 ? '...' : ''}
             </p>
           )}
-          <div className="mt-1 flex items-center gap-1 pl-[18px]">
+          <div className="mt-1 flex items-center gap-1 pl-[18px]" aria-hidden="true">
             {enabledPlatforms.map((p) => (
               <span
                 key={p.platform}
                 className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full text-[7px] font-bold text-white"
                 style={{ background: PLATFORM_COLORS[p.platform] }}
-                title={p.platform}
               >
                 {p.platform[0].toUpperCase()}
               </span>

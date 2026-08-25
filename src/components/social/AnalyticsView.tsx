@@ -25,7 +25,7 @@ function PlatformBar({ platform, reach, maxReach }: { platform: string; reach: n
     <div className="flex items-center gap-3">
       <span className="w-20 shrink-0 text-xs font-medium capitalize text-text-secondary">{platform}</span>
       <div className="flex-1">
-        <div className="h-4 overflow-hidden rounded-full bg-surface-alt">
+        <div className="h-4 overflow-hidden rounded-full bg-surface-alt" role="progressbar" aria-label={`${platform}: ${reach} reach`} aria-valuemin={0} aria-valuemax={maxReach} aria-valuenow={reach}>
           <div
             className="h-full rounded-full transition-all duration-500"
             style={{ width: `${pct}%`, background: color }}
@@ -66,6 +66,7 @@ export default function AnalyticsView() {
         <button
           type="button"
           onClick={() => navigate('/social')}
+          aria-label="Back to Social Dashboard"
           className="flex h-7 w-7 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
         >
           <ArrowLeft size={16} />

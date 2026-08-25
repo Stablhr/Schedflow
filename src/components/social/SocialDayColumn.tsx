@@ -17,7 +17,7 @@ export default function SocialDayColumn({ date, isToday, posts, onPostClick, onE
   const isoDate = toISODate(date)
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col">
+    <div className="flex min-w-0 flex-1 flex-col" aria-label={`${dayLabel} ${dayNum}`}>
       <div
         className={`mb-2 rounded-md px-2 py-1.5 text-center ${
           isToday ? 'bg-primary text-primary-foreground' : 'bg-surface-alt'
@@ -40,7 +40,8 @@ export default function SocialDayColumn({ date, isToday, posts, onPostClick, onE
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`scroll-slim min-h-[120px] flex-1 rounded-lg p-1.5 transition-colors duration-150 ${
+            aria-label={`Posts scheduled for ${dayLabel} ${dayNum}`}
+            className={`scroll-slim min-h-[80px] flex-1 rounded-lg p-1.5 transition-colors duration-150 sm:min-h-[120px] ${
               snapshot.isDraggingOver
                 ? 'bg-primary-subtle/60 ring-2 ring-inset ring-primary'
                 : 'ring-1 ring-border'
@@ -54,6 +55,7 @@ export default function SocialDayColumn({ date, isToday, posts, onPostClick, onE
                 <button
                   type="button"
                   onClick={() => onEmptySlotClick(isoDate)}
+                  aria-label={`Add post on ${dayLabel} ${dayNum}`}
                   className="flex min-h-[60px] items-center justify-center rounded-md border border-dashed border-border-strong text-xs text-text-muted transition-colors hover:border-primary hover:text-primary"
                 >
                   + Add post
