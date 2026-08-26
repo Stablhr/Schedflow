@@ -7,6 +7,7 @@ import Button from '../shared/Button'
 import { Input, Textarea } from '../shared/Input'
 import SectionLabel from '../shared/SectionLabel'
 import AIGenerateModal from './AIGenerateModal'
+import { uploadFile } from '../../lib/api/client'
 
 const ALL_PLATFORMS: Platform[] = ['youtube', 'facebook', 'tiktok', 'instagram']
 
@@ -174,24 +175,47 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
     })
   }
 
-  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader()
-      reader.onload = () => {
-        const attachment: SocialMediaAttachment = {
+    const uploadPromises = Array.from(files).map(async (file) => {
+      const mediaType: SocialMediaAttachment['type'] = file.type.startsWith('video/')
+        ? 'video'
+        : file.type.startsWith('audio/')
+          ? 'audio'
+          : 'image'
+      try {
+        const result = await uploadFile(file)
+        return {
           id: `media-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          type: file.type.startsWith('video/') ? 'video' : file.type.startsWith('audio/') ? 'audio' : 'image',
+          type: mediaType,
           name: file.name,
-          dataUrl: reader.result as string,
+          dataUrl: result.storageUrl,
+          storageUrl: result.storageUrl,
           size: file.size,
+          mimeType: result.mimeType,
           platformCompat: ALL_PLATFORMS,
-        }
-        setMedia((prev) => [...prev, attachment])
+        } as SocialMediaAttachment
+      } catch {
+        // Fallback to base64 if API is unavailable
+        return new Promise<SocialMediaAttachment>((resolve) => {
+          const reader = new FileReader()
+          reader.onload = () => {
+            resolve({
+              id: `media-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+              type: mediaType,
+              name: file.name,
+              dataUrl: reader.result as string,
+              size: file.size,
+              platformCompat: ALL_PLATFORMS,
+            })
+          }
+          reader.readAsDataURL(file)
+        })
       }
-      reader.readAsDataURL(file)
     })
+    const results = await Promise.all(uploadPromises)
+    setMedia((prev) => [...prev, ...results])
     e.target.value = ''
   }
 

@@ -15,7 +15,9 @@ const STATUS_CONFIG: Record<SocialPostStatus, { label: string; color: string; ic
   scheduled: { label: 'Scheduled', color: 'text-info-text', icon: Clock },
   publishing: { label: 'Publishing', color: 'text-warning-text', icon: AlertCircle },
   posted: { label: 'Posted', color: 'text-success-text', icon: CheckCircle2 },
+  partially_published: { label: 'Partial', color: 'text-warning-text', icon: AlertCircle },
   failed: { label: 'Failed', color: 'text-danger-text', icon: XCircle },
+  cancelled: { label: 'Cancelled', color: 'text-text-muted', icon: XCircle },
 }
 
 function PostRow({ post, onEdit, onDelete, onDuplicate }: {

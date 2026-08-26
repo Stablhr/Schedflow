@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { AppData, Board, Card, List, Label, Share, SocialPost, SocialPostPlatform, SocialMediaAttachment, SocialAnalytics, Platform, ThemeMode } from './schema'
-import { BOARD_TEMPLATES, PLATFORM_DEFAULTS, emptyData } from './schema'
-import { clearData, loadData, saveData, loadSocialPosts, saveSocialPosts } from './storage'
+import { BOARD_TEMPLATES, emptyData } from './schema'
+import { clearData, loadData, saveData } from './storage'
 import { StoreContext } from './useStore'
 import type { Store } from './useStore'
 import { uid } from '../utils/id'
 import { formatDate } from '../utils/dates'
+import { useSocialPosts } from '../lib/hooks/useSocialPosts'
 
 function patchRecord<T extends { id: string }>(
   rec: Record<string, T>,
@@ -60,12 +61,12 @@ function withCardAdded(prev: AppData, card: Card): AppData {
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData>(() => loadData())
-  const [socialPosts, setSocialPosts] = useState<SocialPost[]>(() => loadSocialPosts())
   const [error, setError] = useState<string | null>(null)
   const dataRef = useRef(data)
   dataRef.current = data
-  const socialPostsRef = useRef(socialPosts)
-  socialPostsRef.current = socialPosts
+
+  // Social posts: API-first with localStorage fallback
+  const social = useSocialPosts()
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -79,21 +80,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [data])
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      try {
-        saveSocialPosts(socialPostsRef.current)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Could not save social posts.')
-      }
-    }, 400)
-    return () => window.clearTimeout(timer)
-  }, [socialPosts])
-
-  useEffect(() => {
     const flush = () => {
       try {
         saveData(dataRef.current)
-        saveSocialPosts(socialPostsRef.current)
       } catch {
         // best effort on unload
       }
@@ -834,141 +823,64 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setData(emptyData())
   }
 
-  /* ── Social Posts ────────────────────────────────────────── */
-
-  const mutateSocialPosts = useCallback((fn: (prev: SocialPost[]) => SocialPost[]) => {
-    setSocialPosts(fn)
-  }, [])
+  /* ── Social Posts (delegated to useSocialPosts hook) ──────────── */
 
   const addSocialPost = (input: Omit<SocialPost, 'id' | 'createdAt' | 'updatedAt'>): SocialPost => {
-    const post: SocialPost = {
+    // Synchronous wrapper — fires API call in background, returns optimistic result
+    const optimistic: SocialPost = {
       ...input,
       id: uid(),
       createdAt: now(),
       updatedAt: now(),
     }
-    mutateSocialPosts((prev) => [post, ...prev])
-    return post
+    social.addPost(input).catch(() => {})
+    return optimistic
   }
 
   const updateSocialPost = (id: string, patch: Partial<SocialPost>) =>
-    mutateSocialPosts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...patch, updatedAt: now() } : p)),
-    )
+    social.updatePost(id, patch)
 
   const deleteSocialPost = (id: string) =>
-    mutateSocialPosts((prev) => prev.filter((p) => p.id !== id))
+    social.deletePost(id)
 
-  const duplicateSocialPost = (id: string): SocialPost | null => {
-    const original = socialPosts.find((p) => p.id === id)
-    if (!original) return null
-    const copy: SocialPost = {
-      ...original,
-      id: uid(),
-      title: `${original.title} (copy)`,
-      status: 'draft',
-      scheduledDate: undefined,
-      scheduledTime: undefined,
-      createdAt: now(),
-      updatedAt: now(),
-    }
-    mutateSocialPosts((prev) => [copy, ...prev])
-    return copy
-  }
+  const duplicateSocialPost = (id: string): SocialPost | null =>
+    social.duplicatePost(id)
 
   const moveSocialPost = (id: string, newDate: string, newTime?: string) =>
-    mutateSocialPosts((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? { ...p, scheduledDate: newDate, scheduledTime: newTime ?? p.scheduledTime, updatedAt: now() }
-          : p,
-      ),
-    )
+    social.movePost(id, newDate, newTime)
 
   const getSocialPostsByDate = (date: string): SocialPost[] =>
-    socialPosts.filter((p) => p.scheduledDate === date)
+    social.getByDate(date)
 
   const getSocialPostsByPlatform = (platform: Platform): SocialPost[] =>
-    socialPosts.filter((p) => p.platforms.some((pl) => pl.platform === platform && pl.enabled))
+    social.getByPlatform(platform)
 
   const getSocialPostsByStatus = (status: SocialPost['status']): SocialPost[] =>
-    socialPosts.filter((p) => p.status === status)
+    social.getByStatus(status)
 
   const getSocialPostsByCard = (cardId: string): SocialPost[] =>
-    socialPosts.filter((p) => p.cardId === cardId)
+    social.getByCard(cardId)
 
   const getUnscheduledPosts = (): SocialPost[] =>
-    socialPosts.filter((p) => !p.scheduledDate)
+    social.getUnscheduled()
 
   const addPlatformToPost = (postId: string, platform: Platform) =>
-    mutateSocialPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p
-        if (p.platforms.some((pl) => pl.platform === platform)) return p
-        const defaults = PLATFORM_DEFAULTS[platform]
-        const entry: SocialPostPlatform = {
-          platform,
-          enabled: true,
-          status: 'pending',
-          caption: defaults.caption ?? '',
-          hashtags: defaults.hashtags ? [...defaults.hashtags] : [],
-          mentions: [],
-          visibility: defaults.visibility ?? 'public',
-        }
-        return { ...p, platforms: [...p.platforms, entry], updatedAt: now() }
-      }),
-    )
+    social.addPlatform(postId, platform)
 
   const removePlatformFromPost = (postId: string, platform: Platform) =>
-    mutateSocialPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? { ...p, platforms: p.platforms.filter((pl) => pl.platform !== platform), updatedAt: now() }
-          : p,
-      ),
-    )
+    social.removePlatform(postId, platform)
 
   const updatePostPlatform = (postId: string, platform: Platform, patch: Partial<SocialPostPlatform>) =>
-    mutateSocialPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p
-        return {
-          ...p,
-          platforms: p.platforms.map((pl) =>
-            pl.platform === platform ? { ...pl, ...patch } : pl,
-          ),
-          updatedAt: now(),
-        }
-      }),
-    )
+    social.updatePlatform(postId, platform, patch)
 
   const addMediaToPost = (postId: string, media: Omit<SocialMediaAttachment, 'id'>) =>
-    mutateSocialPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p
-        const attachment: SocialMediaAttachment = { ...media, id: uid() }
-        return { ...p, media: [...p.media, attachment], updatedAt: now() }
-      }),
-    )
+    social.addMedia(postId, media)
 
   const removeMediaFromPost = (postId: string, mediaId: string) =>
-    mutateSocialPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? { ...p, media: p.media.filter((m) => m.id !== mediaId), updatedAt: now() }
-          : p,
-      ),
-    )
+    social.removeMedia(postId, mediaId)
 
   const updatePostAnalytics = (postId: string, platform: Platform, analytics: SocialAnalytics) =>
-    mutateSocialPosts((prev) =>
-      prev.map((p) => {
-        if (p.id !== postId) return p
-        const existing = p.analytics ?? []
-        const updated = existing.filter((a) => a.platform !== platform)
-        return { ...p, analytics: [...updated, analytics], updatedAt: now() }
-      }),
-    )
+    social.updateAnalytics(postId, platform, analytics)
 
   const boards = useMemo(
     () => Object.values(data.boards).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
@@ -1025,7 +937,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     createShareLink,
     setDarkMode,
     resetAll,
-    socialPosts,
+    socialPosts: social.posts,
     addSocialPost,
     updateSocialPost,
     deleteSocialPost,

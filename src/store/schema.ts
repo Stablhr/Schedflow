@@ -125,9 +125,9 @@ export interface InboxItem {
 
 export type Platform = 'youtube' | 'facebook' | 'tiktok' | 'instagram'
 
-export type SocialPostStatus = 'draft' | 'scheduled' | 'publishing' | 'posted' | 'failed'
+export type SocialPostStatus = 'draft' | 'scheduled' | 'publishing' | 'posted' | 'partially_published' | 'failed' | 'cancelled'
 
-export type PlatformStatus = 'pending' | 'scheduled' | 'publishing' | 'posted' | 'failed'
+export type PlatformStatus = 'pending' | 'scheduled' | 'publishing' | 'posted' | 'failed' | 'cancelled'
 
 export type RepeatFrequency = 'none' | 'daily' | 'weekdays' | 'weekly' | 'biweekly' | 'monthly'
 
@@ -146,8 +146,15 @@ export interface SocialPostPlatform {
   deepLink?: string
   publishedUrl?: string
   platformPostId?: string
+  externalPostId?: string
   error?: string
+  errorCode?: string
   publishedAt?: string
+  retryCount?: number
+  maxRetries?: number
+  lastAttemptAt?: string
+  nextRetryAt?: string
+  idempotencyKey?: string
 }
 
 export interface SocialMediaAttachment {
@@ -155,10 +162,16 @@ export interface SocialMediaAttachment {
   type: MediaType
   name: string
   dataUrl: string
+  storageUrl?: string
   size: number
   thumbnail?: string
+  thumbnailUrl?: string
+  mimeType?: string
   duration?: number
+  width?: number
+  height?: number
   platformCompat: Platform[]
+  uploadedAt?: string
 }
 
 export interface SocialAnalytics {
@@ -191,6 +204,8 @@ export interface SocialPost {
   cardId?: string
   scheduledDate?: string
   scheduledTime?: string
+  scheduledAt?: string
+  timezone?: string
   status: SocialPostStatus
   repeat: RepeatFrequency
   repeatUntil?: string

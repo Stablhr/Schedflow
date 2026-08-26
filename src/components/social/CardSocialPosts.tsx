@@ -10,7 +10,9 @@ const STATUS_ICONS: Record<SocialPostStatus, typeof Clock> = {
   scheduled: Clock,
   publishing: AlertCircle,
   posted: CheckCircle2,
+  partially_published: AlertCircle,
   failed: XCircle,
+  cancelled: XCircle,
 }
 
 const STATUS_COLORS: Record<SocialPostStatus, string> = {
@@ -18,7 +20,9 @@ const STATUS_COLORS: Record<SocialPostStatus, string> = {
   scheduled: 'text-info-text',
   publishing: 'text-warning-text',
   posted: 'text-success-text',
+  partially_published: 'text-warning-text',
   failed: 'text-danger-text',
+  cancelled: 'text-text-muted',
 }
 
 function LinkedPostRow({ post, onUnlink }: { post: SocialPost; onUnlink: () => void }) {
