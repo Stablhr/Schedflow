@@ -88,9 +88,7 @@ export default function AccountConnectionPanel() {
   }
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-text">Connected Accounts</h3>
-
+    <div className="space-y-3">
       {(Object.entries(PLATFORM_CONFIG) as Array<[string, typeof PLATFORM_CONFIG[keyof typeof PLATFORM_CONFIG]]>).map(
         ([platform, config]) => {
           const platformAccounts = getAccountsForPlatform(platform)
