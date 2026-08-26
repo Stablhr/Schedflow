@@ -1,9 +1,10 @@
 # Social Media Management (SMM) Scheduler — Implementation Plan
 
-> **Status**: Planning
+> **Status**: Phases 1-3 Complete, Phase 4 Next
 > **Date**: 2026-08-26
 > **Scope**: Full production automatic publishing system
 > **Platforms**: YouTube, Facebook, Instagram, TikTok
+> **Stack**: Vercel serverless + MongoDB + Vercel Cron + Vercel Blob
 
 ---
 
@@ -1151,69 +1152,88 @@ These stay server-side only. The frontend communicates exclusively through the R
 
 ## 23. Phased Implementation Plan
 
-### Phase 1: Backend Foundation (Week 1-2)
+> **Actual stack**: Vercel serverless + MongoDB (Mongoose) + Vercel Cron
+> **Auth**: Single-user mode (no login/signup yet)
 
-- Set up Node.js + Hono server with TypeScript
-- PostgreSQL database + Drizzle ORM schema
-- User authentication (session-based)
-- `SocialAccount` model + CRUD endpoints
-- OAuth flow for YouTube (most straightforward API)
-- OAuth flow for Facebook (most mature API, needed for Instagram)
-- Encrypted token storage (AES-256-GCM)
-- REST API for social posts CRUD
-- Frontend API client (replace localStorage reads/writes)
+### Phase 1: Backend Foundation ✅ DONE
 
-### Phase 2: Media & Publishing Core (Week 2-3)
+- [x] Vercel serverless API setup (`/api/` directory)
+- [x] MongoDB connection singleton + Mongoose schemas (SocialPost, SocialAccount)
+- [x] Social posts CRUD endpoints (`/api/social-posts`, `/api/social-posts/:id`)
+- [x] Social accounts CRUD endpoints (`/api/social-accounts`)
+- [x] Media upload to Vercel Blob (`/api/media/upload`)
+- [x] Frontend API client layer (`src/lib/api/client.ts`, `social-posts.ts`, `social-accounts.ts`)
+- [x] `useSocialPosts` hook with API-first + localStorage fallback
+- [x] StoreProvider refactored to delegate social posts to hook
+- [x] Schema updated with `storageUrl`, `externalPostId`, retry fields, new statuses
+- [x] ComposeModal uploads to cloud storage with base64 fallback
+- [x] Vite proxy config for local dev (`/api` → `localhost:3000`)
+- **Files**: `api/_lib/`, `api/social-posts/`, `api/social-accounts/`, `api/media/`, `src/lib/`
+- **Plan**: `docs/phase-1-backend-foundation.md`
 
-- Cloud file storage integration (R2 or S3)
-- Media upload endpoint (streaming to cloud)
-- Media validation service (per-platform rules)
-- `PublishingJob` model + audit logging
-- BullMQ job queue setup with Redis
-- Basic polling scheduler (60s interval)
-- YouTube publisher adapter
-- Facebook publisher adapter
-- Retry logic with exponential backoff
+### Phase 2: OAuth + Publishing Core ✅ DONE
 
-### Phase 3: Instagram + TikTok + Resilience (Week 3-4)
+- [x] Token encryption (AES-256-GCM) for OAuth tokens at rest
+- [x] YouTube OAuth flow (Google OAuth → channel info → encrypted storage)
+- [x] Facebook OAuth flow (Facebook OAuth → long-lived token → page tokens → encrypted storage)
+- [x] PublishingJob Mongoose schema with idempotency key, retry tracking, lock mechanism
+- [x] YouTube publisher adapter (resumable upload via `videos.insert`)
+- [x] Facebook publisher adapter (photo/video/carousel/text via Graph API)
+- [x] Publishing jobs API (`/api/publishing-jobs`)
+- [x] Cron scheduler (`/api/cron/publish`) — runs every minute, processes due jobs, exponential backoff retry
+- [x] Token refresh API (`/api/auth/refresh`)
+- [x] Frontend: AccountConnectionPanel (connect/disconnect YouTube & Facebook)
+- [x] Frontend: PublishStatusBadge component
+- [x] Vercel cron config added
+- **Files**: `api/_lib/oauth.ts`, `api/_lib/publishers/`, `api/auth/youtube/`, `api/auth/facebook/`, `api/cron/`, `api/publishing-jobs/`
+- **Plan**: `docs/phase-2-oauth-publishing.md`
 
-- Instagram publisher adapter (two-step container process)
-- TikTok publisher adapter (Direct Post)
-- OAuth flows for Instagram (via Facebook Login) and TikTok
-- Token refresh background service (refresh before expiry)
-- Idempotency key system (prevent duplicate publishes)
-- Dead-letter queue for permanently failed jobs
-- Concurrency limits per platform
-- Partial failure handling (per-platform status updates)
+### Phase 3: Instagram + TikTok + Resilience ✅ DONE
 
-### Phase 4: Frontend Production Integration (Week 4-5)
+- [x] Instagram publisher adapter (two-step container: create → poll → publish; false-failure detection)
+- [x] TikTok publisher adapter (Direct Post: creator query → init upload → PUT binary → poll status)
+- [x] Instagram OAuth (via Facebook Login → `instagram_business_account`)
+- [x] TikTok OAuth (TikTok OAuth → `video.publish` scope → user info)
+- [x] Token refresh cron (`/api/cron/refresh-tokens`) — runs every 6 hours
+- [x] All 4 publishers registered in cron scheduler
+- [x] AccountConnectionPanel updated for all 4 platforms
+- [x] Auth refresh handles all 4 platforms
+- **Files**: `api/_lib/publishers/instagram.ts`, `api/_lib/publishers/tiktok.ts`, `api/auth/instagram/`, `api/auth/tiktok/`, `api/cron/refresh-tokens.ts`
+- **Plan**: `docs/phase-3-instagram-tiktok.md`
 
-- Replace localStorage social posts with API calls (React Query)
-- Social account connection UI (OAuth redirect flow)
-- Real-time status updates (polling or SSE)
-- Media upload to cloud storage (streaming)
-- Timezone selection in composer
-- Publishing preview with pre-publish platform validation
-- Reschedule / cancel / retry UI controls
+### Phase 4: Frontend Production Integration (NEXT)
 
-### Phase 5: Notifications & Polish (Week 5-6)
+- [ ] Real-time status updates (poll `/api/social-posts/:id` every 10s while publishing)
+- [ ] Reschedule UI (drag on calendar → `PUT /api/social-posts/:id` with new `scheduledDate`)
+- [ ] Cancel publish button (sets status to `cancelled`, removes from cron queue)
+- [ ] Retry failed button (creates new `PublishingJob` with reset retryCount)
+- [ ] Timezone selector in ComposeModal (stores `timezone` field, converts `scheduledAt` to UTC)
+- [ ] Publishing preview panel (shows per-platform caption, hashtags, media validation before scheduling)
+- [ ] Pre-publish validation (calls `publisher.validate()` before creating PublishingJob)
+- [ ] Platform status breakdown in post detail (per-platform status, error details, retry count)
+- [ ] Post detail modal showing publishing job history
 
-- Server-side notification service
-- Inbox integration for publish events
-- Dashboard widgets (scheduled today, failed posts, connected accounts)
-- Error recovery UI
-- Rate limit handling with user-friendly messages
-- Analytics from real platform APIs (YouTube Analytics, Facebook Insights, Instagram Insights)
+### Phase 5: Notifications & Polish
 
-### Phase 6: Advanced Features (Week 6+)
+- [ ] Server-side notification service (MongoDB collection for notifications)
+- [ ] Inbox integration for publish events (success, failure, retry)
+- [ ] Dashboard widgets: Scheduled Today, Failed Posts, Connected Accounts, This Week Overview
+- [ ] Error recovery UI (bulk retry failed posts, clear dead-letter jobs)
+- [ ] Rate limit handling with user-friendly messages (per-platform rate limit display)
+- [ ] Real analytics from platform APIs (YouTube Analytics API, Facebook Insights, Instagram Insights, TikTok Analytics)
+- [ ] Analytics dashboard with real data (replace mock data)
+- [ ] Export analytics to CSV
 
-- Recurring post scheduler
-- Bulk scheduling
-- Content library / media reuse
-- Team collaboration on social posts
-- Advanced analytics dashboard
-- A/B testing for post content
-- Calendar integration (Google Calendar, Outlook)
+### Phase 6: Advanced Features
+
+- [ ] Recurring post scheduler (daily/weekly/monthly patterns, `repeatUntil` date)
+- [ ] Bulk scheduling (select multiple posts, batch schedule)
+- [ ] Content library / media reuse (stored media assets, templates)
+- [ ] Team collaboration on social posts (multi-user auth, roles, approval workflow)
+- [ ] Advanced analytics dashboard (engagement trends, best posting times, A/B results)
+- [ ] A/B testing for post content (auto-variant generation, performance comparison)
+- [ ] Calendar integration (Google Calendar, Outlook sync)
+- [ ] Webhook support for external integrations
 
 ---
 
