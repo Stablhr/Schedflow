@@ -1,1504 +1,1239 @@
-# Social Media Post Scheduler — Implementation Plan
+# Social Media Management (SMM) Scheduler — Implementation Plan
 
-> **Status**: Planning  
-> **Date**: 2026-08-25  
-> **Scope**: React/TypeScript/Vite SPA — no backend  
-> **Principle**: All features are local-first prototype. Real API publishing, OAuth, and backend infrastructure are explicitly out-of-scope for MVP.
+> **Status**: Planning
+> **Date**: 2026-08-26
+> **Scope**: Full production automatic publishing system
+> **Platforms**: YouTube, Facebook, Instagram, TikTok
 
 ---
 
 ## Table of Contents
 
-1. [Feature Overview](#1-feature-overview)
-2. [Goals](#2-goals)
-3. [Non-Goals](#3-non-goals)
-4. [Architecture Overview](#4-architecture-overview)
-5. [Data Model](#5-data-model)
-6. [Platform Models](#6-platform-models)
-7. [Store Methods](#7-store-methods)
-8. [Composer UX](#8-composer-ux)
-9. [Calendar UX](#9-calendar-ux)
-10. [Card ↔ Social Post Interlinking](#10-card--social-post-interlinking)
-11. [Media Attachments](#11-media-attachments)
-12. [Platform Content Overrides](#12-platform-content-overrides)
-13. [Draft Saves](#13-draft-saves)
-14. [Scheduling & Smart Schedule](#14-scheduling--smart-schedule)
-15. [Deep Linking & Platform Apps](#15-deep-linking--platform-apps)
-16. [Analytics Dashboard](#16-analytics-dashboard)
-17. [Undo / Redo](#17-undo--redo)
-18. [JSON Import / Export](#18-json-import--export)
-19. [AI Caption Generation](#19-ai-caption-generation)
-20. [Browser Extension (Future)](#20-browser-extension-future)
-21. [Import from Other Tools (Future)](#21-import-from-other-tools-future)
-22. [Mobile Interface / Responsive Design](#22-mobile-interface--responsive-design)
-23. [Navigation & Routing](#23-navigation--routing)
-24. [localStorage Persistence](#24-localstorage-persistence)
-25. [Schema Versioning & Migration](#25-schema-versioning--migration)
-26. [Shared Components to Reuse](#26-shared-components-to-reuse)
-27. [New Components to Create](#27-new-components-to-create)
-28. [Platform-Specific Considerations](#28-platform-specific-considerations)
-29. [Security Considerations](#29-security-considerations)
-30. [Phased Implementation](#30-phased-implementation)
-31. [Risks & Open Questions](#31-risks--open-questions)
+1. [Current Project State](#1-current-project-state)
+2. [What Can Be Reused](#2-what-can-be-reused)
+3. [What Must Be Created](#3-what-must-be-created)
+4. [Two-Layer Architecture](#4-two-layer-architecture)
+5. [Production Architecture](#5-production-architecture)
+6. [Production Data Model](#6-production-data-model)
+7. [Social Account Model](#7-social-account-model)
+8. [Media Storage Architecture](#8-media-storage-architecture)
+9. [Platform API Integration](#9-platform-api-integration)
+10. [Platform Adapter Architecture](#10-platform-adapter-architecture)
+11. [Scheduling Engine](#11-scheduling-engine)
+12. [Job State Machine](#12-job-state-machine)
+13. [Timezone Handling](#13-timezone-handling)
+14. [Multi-Platform Partial Failure](#14-multi-platform-partial-failure)
+15. [OAuth / Account Connection](#15-oauth--account-connection)
+16. [Media Validation](#16-media-validation)
+17. [User Permissions](#17-user-permissions)
+18. [Notifications](#18-notifications)
+19. [Planner & Dashboard Integration](#19-planner--dashboard-integration)
+20. [Security Requirements](#20-security-requirements)
+21. [Reliability & Failure Handling](#21-reliability--failure-handling)
+22. [Technology Stack](#22-technology-stack)
+23. [Phased Implementation Plan](#23-phased-implementation-plan)
+24. [Risks & Mitigations](#24-risks--mitigations)
 
 ---
 
-## 1. Feature Overview
+## 1. Current Project State
 
-The Social Media Post Scheduler is a new top-level feature of SchedFlow that allows users to compose, customize, schedule, and track social media posts across YouTube, Facebook, TikTok, and Instagram — all from a single interface.
+### Frontend
+- **React 19.2.8** + **TypeScript 6.0.2** + **Vite 8.2.0**
+- **Tailwind CSS 4.3.3** with CSS-based theme tokens
+- **react-router-dom 7.18.2** — 9 routes
+- **@hello-pangea/dnd** — drag-and-drop
+- **lucide-react** — icons
+- **State**: React Context + `useState<AppData>` via `StoreProvider` (no Redux/Zustand)
+- **~100+ TSX/TS files** in `src/`
 
-The scheduler provides:
-- A **composer** for creating posts with per-platform content overrides
-- A **drag-and-drop calendar** for visual scheduling
-- A **deep linking** system to open platform apps from the browser
-- An **analytics dashboard** (demo data in local mode)
-- **Card interlinking** to tie social posts back to SchedFlow cards
-- **AI caption generation** (simulated locally, real API in production)
-- **Cross-platform scheduling** — one compose flow, multiple platforms simultaneously
+### Persistence
+- **localStorage only** — 4 keys:
+  - `schedflow_data` — boards, lists, cards, inbox, members, UI
+  - `schedflow-social-posts` — `SocialPost[]` array
+  - `schedflow_user_comment_reactions` — per-comment emoji reactions
+  - `schedflow-ai-tokens` — AI token counter
+- **5 MB browser limit**. Media stored as base64 data URLs (2 MB per-file cap)
+- **No IndexedDB, no cloud storage**
 
----
+### Backend / Database / Auth
+- **None.** Zero backend, zero database, zero authentication, zero API calls, zero environment files
+- All data is client-side only. The "member" is hardcoded (`member-you`)
 
-## 2. Goals
-
-| Goal | Description |
-|------|-------------|
-| **Unified scheduling** | One interface to create, customize, and schedule posts across all 4 platforms |
-| **Per-platform customization** | Each platform gets its own caption length, hashtags, tone, and content overrides |
-| **Visual scheduling** | Drag-and-drop calendar to rearrange and manage scheduled posts |
-| **Cross-platform** | Single compose → schedule to N platforms simultaneously |
-| **Draft support** | Auto-save drafts; resume later |
-| **Card integration** | Link social posts to existing SchedFlow cards for project context |
-| **Mobile-ready** | Responsive layout; usable on phones via browser (not native app) |
-| **Local-first** | All data persists in localStorage; works fully offline |
-| **Prototype-first** | Every feature ships as a working local prototype before any real API integration |
-| **Extensible** | Architecture supports adding new platforms (Twitter/X, LinkedIn, etc.) later |
-
----
-
-## 3. Non-Goals
-
-| Non-Goal | Reason |
-|----------|--------|
-| Real OAuth flows | No backend; platform login is simulated via manual token paste or QR codes |
-| Actual API publishing | No server to hold API keys or relay requests; posts stay local until future backend |
-| Native mobile apps | Responsive web only; no React Native or Capacitor |
-| Real analytics | Demo/mock data only; real analytics require API integrations |
-| Server-side scheduling | Scheduling is client-side (setTimeout / page-open check); no cron jobs |
-| Browser extension | Deferred to future phase; requires separate extension project |
-| AI caption generation (real) | Local mock/simulated; real API calls require backend proxy to hold API keys |
-| Import from other tools | Deferred to future phase; requires platform-specific import logic |
-| Real-time collaboration on social posts | Social posts are user-scoped, not board-scoped like cards |
-| Monetization / billing | Not applicable |
+### Existing Social Media Feature
+- Already built: `SocialPost` type, `SocialPostPlatform` per-platform overrides, `SocialMediaAttachment`, compose modal, calendar view, analytics view (all mock), deep links, import/export, AI caption generation (mock), card-to-post linking
+- **Status field**: `draft | scheduled | publishing | posted | failed`
+- **Platform statuses**: `pending | scheduled | publishing | posted | failed`
+- **Storage**: posts in localStorage as JSON array
 
 ---
 
-## 4. Architecture Overview
+## 2. What Can Be Reused
+
+| Component | Status |
+|---|---|
+| `SocialPost` data model | Built |
+| `SocialPostPlatform` multi-platform model | Built |
+| `SocialMediaAttachment` | Built |
+| Compose modal (platform selector, caption, media, scheduling) | Built |
+| Social Dashboard (post list, filters, status) | Built |
+| Social Calendar View (week view, drag-and-drop) | Built |
+| Analytics View (mock data) | Built |
+| Card ↔ Social Post linking | Built |
+| Deep links (basic) | Built |
+| Import/Export (JSON) | Built |
+| Platform limits/constants (`PLATFORM_LIMITS`, `PLATFORM_COLORS`) | Built |
+| Toast notification system | Built |
+| Shared UI components (Modal, Button, Input, Chip, etc.) | Built |
+| Date utilities (`formatDate`, `formatDateTime`, `addDays`, `isSameDay`) | Built |
+
+---
+
+## 3. What Must Be Created
+
+| Component | Status |
+|---|---|
+| Backend server | Must create |
+| Database (PostgreSQL) | Must create |
+| API layer (REST) | Must create |
+| Authentication system | Must create |
+| OAuth flow (per platform) | Must create |
+| Secure token storage (encrypted) | Must create |
+| Job scheduler / queue (BullMQ) | Must create |
+| Publishing workers | Must create |
+| Platform adapter services | Must create |
+| Media file storage (cloud object storage) | Must create |
+| Webhook handlers | Must create |
+| Server-side notification system | Must create |
+| Frontend API client (replace localStorage reads) | Must create |
+| Real-time status updates (SSE or polling) | Must create |
+| Timezone handling (IANA + UTC storage) | Must create |
+
+---
+
+## 4. Two-Layer Architecture
+
+The system has two distinct layers serving different purposes.
+
+### Layer 1: Local MVP (localStorage — current app)
+
+Purpose: UI development, testing, prototyping, offline use.
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│                     App Shell (AppShell.tsx)              │
-│  ┌─────────┐  ┌──────────────────────────────────────┐   │
-│  │ Sidebar  │  │  Content Area (react-router-dom)     │   │
-│  │          │  │                                      │   │
-│  │ Dashboard│  │  /social          → SocialDashboard  │   │
-│  │ Boards   │  │  /social/compose  → ComposeModal     │   │
-│  │ Planner  │  │  /social/calendar → CalendarView     │   │
-│  │ Social   │──│  /social/:id      → PostDetail       │   │
-│  │ Archive  │  │                                      │   │
-│  └─────────┘  └──────────────────────────────────────┘   │
-└──────────────────────────────────────────────────────────┘
-         │
-         ▼
-┌──────────────────────────────────────┐
-│         StoreProvider (Context)       │
-│  socialPosts: SocialPost[]           │
-│  addSocialPost / updateSocialPost    │
-│  deleteSocialPost / moveSocialPost   │
-│  ... (see §7)                        │
-└──────────────────────────────────────┘
-         │
-         ▼
-┌──────────────────────────────────────┐
-│        localStorage (storage.ts)     │
-│  Key: "schedflow-social-posts"       │
-│  Schema version: 2                   │
-└──────────────────────────────────────┘
+React Frontend
+    |
+    v
+StoreProvider (React Context)
+    |
+    v
+localStorage (debounced save)
+```
+
+This layer is **already built** and handles:
+- Creating/editing/deleting social posts
+- Calendar visualization
+- Platform content customization
+- Draft management
+- Mock scheduling (status transitions on page load)
+- Deep links (manual publish workaround)
+- Mock analytics, mock AI
+
+LocalStorage is appropriate for:
+- UI prototypes
+- Draft posts
+- Temporary post data
+- Calendar UI
+- Mock scheduled posts
+- Simulated publishing
+- Testing the composer
+- Testing validation
+
+**LocalStorage MUST NOT be the production scheduler.** The production scheduler must work when the browser is closed, the computer is off, and the user is logged out.
+
+### Layer 2: Production Architecture (server-side)
+
+Purpose: Real automatic publishing independent of the browser.
+
+```
+React Frontend (API client)
+    |
+    v
+REST API (Hono / Express / Fastify)
+    |
+    v
+Database (PostgreSQL + Drizzle ORM)
+    |
+    v
+OAuth Token Vault (encrypted at rest)
+    |
+    v
+Job Scheduler (poll DB every 60s for due posts)
+    |
+    v
+Job Queue (BullMQ / Redis)
+    |
+    v
+Platform Adapter Service
+    |-- YouTubePublisher
+    |-- FacebookPublisher
+    |-- InstagramPublisher
+    |-- TikTokPublisher
+    |
+    v
+Platform APIs (Official)
+```
+
+---
+
+## 5. Production Architecture
+
+### System Diagram
+
+```
+                         +-------------------+
+                         |  React Frontend   |
+                         |  (SPA in browser) |
+                         +--------+----------+
+                                  |
+                            REST API calls
+                                  |
+                         +--------v----------+
+                         |    API Gateway     |
+                         |  (Hono/Express)    |
+                         +--------+----------+
+                                  |
+                    +-------------+-------------+
+                    |             |             |
+              +-----v----+ +-----v----+ +------v-----+
+              | Auth &    | | Social   | | Media      |
+              | Sessions  | | Posts    | | Upload     |
+              +-----+----+ +-----+----+ +------+-----+
+                    |             |             |
+                    +------+------+------+------+
+                           |             |
+                    +------v---+   +-----v------+
+                    | PostgreSQL|   | S3 / R2    |
+                    | Database  |   | (Media)    |
+                    +------+---+   +------------+
+                           |
+                    +------v-----------+
+                    |  Scheduler Service |
+                    |  (polls every 60s) |
+                    +------+-----------+
+                           |
+                    +------v-----------+
+                    |   BullMQ Queue    |
+                    |   (Redis)         |
+                    +------+-----------+
+                           |
+              +------------+------------+
+              |            |            |
+        +-----v----+ +----v-----+ +----v------+
+        | YouTube  | | Facebook | | Instagram |
+        | Worker   | | Worker   | | Worker    |
+        +-----+----+ +----+-----+ +----+------+
+              |            |            |
+        +-----v----+ +----v-----+ +----v------+
+        | TikTok   |
+        | Worker   |
+        +----------+
+              |
+        Platform APIs
 ```
 
 ### Key Architectural Decisions
 
 | Decision | Choice | Rationale |
-|----------|--------|-----------|
-| **State management** | Extend existing `StoreProvider` context | Consistent with current pattern; no new libraries |
-| **Persistence** | Separate localStorage key `schedflow-social-posts` | Keeps board data clean; allows independent schema versioning |
-| **Routing** | New top-level `/social` route group | Social scheduler is independent of boards; not a board sub-view |
-| **Platform overrides** | Array of `SocialPostPlatform` child entities | Clean per-platform separation; supports JSON export; avoids deeply nested objects |
-| **Calendar** | Reuse planner patterns (WeekColumns + DayColumn) | Proven drag-and-drop with `@hello-pangea/dnd`; familiar UX |
-| **Deep links** | `window.open()` with platform URL schemes | Simple; works on mobile and desktop; fallback to browser |
-| **Analytics** | Mock data generator in local mode | Allows full UI without real API; swap to real API later |
+|---|---|---|
+| Backend runtime | Node.js + TypeScript | Shares types with frontend; single language |
+| API framework | Hono | Lightweight, fast, TypeScript-native |
+| Database | PostgreSQL | Relational data, job scheduling, audit logs |
+| ORM | Drizzle ORM | TypeScript-native, lightweight, SQL-like |
+| Job queue | BullMQ (Redis) | Battle-tested; delayed jobs, retries, rate limits, concurrency |
+| Media storage | Cloudflare R2 or AWS S3 | S3-compatible, cost-effective for large files |
+| Token encryption | AES-256-GCM | OAuth token security at rest |
+| Auth | Session-based (cookie) | Simple for MVP; JWT possible later |
+| Deployment | Railway / Fly.io | Easy Node.js + Redis + Postgres hosting |
 
 ---
 
-## 5. Data Model
+## 6. Production Data Model
 
-All types live in `src/store/schema.ts`. The social post system introduces a new top-level entity alongside `Board`, `Card`, `List`, etc.
+Extends the existing `SocialPost` model with server-side fields.
 
 ### SocialPost
 
 ```typescript
-type SocialPostStatus = 'draft' | 'scheduled' | 'publishing' | 'posted' | 'failed';
-
-type RepeatFrequency = 'none' | 'daily' | 'weekdays' | 'weekly' | 'biweekly' | 'monthly';
-
 interface SocialPost {
-  id: string;                          // crypto.randomUUID()
+  id: string;                          // UUID
+  workspaceId: string;                 // FK to workspace
+  userId: string;                      // Creator
   title: string;                       // Internal title (not published)
   caption: string;                     // Default/shared caption
-  platforms: SocialPostPlatform[];     // Per-platform overrides (§6)
-  media: SocialMediaAttachment[];      // Images, videos, audio (§11)
-  cardId?: string;                     // Optional link to a Card (§10)
-  scheduledDate?: string;              // ISO date string (YYYY-MM-DD) or null for unscheduled
-  scheduledTime?: string;              // HH:MM (24h) or null
-  status: SocialPostStatus;            // Current lifecycle status
+  scheduledAt: string;                 // UTC ISO 8601 (unambiguous)
+  timezone: string;                    // IANA timezone (e.g. "Asia/Manila")
+  status: SocialPostStatus;            // Overall lifecycle status
   repeat: RepeatFrequency;             // Recurrence pattern
   repeatUntil?: string;                // End date for recurrence
-  analytics?: SocialAnalytics;         // Mock analytics data (§16)
-  aiGeneration?: AIGenerationMeta;     // AI caption metadata (§19)
-  tags: string[];                      // User-defined tags for filtering
-  createdAt: string;                   // ISO timestamp
-  updatedAt: string;                   // ISO timestamp
+  cardId?: string;                     // Optional link to a Card
+  tags: string[];                      // User-defined tags
+  media: MediaReference[];             // URLs to cloud storage
+  createdAt: string;                   // ISO 8601
+  updatedAt: string;                   // ISO 8601
 }
-```
-
-### SocialMediaAttachment
-
-```typescript
-type MediaType = 'image' | 'video' | 'audio';
-
-interface SocialMediaAttachment {
-  id: string;
-  type: MediaType;
-  name: string;                        // Original filename
-  dataUrl: string;                     // base64 data URL (localStorage compatible)
-  size: number;                        // Bytes
-  thumbnail?: string;                  // Base64 data URL for video thumbnails
-  duration?: number;                   // Duration in seconds (video/audio)
-  platformCompat: Platform[];          // Which platforms this media is compatible with
-}
-```
-
-### SocialAnalytics
-
-```typescript
-interface SocialAnalytics {
-  platform: Platform;
-  reach: number;
-  likes: number;
-  comments: number;
-  shares: number;
-  clicks: number;
-  impressions: number;
-  engagementRate: number;              // (likes + comments + shares) / reach
-  fetchedAt: string;                   // ISO timestamp of last fetch
-  isDemo: boolean;                     // true = mock data, false = real API data
-}
-```
-
-### AIGenerationMeta
-
-```typescript
-interface AIGenerationMeta {
-  model: string;                       // e.g. "gpt-4", "claude-3", "local-mock"
-  prompt: string;                      // The prompt used
-  tokensUsed: number;                  // Token count (0 for mock)
-  generatedAt: string;                 // ISO timestamp
-  version: number;                     // Incremented on regenerate
-}
-```
-
-### Schema Additions
-
-These fields are added to the existing `Board` type to support card interlinking:
-
-```typescript
-// Added to Board interface
-interface Board {
-  // ... existing fields ...
-  socialPostIds?: string[];            // IDs of linked social posts
-}
-```
-
----
-
-## 6. Platform Models
-
-### Platform Enum
-
-```typescript
-type Platform = 'youtube' | 'facebook' | 'tiktok' | 'instagram';
 ```
 
 ### SocialPostPlatform
 
-Each entry in `SocialPost.platforms` represents one platform's customized version of the post:
+Each platform publication is independent, allowing per-platform status tracking.
 
 ```typescript
-type PlatformStatus = 'pending' | 'scheduled' | 'publishing' | 'posted' | 'failed';
-
 interface SocialPostPlatform {
-  platform: Platform;
-  enabled: boolean;                    // Is this platform selected for this post?
+  id: string;                          // UUID
+  socialPostId: string;                // FK to SocialPost
+  platform: Platform;                  // youtube | facebook | instagram | tiktok
+  platformAccountId: string;           // FK to SocialAccount
+  enabled: boolean;                    // Is this platform selected?
   status: PlatformStatus;              // Per-platform lifecycle status
-  caption: string;                     // Platform-specific caption override (falls back to SocialPost.caption)
-  hashtags: string[];                  // Platform-specific hashtags
-  mentions: string[];                  // @mentions for this platform
+
+  // Content overrides (fall back to SocialPost defaults)
+  caption: string;                     // Platform-specific caption
+  hashtags: string[];
+  mentions: string[];
+  visibility: string;                  // Platform-dependent options
+
+  // Platform-specific fields
+  title?: string;                      // YouTube title
+  description?: string;                // YouTube description
   location?: string;                   // Geotag (Instagram, Facebook)
-  altText?: string;                    // Accessibility alt text for images
-  visibility: 'public' | 'private' | 'friends' | 'unlisted';
-  deepLink?: string;                   // Platform app deep link URL
-  publishedUrl?: string;               // URL after publishing (for analytics)
-  platformPostId?: string;             // Platform's native post ID (for analytics)
-  error?: string;                      // Last error message if status = 'failed'
-  publishedAt?: string;                // ISO timestamp of actual publish time
+  altText?: string;                    // Accessibility text
+
+  // Publishing result
+  externalPostId?: string;             // Platform's native post ID
+  publishedUrl?: string;               // URL of published post
+  publishedAt?: string;                // UTC ISO 8601
+
+  // Error & retry tracking
+  error?: string;                      // Last error message
+  errorCode?: string;                  // Platform-specific error code
+  retryCount: number;
+  maxRetries: number;
+  lastAttemptAt?: string;
+  nextRetryAt?: string;
+
+  createdAt: string;
+  updatedAt: string;
 }
 ```
 
-### Platform Defaults
+### MediaReference
 
-Each platform has default settings that are applied when creating a new `SocialPostPlatform`:
-
-```typescript
-const PLATFORM_DEFAULTS: Record<Platform, Partial<SocialPostPlatform>> = {
-  youtube: {
-    caption: '',                       // YouTube supports long descriptions (5000 chars)
-    visibility: 'public',
-    hashtags: [],
-  },
-  facebook: {
-    caption: '',                       // Facebook supports long text (63,206 chars)
-    visibility: 'public',
-    hashtags: [],
-  },
-  tiktok: {
-    caption: '',                       // TikTok: 2,200 chars recommended (4,000 max)
-    visibility: 'public',
-    hashtags: [],
-  },
-  instagram: {
-    caption: '',                       // Instagram: 2,200 chars max
-    visibility: 'public',
-    hashtags: [],
-  },
-};
-```
-
-### Platform Constraints (for validation)
+Cloud storage references instead of base64 data.
 
 ```typescript
-const PLATFORM_LIMITS: Record<Platform, { maxCaption: number; maxHashtags: number; supportedMedia: MediaType[] }> = {
-  youtube:   { maxCaption: 5000,  maxHashtags: 15, supportedMedia: ['image', 'video'] },
-  facebook:  { maxCaption: 63206, maxHashtags: 30, supportedMedia: ['image', 'video', 'audio'] },
-  tiktok:    { maxCaption: 2200,  maxHashtags: 30, supportedMedia: ['video', 'image'] },
-  instagram: { maxCaption: 2200,  maxHashtags: 30, supportedMedia: ['image', 'video'] },
-};
-```
-
----
-
-## 7. Store Methods
-
-All social post CRUD operations live in `useStore.ts` / `StoreProvider.tsx`, following the existing `mutate()` pattern.
-
-### New Methods on `StoreContextType`
-
-```typescript
-interface StoreContextType {
-  // ... existing methods ...
-
-  // Social Posts
-  socialPosts: SocialPost[];
-  addSocialPost(post: Omit<SocialPost, 'id' | 'createdAt' | 'updatedAt'>): SocialPost;
-  updateSocialPost(id: string, updates: Partial<SocialPost>): void;
-  deleteSocialPost(id: string): void;
-  duplicateSocialPost(id: string): SocialPost | null;
-  moveSocialPost(id: string, newDate: string, newTime?: string): void;
-  getSocialPostsByDate(date: string): SocialPost[];
-  getSocialPostsByPlatform(platform: Platform): SocialPost[];
-  getSocialPostsByStatus(status: SocialPostStatus): SocialPost[];
-  getSocialPostsByCard(cardId: string): SocialPost[];
-  getUnscheduledPosts(): SocialPost[];
-
-  // Social Post Platforms
-  addPlatformToPost(postId: string, platform: Platform): void;
-  removePlatformFromPost(postId: string, platform: Platform): void;
-  updatePostPlatform(postId: string, platform: Platform, updates: Partial<SocialPostPlatform>): void;
-  togglePlatformEnabled(postId: string, platform: Platform): void;
-
-  // Media
-  addMediaToPost(postId: string, media: Omit<SocialMediaAttachment, 'id'>): void;
-  removeMediaFromPost(postId: string, mediaId: string): void;
-
-  // Analytics
-  updatePostAnalytics(postId: string, platform: Platform, analytics: SocialAnalytics): void;
-  getPostAnalytics(postId: string): SocialAnalytics[];
+interface MediaReference {
+  id: string;
+  socialPostId: string;
+  type: 'image' | 'video' | 'audio';
+  name: string;                        // Original filename
+  storageUrl: string;                  // Cloud storage URL (S3/R2)
+  thumbnailUrl?: string;
+  size: number;                        // Bytes
+  mimeType: string;                    // e.g. "video/mp4"
+  duration?: number;                   // Seconds (video/audio)
+  width?: number;                      // Pixels
+  height?: number;                     // Pixels
+  uploadedAt: string;
+  expiresAt?: string;                  // Optional TTL
 }
 ```
 
-### Persistence Pattern
+### PublishingJob
 
-Social posts are persisted in a separate localStorage key to keep board data isolated:
+Audit trail for every publishing attempt.
 
 ```typescript
-// In storage.ts
-const SOCIAL_POSTS_KEY = 'schedflow-social-posts';
-const SOCIAL_POSTS_VERSION = 1;
-
-export function loadSocialPosts(): SocialPost[] {
-  // ... similar to loadData() but for social posts ...
-}
-
-export function saveSocialPosts(posts: SocialPost[]): void {
-  // ... similar to saveData() but for social posts ...
-}
-```
-
-The `StoreProvider` calls `loadSocialPosts()` on mount and `saveSocialPosts()` via `mutate()` on every social post mutation.
-
----
-
-## 8. Composer UX
-
-The composer is the primary interface for creating and editing social posts.
-
-### Entry Points
-
-1. **Social Dashboard** — "New Post" button
-2. **Calendar View** — Click on an empty time slot
-3. **Card Modal** — "Create Social Post" action button (links the new post to the card)
-4. **Unscheduled Pool** — Drag a card to the social scheduler area
-
-### Composer Layout
-
-```
-┌────────────────────────────────────────────────────────────────┐
-│  Compose Social Post                                  [×]     │
-├────────────────────────────────────────────────────────────────┤
-│                                                                │
-│  ┌─ Platform Selector ──────────────────────────────────────┐ │
-│  │ [✓ YT] [✓ FB] [✓ TT] [✓ IG]     [+ Add Platform]      │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                                │
-│  ┌─ Caption Area ───────────────────────────────────────────┐ │
-│  │ Title:  [____________________________]                   │ │
-│  │                                                           │ │
-│  │ Default Caption:                                          │ │
-│  │ ┌───────────────────────────────────────────────────┐    │ │
-│  │ │ Write your caption here...                         │    │ │
-│  │ │                                                     │    │ │
-│  │ │                              [AI Generate ✨]       │    │ │
-│  │ └───────────────────────────────────────────────────┘    │ │
-│  │ Character count: 0/2200                                  │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                                │
-│  ┌─ Media ─────────────────────────────────────────────────┐  │
-│  │ [+ Image] [+ Video] [+ Audio]                           │  │
-│  │ ┌──────┐ ┌──────┐ ┌──────┐                              │  │
-│  │ │ img1 │ │ vid1 │ │      │                              │  │
-│  │ │  ✕   │ │  ✕   │ │      │                              │  │
-│  │ └──────┘ └──────┘ └──────┘                              │  │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                                │
-│  ┌─ Per-Platform Overrides ─────────────────────────────────┐ │
-│  │ YouTube    [Edit ▾]  Caption: 45/5000  |  Hashtags: 3    │ │
-│  │ Facebook   [Edit ▾]  Caption: 45/63206 |  Hashtags: 3    │ │
-│  │ TikTok     [Edit ▾]  Caption: 45/2200  |  Hashtags: 3    │ │
-│  │ Instagram  [Edit ▾]  Caption: 45/2200  |  Hashtags: 3    │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                                │
-│  ┌─ Scheduling ────────────────────────────────────────────┐  │
-│  │ Date: [2026-08-26]  Time: [14:00]                       │  │
-│  │ [ ] Repeat: [Daily ▾] until [2026-09-26]               │  │
-│  │                                                           │  │
-│  │ 💡 Smart Schedule: Best times → Tue 10:00, Thu 14:00    │  │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                                │
-│  ┌─ Linked Card ────────────────────────────────────────────┐ │
-│  │ [+ Link to Card]    or    [Card: "Launch Campaign" ✕]   │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                                │
-│  ┌─ Tags ───────────────────────────────────────────────────┐ │
-│  │ [+ Add tag]  [marketing] [launch] [promo]               │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                                │
-│  ┌─ Actions ────────────────────────────────────────────────┐ │
-│  │ [Save Draft]  [Schedule]  [Schedule to All]  [Preview]  │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                                │
-└────────────────────────────────────────────────────────────────┘
-```
-
-### Behavior
-
-- **Default caption** is shared across all platforms; per-platform overrides inherit from it unless overridden
-- **Platform selector** toggles which platforms are included; adding a platform creates a new `SocialPostPlatform` entry
-- **AI Generate** button opens a small modal to enter a prompt, select a model, and generate a caption (§19)
-- **Save Draft** persists with `status: 'draft'` and no scheduled date
-- **Schedule** validates date/time, sets `status: 'scheduled'`, and saves
-- **Schedule to All** enables all selected platforms and schedules them simultaneously
-- **Preview** shows a mock preview of how the post would look on each platform
-- Auto-save draft every 30 seconds if the form has unsaved changes
-
----
-
-## 9. Calendar UX
-
-### Layout
-
-The calendar view occupies the main content area when navigating to `/social/calendar`.
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│  Social Calendar                                    [Month ▾]   │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌─ Unscheduled Pool ─────────────────────────────────────────┐ │
-│  │  [Post 1]  [Post 2]  [Post 3]  ...                         │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  ┌─ Week View ───────────────────────────────────────────────┐  │
-│  │  Mon 25    Tue 26    Wed 27    Thu 28    Fri 29    Sat 30  │  │
-│  │ ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐ ┌────┐ │  │
-│  │ │       │ │ Post  │ │       │ │ Post  │ │       │ │    │ │  │
-│  │ │       │ │ 1 ✓   │ │       │ │ 2 ✓   │ │       │ │    │ │  │
-│  │ │       │ │ YT FB │ │       │ │ IG TT │ │       │ │    │ │  │
-│  │ │       │ │       │ │       │ │       │ │       │ │    │ │  │
-│  │ └───────┘ └───────┘ └───────┘ └───────┘ └───────┘ └────┘ │  │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  ← Previous Week    Today    Next Week →                        │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### Features
-
-- **Drag-and-drop** between days and from unscheduled pool (uses `@hello-pangea/dnd`)
-- **Platform color coding** on each post chip (YouTube=red, Facebook=blue, TikTok=black/cyan, Instagram=purple/pink gradient)
-- **Status indicators**: draft (grey), scheduled (blue), posting (yellow spinner), posted (green checkmark), failed (red)
-- **Click to open** composer in edit mode
-- **Week navigation** with arrow keys and "Today" button
-- **Month view** toggle (optional; week view is primary)
-- **New post** button opens composer; if clicking a date slot, pre-fills the date
-
-### Drag-and-Drop
-
-- Source: `DragDropContext` wrapping the week grid
-- `Droppable` for each day column + unscheduled pool
-- `Draggable` for each post chip
-- On drop: call `moveSocialPost(postId, newDate, newTime)`
-- Visual feedback: dragged post shows platform icons and truncated caption
-
----
-
-## 10. Card ↔ Social Post Interlinking
-
-### How It Works
-
-- A `SocialPost` can optionally link to a `Card` via `cardId`
-- A `Card` can optionally track linked social posts via `socialPostIds[]` (array on Board or Card)
-- Bidirectional linking: when you link a post to a card, the card's `socialPostIds` is also updated
-
-### UX in Card Modal
-
-- New action button in card toolbar: "Create Social Post"
-  - Opens composer with `cardId` pre-set
-  - On save, updates `card.socialPostIds` in the board
-- New action button: "Link Existing Social Post"
-  - Opens a search/select modal listing unscheduled and draft posts
-  - On select, creates the bidirectional link
-
-### UX in Social Post Composer
-
-- "Link to Card" section at bottom of composer
-- Click to open card search modal
-- Shows linked card title with unlink button
-
-### Display
-
-- Card modal shows a "Social Posts" section listing linked posts with status badges
-- Social post detail view shows linked card with board/list context
-
-### Storage
-
-Social post IDs are stored on the `Board` object in `board.socialPostIds[]`. When a social post is deleted, the corresponding ID is removed from the board's array. This keeps the social post system decoupled from board storage while maintaining the link.
-
----
-
-## 11. Media Attachments
-
-### Upload Flow
-
-1. User clicks "+ Image" / "+ Video" / "+ Audio" in the media section
-2. File input opens with platform-appropriate accept filter
-3. File is read as base64 data URL via `FileReader.readAsDataURL()`
-4. Thumbnail is generated for videos using `<canvas>` element
-5. `SocialMediaAttachment` is created and added to `SocialPost.media[]`
-6. Media is stored inline as base64 in localStorage
-
-### Platform Compatibility
-
-Each media attachment tracks which platforms it's compatible with:
-
-| Media Type | YouTube | Facebook | TikTok | Instagram |
-|------------|---------|----------|--------|-----------|
-| Image      | ✅      | ✅       | ✅     | ✅        |
-| Video      | ✅      | ✅       | ✅     | ✅        |
-| Audio      | ❌      | ✅       | ❌     | ❌        |
-
-### Constraints
-
-- **Max file size**: 10MB per file (enforced in UI; localStorage has ~5MB total limit per origin)
-- **Max total media per post**: 10 files
-- **Video max duration**: 60 seconds (Instagram), 10 minutes (YouTube), 3 minutes (TikTok), 240 minutes (Facebook) — warnings shown in UI
-- **Image formats**: JPEG, PNG, GIF, WebP
-- **Video formats**: MP4, MOV, WebM
-- **Audio formats**: MP3, WAV, AAC
-
-### localStorage Warning
-
-Since base64-encoded media can quickly consume localStorage (5MB limit), the UI should:
-- Show total storage usage in settings
-- Warn when approaching 80% capacity
-- Allow deleting media from posts without deleting the post
-- Consider future: IndexedDB for larger media storage
-
----
-
-## 12. Platform Content Overrides
-
-### Per-Platform Customization
-
-Each `SocialPostPlatform` entry allows independent customization of:
-
-1. **Caption** — Platform-specific text (falls back to `SocialPost.caption` if empty)
-2. **Hashtags** — Array of strings; platform-specific limits enforced
-3. **Mentions** — @mentions (platform-specific formatting)
-4. **Location** — Geotag string (Instagram, Facebook)
-5. **Alt Text** — Accessibility text for images
-6. **Visibility** — Public, private, friends-only, unlisted (platform-dependent options)
-
-### Override UX
-
-In the composer, the "Per-Platform Overrides" section shows a collapsed summary for each enabled platform. Clicking "Edit" expands a sub-form with that platform's specific fields.
-
-```
-YouTube    [Edit ▾]
-  ┌─ YouTube Overrides ──────────────────────────────────┐
-  │ Caption:    [___________________________________]    │
-  │             0/5000 chars                             │
-  │ Hashtags:   [#youtube] [#content] [+]                │
-  │ Visibility: [Public ▾]                               │
-  │ Alt Text:   [___________________________________]    │
-  └──────────────────────────────────────────────────────┘
-```
-
-### Inheritance Rules
-
-1. If `SocialPostPlatform.caption` is empty → use `SocialPost.caption`
-2. If `SocialPostPlatform.hashtags` is empty → use `SocialPost.tags` as hashtags
-3. If `SocialPostPlatform.visibility` is not set → use platform default (`public`)
-
-### JSON Export Format
-
-Platform overrides export cleanly as structured JSON:
-
-```json
-{
-  "title": "Launch Announcement",
-  "caption": "Excited to announce our new feature!",
-  "platforms": [
-    {
-      "platform": "youtube",
-      "caption": "Full video walkthrough of our new feature. Link in description!",
-      "hashtags": ["tutorial", "newfeature", "launch"],
-      "visibility": "public"
-    },
-    {
-      "platform": "instagram",
-      "caption": "It's here! 🎉 Swipe up for the full demo.",
-      "hashtags": ["launch", "newfeature", "instadaily"],
-      "visibility": "public"
-    }
-  ]
+interface PublishingJob {
+  id: string;
+  socialPostPlatformId: string;        // FK to SocialPostPlatform
+  status: 'queued' | 'locked' | 'publishing' | 'completed' | 'failed';
+  lockedAt?: string;
+  lockedBy?: string;                   // Worker instance ID
+  startedAt?: string;
+  completedAt?: string;
+  error?: string;
+  errorCode?: string;
+  retryCount: number;
+  nextRetryAt?: string;
+  idempotencyKey: string;             // Prevents duplicate publishes
+  createdAt: string;
+  updatedAt: string;
 }
 ```
 
 ---
 
-## 13. Draft Saves
+## 7. Social Account Model
 
-### Auto-Save
+### SocialAccount
 
-- Composer auto-saves as draft every **30 seconds** when there are unsaved changes
-- Auto-save creates or updates a draft `SocialPost` with `status: 'draft'`
-- Draft posts appear in the "Drafts" section of the Social Dashboard
-- Visual indicator: "Draft saved at 14:32" shown in composer footer
-
-### Manual Save
-
-- "Save Draft" button in composer actions
-- Saves immediately with `status: 'draft'`
-- Confirms with toast notification: "Draft saved"
-
-### Draft Behavior
-
-- Drafts have no `scheduledDate` or `scheduledTime`
-- Drafts are not shown on the calendar (only in drafts list or unscheduled pool)
-- Drafts can be edited, deleted, or scheduled later
-- Drafts persist across sessions via localStorage
-
-### Draft Recovery
-
-- If the user closes the composer with unsaved changes, show a confirmation dialog:
-  "You have unsaved changes. Save as draft?"
-- On browser crash/reload, the last auto-saved draft is recoverable from localStorage
-
----
-
-## 14. Scheduling & Smart Schedule
-
-### Manual Scheduling
-
-- User selects a date and time in the composer
-- On "Schedule", the post's `status` changes to `'scheduled'` and `scheduledDate`/`scheduledTime` are set
-- Post appears on the calendar at the specified slot
-
-### Smart Schedule Suggestions
-
-A mock "smart schedule" system suggests optimal posting times based on demo engagement data:
+Server-side only. Tokens are encrypted at rest.
 
 ```typescript
-const SMART_SCHEDULE_DATA: Record<Platform, { day: number; hour: number; score: number }[]> = {
-  youtube: [
-    { day: 2, hour: 14, score: 0.92 },  // Tuesday 2 PM
-    { day: 4, hour: 10, score: 0.88 },  // Thursday 10 AM
-    { day: 6, hour: 12, score: 0.85 },  // Saturday 12 PM
-  ],
-  facebook: [
-    { day: 3, hour: 9, score: 0.90 },   // Wednesday 9 AM
-    { day: 5, hour: 13, score: 0.87 },   // Friday 1 PM
-  ],
-  tiktok: [
-    { day: 6, hour: 19, score: 0.95 },  // Saturday 7 PM
-    { day: 0, hour: 10, score: 0.88 },   // Sunday 10 AM
-    { day: 4, hour: 18, score: 0.86 },   // Friday 6 PM
-  ],
-  instagram: [
-    { day: 1, hour: 11, score: 0.93 },  // Monday 11 AM
-    { day: 5, hour: 20, score: 0.91 },   // Friday 8 PM
-    { day: 0, hour: 14, score: 0.87 },   // Sunday 2 PM
-  ],
-};
+interface SocialAccount {
+  id: string;
+  userId: string;
+  workspaceId: string;
+  platform: Platform;
+  platformAccountId: string;           // Platform's user/page/channel ID
+  accountName: string;                 // Display name
+  accountUsername: string;
+  profileImageUrl?: string;
+
+  // Token fields — stored encrypted server-side ONLY
+  // Never exposed to the frontend
+  accessToken: string;                 // AES-256-GCM encrypted
+  refreshToken: string;                // AES-256-GCM encrypted
+  tokenExpiresAt: string;
+  scopes: string[];                    // Granted OAuth scopes
+
+  connectedAt: string;
+  status: 'active' | 'expired' | 'revoked' | 'error';
+  lastUsedAt?: string;
+}
 ```
 
-The composer shows a "Smart Schedule" hint below the date/time picker with the top 2-3 suggested slots for the selected platforms.
+### Token Security Rules
 
-### Recurrence
-
-- `repeat: RepeatFrequency` allows posts to repeat on a schedule
-- `repeatUntil` defines the end date
-- Recurring posts auto-generate copies with updated `scheduledDate` for each occurrence
-- The recurrence engine runs on app load (not via cron), checking for missed recurrences
-
-### Scheduling Execution
-
-Since there is no backend, scheduling is simulated:
-- On app load, check all `'scheduled'` posts
-- If `scheduledDate + scheduledTime` is in the past, transition status to `'posting'` → `'posted'` (simulated after 2-second delay)
-- Show a notification/toast: "Post [title] has been published to [platforms]!"
-- In production, this would be replaced by actual API calls
+| Rule | Implementation |
+|---|---|
+| Never store in browser | All tokens server-side only |
+| Encrypt at rest | AES-256-GCM for access + refresh tokens |
+| No localStorage | Not in browser storage, cookies, or IndexedDB |
+| Refresh before expiry | YouTube: before 1hr; Instagram: at day 50 of 60; Facebook: auto |
+| Revocation detection | Check permissions endpoint on API errors; mark account as `revoked` |
+| Scope tracking | Store granted scopes; compare against required scopes |
 
 ---
 
-## 15. Deep Linking & Platform Apps
+## 8. Media Storage Architecture
 
-### Deep Link URL Schemes
+### Why localStorage is Insufficient
 
-| Platform   | Mobile App Deep Link | Web Fallback |
-|------------|---------------------|--------------|
-| YouTube    | `youtube://`         | `https://youtube.com` |
-| Facebook   | `fb://`              | `https://facebook.com` |
-| TikTok     | `snssdk1233://`      | `https://tiktok.com` |
-| Instagram  | `instagram://`       | `https://instagram.com` |
+| Problem | Impact |
+|---|---|
+| base64 encoding = 33% overhead | 3 MB image becomes 4 MB in storage |
+| 5 MB localStorage limit | Fills up with just a few images |
+| Worker cannot access browser memory | No media available for server-side publishing |
+| Media must persist across sessions | User may close browser for days before scheduled post |
+| No cloud access by worker | Instagram requires publicly accessible URLs |
 
-### UX Flow
+### Production Solution
 
-1. User clicks "Open in [Platform]" button on a posted/scheduled social post
-2. `window.open(deepLinkUrl, '_blank')` attempts to open the native app
-3. If the app is not installed, the browser falls back to the web URL
-4. A confirmation dialog explains: "This will open [Platform]. Publish your post there."
+```
+Frontend: User uploads file
+    |
+    v
+Frontend: Stream to API endpoint (POST /api/media)
+    |
+    v
+Backend: Stream to cloud storage (S3 / R2)
+    |
+    v
+Backend: Store MediaReference in database (URL + metadata)
+    |
+    v
+Backend: Return MediaReference to frontend
+    |
+    v
+Worker: At publish time, retrieve URL from DB
+    |
+    v
+Worker: Fetch media from URL (or stream from storage)
+    |
+    v
+Worker: Upload to platform using media URL
+    (Instagram: must be publicly accessible URL)
+```
 
-### Deep Link Generation
+---
 
-Deep links are generated per-platform and stored in `SocialPostPlatform.deepLink`. For example:
+## 9. Platform API Integration
+
+### YouTube (Data API v3)
+
+| Aspect | Detail |
+|---|---|
+| **Auth** | OAuth 2.0, scope: `youtube.upload` |
+| **Upload** | `videos.insert` with resumable upload protocol |
+| **Native scheduling** | YES — `status.privacyStatus: "private"` + `status.publishAt: ISO8601` |
+| **Quota** | 10,000 units/day; `videos.insert` = 1 unit (capped at 100/day) |
+| **Max file size** | 256 GB |
+| **Token lifetime** | Access: 1 hour; Refresh: indefinite |
+| **App audit** | Required for public uploads; unverified = private only |
+| **Title** | Max 100 characters |
+| **Description** | Max 5,000 bytes |
+| **Tags** | Max 500 characters total |
+| **Scheduling approach** | Upload with `publishAt` — YouTube handles timing internally |
+| **Quota reset** | Midnight Pacific Time (PT) |
+
+**Upload flow (resumable):**
+1. POST to initiate resumable session (metadata + file info)
+2. Receive session URI from `Location` header
+3. PUT video binary to session URI
+4. Receive video resource on completion (HTTP 201)
+
+**Key advantage:** YouTube's native scheduling means SchedFlow only needs to upload at the right time with the right `publishAt` value. No separate scheduler needed for YouTube.
+
+**App verification:** Since July 2020, all videos uploaded via unverified API projects are forced to private. Submit the [YouTube API Services Audit Form](https://support.google.com/youtube/contact/yt_api_form) for public uploads.
+
+### Facebook (Graph API v26)
+
+| Aspect | Detail |
+|---|---|
+| **Auth** | OAuth 2.0; scopes: `pages_manage_posts`, `pages_read_engagement`, `pages_show_list` |
+| **Upload photos** | `POST /{page-id}/photos` (URL or multipart) |
+| **Upload video** | Resumable upload to `POST /{page-id}/videos` |
+| **Native scheduling** | YES — `published=false` + `scheduled_publish_time` (10 min–30 days) |
+| **Rate limits** | 4,800 x engaged users/day (BUC); formula-based, not fixed |
+| **Token hierarchy** | Short-lived (1-2hr) -> long-lived (60 days) -> Page token (no expiry) |
+| **App review** | Required for `pages_manage_posts` (1-3 weeks, up to 3 months) |
+| **Max photo** | 10 MB; max 10 per carousel |
+| **Max video** | 4 GB (resumable); 240 min duration |
+| **Scheduling approach** | Use native `scheduled_publish_time` — Facebook handles timing |
+| **Business verification** | Required for Advanced Access; independent from App Review |
+
+**Token flow:**
+1. Get short-lived user token via OAuth
+2. Exchange for long-lived user token (`fb_exchange_token` grant, ~60 days)
+3. Get Page access token via `GET /me/accounts`
+4. Page token has no scheduled expiry but is invalidated by password changes, app revocation, or 90 days of inactivity
+
+**Key limitation:** Pages only. Cannot publish to personal Facebook profiles (removed since 2018).
+
+### Instagram (Graph API)
+
+| Aspect | Detail |
+|---|---|
+| **Auth** | OAuth 2.0 via Facebook Login; scopes: `instagram_content_publish`, `instagram_basic`, `pages_read_engagement` |
+| **Publishing** | Two-step: create media container -> publish container |
+| **Native scheduling** | NO — Must build own scheduler |
+| **Rate limits** | 50-100 posts/24h (varies); 400 containers/24h; containers expire in 24h |
+| **Image format** | JPEG only; max 8 MB; aspect ratio 4:5 to 1.91:1 |
+| **Video** | MP4/MOV; max 300 MB; 3s-15min; H.264 codec |
+| **Caption** | Max 2,200 chars; 30 hashtags; 20 @-mentions |
+| **Account requirement** | Business or Creator account connected to a Facebook Page |
+| **Scheduling approach** | Store payload, create container + publish at scheduled time |
+| **Alt text** | Up to 1,000 characters (images only, not Reels) |
+
+**Two-step publishing flow:**
+1. `POST /{ig-user-id}/media` — create container (returns container ID)
+2. For video: poll `GET /{container_id}?fields=status_code` until `FINISHED`
+3. `POST /{ig-user-id}/media_publish` — publish container
+
+**Critical:** Containers expire after 24 hours. The container must be created at publish time, NOT when the user schedules the post. This means SchedFlow must store the payload and create the container when the scheduled time arrives.
+
+**Idempotency issue:** `media_publish` can return HTTP 500 while the post actually succeeds (~10% false failures). Always check container `status_code` before retrying.
+
+### TikTok (Content Posting API)
+
+| Aspect | Detail |
+|---|---|
+| **Auth** | OAuth 2.0; scope: `video.publish` (Direct Post) or `video.upload` (inbox) |
+| **Direct Post** | YES — publishes directly to user's TikTok profile |
+| **Native scheduling** | NO — Must build own scheduler |
+| **Rate limits** | 6 req/min per token; ~15 posts/day per creator |
+| **Video** | MP4/MOV/WebM; max 4 GB; H.264; 23-60 FPS; 360-4096px |
+| **Photos** | JPEG/WebP; max 20 MB; up to 35 images per post |
+| **Title** | Max 90 UTF-16 runes |
+| **Description** | Max 4,000 UTF-16 runes |
+| **App review** | Required; unaudited = private accounts only, SELF_ONLY visibility |
+| **Upload URL expiry** | 1 hour after issuance |
+| **Scheduling approach** | Store payload, call Direct Post API at scheduled time |
+| **Pending share cap** | Max 5 pending shares within 24h (unaudited) |
+
+**Direct Post flow (video):**
+1. `POST /v2/post/publish/creator_info/query/` — get creator info (required for UX compliance)
+2. `POST /v2/post/publish/video/init/` — initialize with post_info + source_info
+3. PUT binary video to returned `upload_url` (valid for 1 hour)
+4. `POST /v2/post/publish/status/fetch/` — check publish status
+
+**Direct Post flow (photos):**
+1. Query creator info
+2. `POST /v2/post/publish/content/init/` with `post_mode: DIRECT_POST`, `media_type: PHOTO`, `source_info: PULL_FROM_URL` (URLs must be publicly accessible)
+
+**App audit:** Unevaluated clients can only post to private accounts with SELF_ONLY visibility. Submit for TikTok Content Posting API audit for public posting.
+
+### Platform Scheduling Summary
+
+| Platform | Native Scheduling | SchedFlow Must Implement |
+|---|---|---|
+| YouTube | YES (`publishAt` field) | Upload at scheduled time with `publishAt` metadata |
+| Facebook | YES (`scheduled_publish_time`) | Call API at schedule time with `published=false` |
+| Instagram | NO | Store payload; create container + publish at time |
+| TikTok | NO | Store payload; call Direct Post API at time |
+
+**Conclusion:** 2 of 4 platforms (Instagram, TikTok) require SchedFlow to implement its own scheduling engine. Even though YouTube and Facebook support native scheduling, a unified scheduler is needed to handle all platforms consistently, manage retries, and provide a single status source of truth.
+
+---
+
+## 10. Platform Adapter Architecture
+
+### Interface
 
 ```typescript
-function generateDeepLink(platform: Platform, caption: string, mediaUrl?: string): string {
-  switch (platform) {
-    case 'instagram':
-      return `instagram://library?AssetPickerAssetType=2`;
-    case 'tiktok':
-      return `snssdk1233://camera`;
-    case 'facebook':
-      return `fb://`;
-    case 'youtube':
-      return `youtube://`;
-    default:
-      return '#';
+interface PlatformPublisher {
+  platform: Platform;
+
+  // Validate post against platform requirements before scheduling
+  validate(post: SocialPostPlatform, media: MediaReference[]): ValidationResult;
+
+  // Publish content to the platform
+  publish(
+    post: SocialPostPlatform,
+    media: MediaReference[],
+    account: SocialAccount
+  ): Promise<PublishResult>;
+
+  // Check status of a published/scheduled post
+  getStatus(externalPostId: string, account: SocialAccount): Promise<PostStatus>;
+
+  // Refresh expired tokens
+  refreshCredentials(account: SocialAccount): Promise<RefreshResult>;
+}
+
+interface PublishResult {
+  success: boolean;
+  externalPostId?: string;         // Platform's native post ID
+  publishedUrl?: string;           // URL of published post
+  error?: string;
+  errorCode?: string;
+  retryable: boolean;              // Can this be retried?
+}
+
+interface ValidationResult {
+  valid: boolean;
+  errors: string[];                // Human-readable validation errors
+  warnings: string[];              // Non-blocking warnings
+}
+
+interface PostStatus {
+  status: 'publishing' | 'published' | 'failed';
+  publishedAt?: string;
+  error?: string;
+}
+
+interface RefreshResult {
+  success: boolean;
+  newAccessToken?: string;
+  newRefreshToken?: string;
+  expiresAt?: string;
+  error?: string;
+}
+```
+
+### Implementations
+
+```typescript
+class YouTubePublisher implements PlatformPublisher {
+  platform: Platform = 'youtube';
+
+  validate(post, media) {
+    // Check: at least one video
+    // Check: title <= 100 chars
+    // Check: description <= 5000 bytes
+    // Check: tags total <= 500 chars
+    // Check: video format supported
+  }
+
+  async publish(post, media, account) {
+    // 1. Initiate resumable upload session with metadata
+    // 2. Upload video binary
+    // 3. If scheduled: set privacyStatus='private' + publishAt
+    // 4. Return video ID
+  }
+
+  async getStatus(externalPostId, account) {
+    // GET /videos?id={id}&part=status,processingDetails
+  }
+
+  async refreshCredentials(account) {
+    // POST /oauth2/token with refresh_token
+  }
+}
+
+class FacebookPublisher implements PlatformPublisher {
+  platform: Platform = 'facebook';
+
+  validate(post, media) {
+    // Check: at least one image or video
+    // Check: message <= 63,206 chars
+    // Check: image <= 10 MB, video <= 4 GB
+    // Check: carousel max 10 images
+  }
+
+  async publish(post, media, account) {
+    // If text/link: POST /{page-id}/feed
+    // If photo: POST /{page-id}/photos
+    // If video: Resumable upload to /{page-id}/videos
+    // If scheduled: published=false + scheduled_publish_time
+  }
+
+  async getStatus(externalPostId, account) {
+    // GET /{post-id}?fields=is_published,scheduled_publish_time
+  }
+
+  async refreshCredentials(account) {
+    // Exchange long-lived token for new Page token
+  }
+}
+
+class InstagramPublisher implements PlatformPublisher {
+  platform: Platform = 'instagram';
+
+  validate(post, media) {
+    // Check: JPEG only for images
+    // Check: image <= 8 MB, video <= 300 MB
+    // Check: aspect ratio 4:5 to 1.91:1
+    // Check: caption <= 2,200 chars
+    // Check: hashtags <= 30
+    // Check: video duration 3s-15min
+  }
+
+  async publish(post, media, account) {
+    // 1. Create media container (POST /{ig-user-id}/media)
+    // 2. If video: poll status_code until FINISHED
+    // 3. Publish container (POST /{ig-user-id}/media_publish)
+    // 4. Check for false failure (container may already be PUBLISHED)
+  }
+
+  async getStatus(externalPostId, account) {
+    // GET /{container-id}?fields=status_code
+  }
+
+  async refreshCredentials(account) {
+    // GET /refresh_access_token?grant_type=ig_refresh_token
+    // Token must be >= 24 hours old to refresh
+  }
+}
+
+class TikTokPublisher implements PlatformPublisher {
+  platform: Platform = 'tiktok';
+
+  validate(post, media) {
+    // Check: video MP4/MOV/WebM
+    // Check: video <= 4 GB
+    // Check: FPS 23-60
+    // Check: resolution 360-4096px
+    // Check: title <= 90 UTF-16 runes
+    // Check: description <= 4,000 UTF-16 runes
+  }
+
+  async publish(post, media, account) {
+    // 1. Query creator info (required)
+    // 2. Init video post (POST /v2/post/publish/video/init/)
+    // 3. Upload video to upload_url (valid 1 hour)
+    // 4. Check status (POST /v2/post/publish/status/fetch/)
+  }
+
+  async getStatus(externalPostId, account) {
+    // POST /v2/post/publish/status/fetch/ with publish_id
+  }
+
+  async refreshCredentials(account) {
+    // POST /oauth/access_token/ with refresh_token
   }
 }
 ```
 
-> **Note**: True deep linking with pre-filled content requires platform SDKs and OAuth. The local prototype version opens the app; the user manually pastes content. Production version would use platform APIs to pre-fill.
+---
+
+## 11. Scheduling Engine
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────┐
+│           Scheduler Service                  │
+│                                              │
+│  Polling Loop (every 60 seconds):            │
+│  1. Query DB:                                │
+│     SELECT * FROM social_post_platforms      │
+│     WHERE status = 'scheduled'               │
+│     AND social_post.scheduled_at <= NOW()    │
+│  2. Lock/claim each job (SELECT FOR UPDATE)  │
+│  3. Update status to 'queued'                │
+│  4. Dispatch to BullMQ job queue            │
+│                                              │
+└──────────────┬──────────────────────────────┘
+               |
+               v
+┌─────────────────────────────────────────────┐
+│         Job Queue (BullMQ / Redis)           │
+│                                              │
+│  - One job per platform publication          │
+│  - Delayed jobs for retry scheduling         │
+│  - Concurrency limits per platform           │
+│  - Dead-letter queue for permanent failures  │
+│                                              │
+└──────────────┬──────────────────────────────┘
+               |
+               v
+┌─────────────────────────────────────────────┐
+│           Publishing Worker                   │
+│                                              │
+│  1. Load SocialPostPlatform from DB         │
+│  2. Load SocialAccount (decrypt tokens)      │
+│  3. Refresh token if expired                 │
+│  4. Retrieve media from cloud storage        │
+│  5. Validate against platform limits         │
+│  6. Call platform adapter (publish)          │
+│  7. Handle response                          │
+│  8. Update status + externalPostId           │
+│  9. Log audit event (PublishingJob)          │
+│ 10. Notify user (Inbox notification)         │
+│                                              │
+└─────────────────────────────────────────────┘
+```
+
+### Why Polling + Queue
+
+| Approach | Pros | Cons |
+|---|---|---|
+| Cron only | Simple | No job locking, no retry, no concurrency control |
+| DB polling only | Reliable, no lost jobs | No retry logic, no rate limiting |
+| Queue only | Built-in retry, concurrency | Jobs can be lost if not persisted |
+| **Polling + Queue** | **Reliable discovery + robust execution** | **Slightly more infrastructure** |
+
+Combined: scheduler polls DB every 60s (catches all due jobs, handles server restarts), dispatches to BullMQ (provides retry, concurrency, dead-letter), worker processes jobs with platform-specific logic.
+
+### Polling Query
+
+```sql
+-- Find due posts and lock them atomically
+SELECT psp.*, sp.scheduled_at, sp.timezone
+FROM social_post_platforms psp
+JOIN social_posts sp ON sp.id = psp.social_post_id
+WHERE psp.status = 'scheduled'
+  AND sp.scheduled_at <= NOW()
+  AND psp.enabled = true
+ORDER BY sp.scheduled_at ASC
+LIMIT 50
+FOR UPDATE SKIP LOCKED;  -- Prevents double-claiming in concurrent workers
+```
 
 ---
 
-## 16. Analytics Dashboard
+## 12. Job State Machine
 
-### Overview
-
-The analytics dashboard shows performance metrics for published posts. In local mode, all data is **mock/demo data**. In production, data comes from real platform APIs.
-
-### Dashboard Layout
+### SocialPostPlatform States
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│  Social Analytics                                  [This Week ▾] │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌─ Summary Cards ─────────────────────────────────────────────┐ │
-│  │  Total Reach    │  Total Engagements │  Growth              │ │
-│  │  12,450         │  1,234 (9.9%)      │  +340 followers      │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  ┌─ Platform Breakdown ───────────────────────────────────────┐  │
-│  │  YouTube   ████████████████░░░░  8,200 reach  (66%)        │  │
-│  │  Instagram ████████░░░░░░░░░░░░  3,100 reach  (25%)        │  │
-│  │  TikTok    ███░░░░░░░░░░░░░░░░░    850 reach  ( 7%)        │  │
-│  │  Facebook  █░░░░░░░░░░░░░░░░░░░    300 reach  ( 2%)        │  │
-│  └────────────────────────────────────────────────────────────┘  │
-│                                                                  │
-│  ┌─ Top Posts ────────────────────────────────────────────────┐  │
-│  │  1. "Launch Announcement" — 2,340 reach, 4.2% engagement   │  │
-│  │  2. "Behind the Scenes"   — 1,890 reach, 6.1% engagement   │  │
-│  │  3. "Tutorial: Feature X" — 1,560 reach, 3.8% engagement   │  │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  ┌─ Engagement Over Time ─────────────────────────────────────┐ │
-│  │  [Line chart placeholder — renders with CSS/divs]          │ │
-│  │  Mon  Tue  Wed  Thu  Fri  Sat  Sun                         │ │
-│  │   ·    ·    ·    ·    ·    ·    ·                          │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
+pending --> scheduled --> queued --> publishing --> published
+                                                \-> failed --> retrying --> publishing
+                                                \-> failed (max retries) --> permanently_failed
+scheduled --> cancelled
 ```
 
-### Mock Data Generation
+### Valid Transitions
 
-```typescript
-function generateMockAnalytics(post: SocialPost): SocialAnalytics[] {
-  return post.platforms
-    .filter(p => p.enabled && p.status === 'posted')
-    .map(p => ({
-      platform: p.platform,
-      reach: Math.floor(Math.random() * 5000) + 500,
-      likes: Math.floor(Math.random() * 500) + 50,
-      comments: Math.floor(Math.random() * 100) + 5,
-      shares: Math.floor(Math.random() * 200) + 10,
-      clicks: Math.floor(Math.random() * 300) + 20,
-      impressions: Math.floor(Math.random() * 10000) + 1000,
-      engagementRate: 0,
-      fetchedAt: new Date().toISOString(),
-      isDemo: true,
-    }))
-    .map(a => ({ ...a, engagementRate: (a.likes + a.comments + a.shares) / a.reach }));
-}
-```
+| From | To | Trigger |
+|---|---|---|
+| `pending` | `scheduled` | User schedules the post |
+| `scheduled` | `queued` | Scheduler picks up the job |
+| `queued` | `publishing` | Worker starts publishing |
+| `publishing` | `published` | Platform returns success |
+| `publishing` | `failed` | Platform returns error |
+| `failed` | `retrying` | Retryable error, retries remaining |
+| `retrying` | `publishing` | Retry attempt |
+| `failed` | `permanently_failed` | Max retries exhausted |
+| `scheduled` | `cancelled` | User cancels the post |
 
-### Analytics Display
+### SocialPost (Overall) States
 
-- **Summary cards**: Total reach, total engagements, engagement rate, follower growth (mock)
-- **Platform breakdown**: Horizontal bar chart per platform
-- **Top posts**: Ranked list by reach
-- **Engagement over time**: Simple line chart (CSS-based, no chart library)
-- All mock data clearly labeled with "Demo Data" badge
+| Overall Status | Condition |
+|---|---|
+| `draft` | No platform is enabled or scheduled |
+| `scheduled` | All enabled platforms are scheduled |
+| `publishing` | At least one platform is publishing |
+| `posted` | ALL enabled platforms are published |
+| `partially_published` | Some published, some failed |
+| `failed` | ALL enabled platforms failed |
+| `cancelled` | User cancelled all platforms |
 
 ---
 
-## 17. Undo / Redo
-
-### Implementation
-
-Undo/redo is implemented via a **command pattern** with an undo stack:
-
-```typescript
-interface UndoableAction {
-  type: string;                        // e.g. 'CREATE_POST', 'UPDATE_POST', 'DELETE_POST'
-  timestamp: number;
-  before: Partial<SocialPost>;         // State before the action
-  after: Partial<SocialPost>;          // State after the action
-  postId: string;                      // Affected post ID
-}
-```
-
-### Scope
-
-- **Undoable**: Creating, updating, deleting, moving social posts; adding/removing platforms
-- **Not undoable**: Analytics refresh, media upload (too complex; would need file re-read)
-
-### UX
-
-- **Keyboard shortcuts**: `Ctrl+Z` (undo), `Ctrl+Shift+Z` (redo)
-- **Toolbar buttons**: Undo / Redo icons in the composer and calendar toolbar
-- **Toast notification**: "Undid: Delete Post 'Launch Announcement'" on undo
-- **Stack limit**: Last 50 actions
+## 13. Timezone Handling
 
 ### Storage
+- **All scheduled times stored as UTC** in the database
+- **User's timezone** stored as IANA string (e.g., `Asia/Manila`, `America/New_York`)
+- `scheduledAt` column = UTC ISO 8601
 
-Undo/redo stacks are **in-memory only** (not persisted to localStorage). They reset on page reload. This is acceptable for a local prototype.
+### Conversion Rules
+- Frontend displays times in user's local timezone
+- Scheduler compares against UTC (server runs in UTC)
+- **Never use the server's local timezone**
+- Use a proper timezone library (`date-fns-tz` or `luxon`) for conversions
+
+### Daylight Saving
+- IANA timezone database handles DST automatically
+- Store timezone name (e.g., `America/New_York`), NOT UTC offset (e.g., `UTC-5`)
+- Offsets change with DST; names do not
+
+### Example
+
+```
+User selects: August 30, 2026, 8:30 PM, Asia/Manila
+Stored in DB: 2026-08-30T12:30:00Z  (UTC)
+Server scheduler: compares against current UTC time
+Worker: publishes at the UTC moment
+Platform: receives the correct local time
+```
 
 ---
 
-## 18. JSON Import / Export
+## 14. Multi-Platform Partial Failure
 
-### Export
+When a post targets 4 platforms and one fails:
 
-- **Single post**: Export button in post detail/composer → downloads `.json` file with full `SocialPost` object
-- **Bulk export**: Export all social posts from Social Dashboard → downloads `.json` file with `SocialPost[]`
-- **Board-scoped export**: Export all posts linked to a specific board → included in board export (future)
+```
+SocialPost: "Summer Campaign"
+  |-- Facebook:    PUBLISHED (post #12345)
+  |-- Instagram:   PUBLISHED (post #67890)
+  |-- TikTok:      FAILED (rate_limit_exceeded)
+  |-- YouTube:     PUBLISHED (video #abc123)
 
-### Export Format
+Overall status: PARTIALLY_PUBLISHED
+```
 
-```json
-{
-  "version": 1,
-  "exportedAt": "2026-08-25T14:30:00Z",
-  "posts": [
-    {
-      "id": "...",
-      "title": "Launch Announcement",
-      "caption": "Excited to announce!",
-      "platforms": [...],
-      "media": [...],
-      "scheduledDate": "2026-08-26",
-      "status": "scheduled",
-      "tags": ["marketing"]
-    }
-  ]
+Each platform publication is independent. The system:
+1. Marks each platform's status individually
+2. Computes the overall `SocialPost.status` as an aggregate
+3. Allows retrying failed platforms without affecting published ones
+4. Shows per-platform status in the UI with clear visual indicators
+
+---
+
+## 15. OAuth / Account Connection
+
+### Standard OAuth Flow
+
+```
+Frontend: Settings -> Connect YouTube
+    |
+    v
+Backend: GET /api/auth/youtube/authorize
+    -> Generates state token (CSRF protection)
+    -> Stores state in session/DB
+    -> Returns redirect URL:
+       https://accounts.google.com/o/oauth2/v2/auth?
+         client_id=...&redirect_uri=...&
+         scope=youtube.upload&state=...
+    |
+    v
+Browser: Redirects to Google OAuth consent screen
+    |
+    v
+Google: User authorizes SchedFlow
+    |
+    v
+Backend: GET /api/auth/youtube/callback?code=...&state=...
+    -> Validates state token (CSRF check)
+    -> Exchanges authorization code for access + refresh tokens
+    -> Encrypts tokens (AES-256-GCM)
+    -> Stores in SocialAccount table
+    -> Returns success -> frontend shows connected account
+```
+
+### Per-Platform OAuth Configuration
+
+| Platform | Authorization URL | Token Endpoint | Required Scopes |
+|---|---|---|---|
+| YouTube | `accounts.google.com/o/oauth2/v2/auth` | `oauth2.googleapis.com/token` | `youtube.upload` |
+| Facebook | `facebook.com/v26.0/dialog/oauth` | `graph.facebook.com/oauth/access_token` | `pages_manage_posts`, `pages_read_engagement`, `pages_show_list` |
+| Instagram | `facebook.com/v26.0/dialog/oauth` (via FB Login) | `graph.facebook.com/oauth/access_token` | `instagram_content_publish`, `instagram_basic`, `pages_read_engagement` |
+| TikTok | `www.tiktok.com/v2/auth/authorize/` | `open.tiktokapis.com/oauth/access_token/` | `video.publish` |
+
+### Account Management UI
+
+- **Settings > Connected Accounts** — list of connected accounts with platform icon, name, status
+- **Connect** button per platform — opens OAuth flow
+- **Disconnect** button — revokes token, marks account as `revoked`
+- **Reconnect** button — re-initiates OAuth when token is expired
+- **Multiple accounts** — users can connect multiple accounts per platform (e.g., 2 Facebook Pages)
+
+---
+
+## 16. Media Validation
+
+### At Upload Time (Frontend)
+
+Validate before uploading to cloud storage to catch issues early.
+
+```typescript
+interface MediaValidation {
+  fileType: string;           // Check against allowed MIME types
+  fileSize: number;           // Check against platform max
+  width?: number;             // Check minimum/maximum
+  height?: number;
+  duration?: number;          // For video/audio
+  aspectRatio?: number;       // Compute from width/height
 }
 ```
 
-### Import
+### At Publish Time (Backend)
 
-- **Import button** in Social Dashboard → file input accepts `.json`
-- Validates JSON structure and schema version
-- Imports posts with `status: 'draft'` to avoid accidental re-scheduling
-- Handles duplicates by checking `id` — skips posts that already exist
-- Shows import summary: "Imported 5 posts, skipped 2 duplicates"
+Double-validate before calling platform API.
 
-### Validation
+### Platform Constraints
 
-```typescript
-function validateImportData(data: unknown): { valid: boolean; errors: string[] } {
-  // Check structure: must be { version: number, posts: SocialPost[] }
-  // Validate each post has required fields
-  // Check for duplicate IDs
-}
-```
+| Constraint | YouTube | Facebook | Instagram | TikTok |
+|---|---|---|---|---|
+| **Image format** | Any | JPEG, PNG, GIF | JPEG only | JPEG, WebP |
+| **Image max size** | N/A | 10 MB | 8 MB | 20 MB |
+| **Image aspect ratio** | Any | Any | 4:5 – 1.91:1 | Any |
+| **Video format** | MP4, MOV, etc. | MP4, MOV | MP4, MOV | MP4, MOV, WebM |
+| **Video codec** | Any | H.264 | H.264 | H.264, H.265 |
+| **Video max size** | 256 GB | 4 GB | 300 MB | 4 GB |
+| **Video min duration** | None | 1s | 3s | None |
+| **Video max duration** | None | 240 min | 15 min | 10 min |
+| **Video FPS** | Any | 30 recommended | 23-60 | 23-60 |
+| **Caption max** | 5,000 bytes | 63,206 chars | 2,200 chars | 4,000 runes |
+| **Hashtag max** | 15 | 30 | 30 | 30 |
+| **Alt text** | Yes | Yes | Yes (images) | No |
 
----
-
-## 19. AI Caption Generation
-
-### Local Mode (MVP)
-
-In local mode, AI caption generation is **simulated** with a mock system:
-
-1. User clicks "AI Generate" in the composer
-2. Modal opens with:
-   - Prompt textarea: "Write a caption for a product launch post..."
-   - Model selector: "Mock AI (local)" only
-   - Token counter: "0 tokens used"
-3. User clicks "Generate"
-4. After a 1-2 second simulated delay, a pre-built caption template is returned
-5. Caption is inserted into the text area
-6. `AIGenerationMeta` is saved on the `SocialPost`
-
-### Mock Templates
-
-```typescript
-const MOCK_CAPTIONS: Record<string, string[]> = {
-  'product launch': [
-    "Excited to announce our latest feature! Stay tuned for more details. #launch #newfeature",
-    "It's here! We've been working hard on this and can't wait for you to try it. #launch",
-    "Big news! Our newest update is live. Check it out and let us know what you think!",
-  ],
-  'tutorial': [
-    "Here's how to get started with our latest feature. Step by step guide inside!",
-    "Quick tip: Here's everything you need to know about [topic]. Save this for later!",
-  ],
-  'default': [
-    "Check out our latest update! We're always improving to serve you better.",
-    "New post! Don't forget to like and share if you find this useful.",
-  ],
-};
-```
-
-### Production Mode (Future)
-
-In production, the AI caption system would:
-1. Call a backend API endpoint (e.g., `POST /api/ai/caption`)
-2. Backend proxies to OpenAI/Anthropic API (holds API keys server-side)
-3. Returns generated caption with token usage
-4. Supports model selection, temperature, and platform-specific prompts
-
-### Token Tracking
-
-- Each generation records `tokensUsed` in `AIGenerationMeta`
-- Dashboard shows total tokens used this month (mock counter in local mode)
-- Production: token budget limits, usage alerts
+The UI should tell the user: *"This video cannot be scheduled for TikTok because it exceeds 15 minutes"* instead of waiting until publish time.
 
 ---
 
-## 20. Browser Extension (Future)
+## 17. User Permissions
 
-> **Status**: Deferred. Not implemented in MVP.
+### Roles (for multi-user workspaces)
 
-### Concept
-
-A browser extension that allows one-click scheduling from any webpage:
-
-- Right-click on an image → "Schedule to Social Media"
-- Extension popup with quick composer
-- Auto-imports page title, URL, and selected text as caption
-- Deep links back to SchedFlow web app for full editing
-
-### Requirements (Future)
-
-- Separate Chrome/Firefox extension project
-- Communication with SchedFlow via `chrome.storage` or `postMessage`
-- Content scripts for page scraping
-- Background script for scheduling notifications
+| Permission | Admin | Member |
+|---|---|---|
+| Create social post | Yes | Yes |
+| Edit social post | Yes | Yes (own + assigned) |
+| Delete social post | Yes | No |
+| Schedule post | Yes | Yes |
+| Cancel scheduled post | Yes | Yes (own) |
+| Publish now | Yes | Yes |
+| Retry failed post | Yes | Yes (own) |
+| Connect social account | Yes | Yes |
+| Disconnect social account | Yes | Yes (own accounts) |
+| View analytics | Yes | Yes |
+| Manage workspace social settings | Yes | No |
 
 ---
 
-## 21. Import from Other Tools (Future)
+## 18. Notifications
 
-> **Status**: Deferred. Not implemented in MVP.
+Server-side notifications for publishing events:
 
-### Supported Sources (Future)
+| Event | Notification Type | Message |
+|---|---|---|
+| Post published | success | "Your Instagram post was published successfully" |
+| Post failed | error | "TikTok post failed: rate_limit_exceeded" |
+| Token expired | warning | "YouTube authentication expired — reconnect in Settings" |
+| Token revoked | error | "Facebook account disconnected by user" |
+| Retry scheduled | info | "Retrying failed YouTube publish in 5 minutes" |
+| Partial success | warning | "2 of 4 platforms published successfully" |
+| All failed | error | "All platform publications failed for 'Summer Campaign'" |
 
-| Tool | Import Method |
-|------|---------------|
-| Buffer | Export CSV → parse → map to SocialPost |
-| Hootsuite | Export CSV → parse → map to SocialPost |
-| Later | Export JSON → parse → map to SocialPost |
-| CoSchedule | Export CSV → parse → map to SocialPost |
-
-### Import Flow (Future)
-
-1. User uploads CSV/JSON from external tool
-2. Parser maps fields to `SocialPost` structure
-3. User reviews and confirms import
-4. Posts imported as drafts
+Notifications integrate with the existing Inbox system and/or a dedicated notification center.
 
 ---
 
-## 22. Mobile Interface / Responsive Design
+## 19. Planner & Dashboard Integration
 
-### Breakpoints
+### Planner
 
-Following the existing SchedFlow responsive patterns:
+- Extend the existing Planner to show social posts alongside cards
+- Social posts appear as chips with platform icons + status-colored left border
+- Drag social posts to reschedule (same UX as card scheduling)
+- Status colors: draft (secondary), scheduled (primary), publishing (warning), published (success), failed (danger)
 
-| Breakpoint | Width | Layout |
-|------------|-------|--------|
-| Mobile     | < 640px | Single column; stacked composer; full-width calendar |
-| Tablet     | 640-1024px | Two-column where possible; compact calendar |
-| Desktop    | > 1024px | Full layout; side-by-side panels |
+### Dashboard Widgets (prioritized)
 
-### Mobile-Specific UX
-
-- **Composer**: Full-screen modal; fields stacked vertically
-- **Calendar**: Day view (not week view); swipe between days
-- **Analytics**: Summary cards stacked; charts full-width
-- **Deep links**: Primary CTA; opens platform apps directly
-- **Navigation**: Hamburger menu for sidebar; social scheduler accessible via bottom nav or sidebar
-
-### Touch Interactions
-
-- **Drag-and-drop**: Long-press to initiate drag on calendar (mobile `@hello-pangea/dnd` support)
-- **Swipe**: Swipe left/right on calendar days
-- **Pull-to-refresh**: Refresh analytics data (mock)
+| Widget | Priority | Description |
+|---|---|---|
+| Scheduled Today | High | Posts scheduled for today with platform icons |
+| Failed Posts | High | Quick access to retry failed publications |
+| Connected Accounts | Medium | Status of linked platform accounts |
+| This Week Overview | Medium | Calendar-style preview of upcoming posts |
+| Publishing Activity | Low | Recent publish history |
 
 ---
 
-## 23. Navigation & Routing
+## 20. Security Requirements
 
-### New Routes
+### Production Security
 
-| Route | Component | Description |
-|-------|-----------|-------------|
-| `/social` | `SocialDashboard` | Main social scheduler dashboard |
-| `/social/compose` | `ComposeModal` (full-screen) | Create/edit social post |
-| `/social/compose/:id` | `ComposeModal` (full-screen) | Edit existing social post |
-| `/social/calendar` | `SocialCalendarView` | Calendar scheduling view |
-| `/social/analytics` | `AnalyticsView` | Analytics dashboard |
-| `/social/post/:id` | `PostDetailView` | View single post details |
+| Concern | Implementation |
+|---|---|
+| OAuth tokens | Encrypted at rest (AES-256-GCM); never exposed to frontend |
+| API secrets | Server-side environment variables only |
+| CSRF | State token in OAuth flow; SameSite cookies |
+| Authorization | Server verifies workspace membership for every request |
+| Media access | Signed URLs with short TTL; private bucket by default |
+| Rate limiting | Backend rate limiting per user per platform |
+| Data encryption | Encrypt sensitive fields at rest in database |
+| Webhook verification | Verify platform webhook signatures (if applicable) |
+| Input validation | Sanitize all user input; validate against platform schemas |
+| Audit logging | Log all publishing attempts, token operations, account changes |
 
-### Sidebar Navigation
+### Never Expose
 
-Add a new top-level item in the sidebar between "Planner" and "Archive":
+- Platform API keys
+- OAuth refresh tokens
+- OAuth access tokens
+- App secrets
+- Database credentials
 
-```typescript
-// In Sidebar.tsx
-{
-  label: 'Social',
-  icon: Share2,  // from lucide-react
-  path: '/social',
-}
-```
-
-### App.tsx Route Registration
-
-```tsx
-<Route path="/social" element={<SocialDashboard />} />
-<Route path="/social/compose" element={<ComposeModal />} />
-<Route path="/social/compose/:id" element={<ComposeModal />} />
-<Route path="/social/calendar" element={<SocialCalendarView />} />
-<Route path="/social/analytics" element={<AnalyticsView />} />
-<Route path="/social/post/:id" element={<PostDetailView />} />
-```
-
-### ViewsMenu Integration
-
-The Social Dashboard includes its own sub-navigation tabs:
-- **Posts** (all posts with filters)
-- **Calendar** (week/day view)
-- **Analytics** (dashboard)
-- **Drafts** (draft-only list)
+These stay server-side only. The frontend communicates exclusively through the REST API.
 
 ---
 
-## 24. localStorage Persistence
+## 21. Reliability & Failure Handling
 
-### Storage Keys
+### Failure Scenarios
 
-| Key | Value | Version |
-|-----|-------|---------|
-| `schedflow-data` | Board data (existing) | 2 |
-| `schedflow-social-posts` | SocialPost[] (new) | 1 |
-| `schedflow-ui` | UI preferences (dark mode, etc.) | 1 |
+| Scenario | Handling |
+|---|---|
+| Server restarts | DB polling catches all due jobs; no jobs lost |
+| Worker crashes | BullMQ job is released back to queue after lock timeout |
+| API request times out | Retry with exponential backoff (5xx errors) |
+| Platform is unavailable | Retry with backoff; classify as retryable |
+| Database temporarily fails | Queue holds jobs; retry when DB recovers |
+| Token expires | Refresh before each publish attempt; re-authenticate if refresh fails |
+| Token is revoked | Mark account as `revoked`; notify user to reconnect |
+| User disconnects account | Cancel all scheduled posts for that account; notify user |
+| Job runs twice | Idempotency key prevents duplicate publishes |
+| Network connection fails | Retry with backoff; resumable upload for large files |
+| Media upload fails | Retry upload; check file integrity |
 
-### Read/Write Pattern
+### Duplicate Prevention
 
-Following the existing `storage.ts` pattern:
+- Each `SocialPostPlatform` + `scheduledAt` combination generates a unique `idempotencyKey`
+- Before publishing, check if a completed job with the same key exists
+- For Instagram: always check container `status_code` before retrying failed `media_publish` (~10% are false failures)
 
-```typescript
-const SOCIAL_POSTS_KEY = 'schedflow-social-posts';
-const SOCIAL_POSTS_VERSION = 1;
+### Retry Strategy
 
-export function loadSocialPosts(): SocialPost[] {
-  try {
-    const raw = localStorage.getItem(SOCIAL_POSTS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (parsed.version !== SOCIAL_POSTS_VERSION) {
-      return migrateSocialPosts(parsed.data);
-    }
-    return Array.isArray(parsed.data) ? parsed.data : [];
-  } catch {
-    return [];
-  }
-}
-
-export function saveSocialPosts(posts: SocialPost[]): void {
-  const payload = { version: SOCIAL_POSTS_VERSION, data: posts };
-  localStorage.setItem(SOCIAL_POSTS_KEY, JSON.stringify(payload));
-}
-```
-
-### Storage Limits
-
-- localStorage per origin: ~5MB
-- Current board data usage: varies (estimate ~500KB-1MB for active users)
-- Social posts with media: each image ~100KB-1MB in base64
-- **Strategy**: Keep media small; show storage meter in settings; warn at 80% capacity
+| Error Type | Retries | Backoff |
+|---|---|---|
+| Rate limit (429, 80001) | 5 | Exponential: 1min, 5min, 30min, 2hr, 12hr |
+| Server error (5xx) | 3 | Exponential: 1min, 5min, 30min |
+| Token expired | 1 (after refresh) | Immediate |
+| Token revoked | 0 (permanent) | Notify user |
+| Invalid content | 0 (permanent) | Notify user with error |
+| Network timeout | 3 | Exponential: 30s, 2min, 10min |
 
 ---
 
-## 25. Schema Versioning & Migration
+## 22. Technology Stack
 
-### Version Tracking
-
-Social posts have their own schema version, independent of board data:
-
-```typescript
-const SOCIAL_POSTS_VERSION = 1;
-```
-
-### Migration Function
-
-```typescript
-function migrateSocialPosts(data: unknown): SocialPost[] {
-  if (!Array.isArray(data)) return [];
-
-  return data.map(post => {
-    let migrated = { ...post };
-
-    // v0 → v1: Add missing fields
-    if (!migrated.tags) migrated.tags = [];
-    if (!migrated.repeat) migrated.repeat = 'none';
-    if (!migrated.createdAt) migrated.createdAt = new Date().toISOString();
-    if (!migrated.updatedAt) migrated.updatedAt = new Date().toISOString();
-    if (!migrated.platforms) migrated.platforms = [];
-    if (!migrated.media) migrated.media = [];
-
-    // Ensure each platform has required fields
-    migrated.platforms = migrated.platforms.map(p => ({
-      enabled: true,
-      status: 'pending' as PlatformStatus,
-      caption: '',
-      hashtags: [],
-      mentions: [],
-      visibility: 'public' as const,
-      ...p,
-    }));
-
-    return migrated;
-  });
-}
-```
-
-### Future Migrations
-
-When schema changes are needed:
-1. Increment `SOCIAL_POSTS_VERSION`
-2. Add migration logic in `migrateSocialPosts()` for the previous version → new version
-3. `loadSocialPosts()` detects version mismatch and runs migration
+| Layer | Technology | Rationale |
+|---|---|---|
+| Backend runtime | Node.js + TypeScript | Same language as frontend; shares types |
+| API framework | Hono | Lightweight, fast, TypeScript-native |
+| Database | PostgreSQL | Relational data, job scheduling, audit logs |
+| ORM | Drizzle ORM | TypeScript-native, lightweight, SQL-like |
+| Job queue | BullMQ (Redis) | Battle-tested; delayed jobs, retries, rate limits |
+| Object storage | Cloudflare R2 or AWS S3 | Cost-effective media storage |
+| Token encryption | AES-256-GCM | OAuth token security at rest |
+| Auth | Session-based (cookie) | Simple for MVP |
+| Deployment | Railway / Fly.io | Easy Node.js + Redis + Postgres |
+| Frontend API client | fetch + React Query (or SWR) | Data fetching, caching, real-time updates |
 
 ---
 
-## 26. Shared Components to Reuse
+## 23. Phased Implementation Plan
 
-| Component | Location | Reuse In |
-|-----------|----------|----------|
-| `Modal` | `src/components/shared/Modal.tsx` | Composer wrapper, analytics modals |
-| `Button` | `src/components/shared/Button.tsx` | All action buttons |
-| `Input` | `src/components/shared/Input.tsx` | Composer fields, search |
-| `Chip` | `src/components/shared/Chip.tsx` | Platform tags, status badges, hashtags |
-| `SectionLabel` | `src/components/shared/SectionLabel.tsx` | Composer section headers |
-| `DueBadge` | `src/components/shared/DueBadge.tsx` | Post status badges |
-| `CardAttachments` | `src/components/card-modal/CardAttachments.tsx` | Media upload/display pattern |
-| `CardCover` | `src/components/card-modal/CardCover.tsx` | Media preview rendering |
-| `CoverPanel` | `src/components/card-modal/CoverPanel.tsx` | Media gallery layout |
-| `MoveCardDialog` | `src/components/card-modal/MoveCardDialog.tsx` | Dialog pattern for move/schedule |
-| `ErrorBoundary` | `src/components/shared/ErrorBoundary.tsx` | Route-level error handling |
+### Phase 1: Backend Foundation (Week 1-2)
 
-### Utility Functions
+- Set up Node.js + Hono server with TypeScript
+- PostgreSQL database + Drizzle ORM schema
+- User authentication (session-based)
+- `SocialAccount` model + CRUD endpoints
+- OAuth flow for YouTube (most straightforward API)
+- OAuth flow for Facebook (most mature API, needed for Instagram)
+- Encrypted token storage (AES-256-GCM)
+- REST API for social posts CRUD
+- Frontend API client (replace localStorage reads/writes)
 
-| Utility | Location | Reuse In |
-|---------|----------|----------|
-| `uid()` | `src/utils/id.ts` | ID generation for all new entities |
-| `formatSize()` | `src/utils/format.ts` | Media file size display |
-| `addDays()`, `formatDate()`, `isSameDay()` | `src/utils/dates.ts` | Calendar date logic |
-| `PLATFORM_COLORS` | `src/utils/color.ts` | Platform color coding |
-| `getContrastColor()` | `src/utils/contrast.ts` | Text contrast on platform colors |
+### Phase 2: Media & Publishing Core (Week 2-3)
 
----
+- Cloud file storage integration (R2 or S3)
+- Media upload endpoint (streaming to cloud)
+- Media validation service (per-platform rules)
+- `PublishingJob` model + audit logging
+- BullMQ job queue setup with Redis
+- Basic polling scheduler (60s interval)
+- YouTube publisher adapter
+- Facebook publisher adapter
+- Retry logic with exponential backoff
 
-## 27. New Components to Create
+### Phase 3: Instagram + TikTok + Resilience (Week 3-4)
 
-### `src/components/social/`
+- Instagram publisher adapter (two-step container process)
+- TikTok publisher adapter (Direct Post)
+- OAuth flows for Instagram (via Facebook Login) and TikTok
+- Token refresh background service (refresh before expiry)
+- Idempotency key system (prevent duplicate publishes)
+- Dead-letter queue for permanently failed jobs
+- Concurrency limits per platform
+- Partial failure handling (per-platform status updates)
 
-| Component | File | Description |
-|-----------|------|-------------|
-| `SocialDashboard` | `SocialDashboard.tsx` | Main dashboard with post list, filters, actions |
-| `SocialCalendarView` | `SocialCalendarView.tsx` | Calendar view with drag-and-drop scheduling |
-| `ComposeModal` | `ComposeModal.tsx` | Full composer for creating/editing posts |
-| `PlatformSelector` | `PlatformSelector.tsx` | Platform toggle chips with icons |
-| `PlatformOverrides` | `PlatformOverrides.tsx` | Per-platform content customization panels |
-| `MediaUploader` | `MediaUploader.tsx` | File upload with preview and constraints |
-| `MediaGallery` | `MediaGallery.tsx` | Grid of attached media with remove/edit |
-| `SmartScheduleHint` | `SmartScheduleHint.tsx` | Optimal time suggestions display |
-| `PostCard` | `PostCard.tsx` | Post summary card for lists and calendar |
-| `PostDetailView` | `PostDetailView.tsx` | Full post detail view |
-| `AnalyticsView` | `AnalyticsView.tsx` | Analytics dashboard |
-| `AnalyticsCard` | `AnalyticsCard.tsx` | Summary metric card |
-| `PlatformBreakdown` | `PlatformBreakdown.tsx` | Per-platform analytics bar chart |
-| `DraftsList` | `DraftsList.tsx` | Draft posts list view |
-| `TagInput` | `TagInput.tsx` | Tag/chip input component |
-| `CaptionEditor` | `CaptionEditor.tsx` | Rich caption textarea with character count |
-| `AIGenerateModal` | `AIGenerateModal.tsx` | AI caption generation modal |
-| `DeepLinkButton` | `DeepLinkButton.tsx` | Platform deep link open button |
-| `PostPreviewModal` | `PostPreviewModal.tsx` | Preview of how post looks on each platform |
-| `ImportExportPanel` | `ImportExportPanel.tsx` | JSON import/export UI |
-| `CardLinker` | `CardLinker.tsx` | Search and link cards to social posts |
-| `UnscheduledPool` | `UnscheduledPool.tsx` | Drag source for unscheduled posts |
+### Phase 4: Frontend Production Integration (Week 4-5)
 
----
+- Replace localStorage social posts with API calls (React Query)
+- Social account connection UI (OAuth redirect flow)
+- Real-time status updates (polling or SSE)
+- Media upload to cloud storage (streaming)
+- Timezone selection in composer
+- Publishing preview with pre-publish platform validation
+- Reschedule / cancel / retry UI controls
 
-## 28. Platform-Specific Considerations
+### Phase 5: Notifications & Polish (Week 5-6)
 
-### YouTube
-- **Video required**: YouTube posts should have at least one video attachment
-- **Title field**: YouTube requires a separate title (use `SocialPost.title`)
-- **Description**: Long-form caption (5000 chars)
-- **Hashtags**: Up to 15; displayed above title
-- **Thumbnail**: Custom thumbnail upload (future; use video frame for MVP)
-- **Deep link**: `youtube://` opens YouTube app
+- Server-side notification service
+- Inbox integration for publish events
+- Dashboard widgets (scheduled today, failed posts, connected accounts)
+- Error recovery UI
+- Rate limit handling with user-friendly messages
+- Analytics from real platform APIs (YouTube Analytics, Facebook Insights, Instagram Insights)
 
-### Facebook
-- **Long text**: Facebook supports very long captions (63K chars)
-- **Image/video**: Both supported; carousel for multiple images
-- **Visibility options**: Public, Friends, Only Me, Custom
-- **Location**: Geotag supported
-- **Deep link**: `fb://` opens Facebook app
+### Phase 6: Advanced Features (Week 6+)
 
-### TikTok
-- **Video-first**: TikTok is primarily video; images shown as slideshow
-- **Short captions**: 2200 chars recommended (4000 max)
-- **Hashtags**: Critical for discovery; up to 30
-- **Sounds**: Not supported via API (manual in-app only)
-- **Duration limits**: 15s, 60s, 3min, 10min options
-- **Deep link**: `snssdk1233://` opens TikTok app
-
-### Instagram
-- **Visual-first**: Images and Reels (video) are primary
-- **Caption limit**: 2200 chars
-- **Hashtags**: Up to 30; 5-15 recommended for optimal engagement
-- **Alt text**: Important for accessibility
-- **Location**: Geotag supported
-- **Carousel**: Up to 10 images/videos per post
-- **Stories**: Not supported via basic API (manual in-app only)
-- **Deep link**: `instagram://` opens Instagram app
-
-### Cross-Platform Media Compatibility Matrix
-
-| Feature | YouTube | Facebook | TikTok | Instagram |
-|---------|---------|----------|--------|-----------|
-| Image posts | ✅ | ✅ | ⚠️ Slideshow | ✅ |
-| Video posts | ✅ | ✅ | ✅ (primary) | ✅ Reels |
-| Audio only | ❌ | ✅ | ❌ | ❌ |
-| Carousel | ❌ | ✅ | ❌ | ✅ |
-| Custom thumbnail | ✅ | ✅ | ❌ | ❌ |
-| Alt text | ✅ | ✅ | ❌ | ✅ |
-| Geotag | ❌ | ✅ | ❌ | ✅ |
+- Recurring post scheduler
+- Bulk scheduling
+- Content library / media reuse
+- Team collaboration on social posts
+- Advanced analytics dashboard
+- A/B testing for post content
+- Calendar integration (Google Calendar, Outlook)
 
 ---
 
-## 29. Security Considerations
-
-### Local Mode (MVP)
-
-| Concern | Mitigation |
-|---------|------------|
-| **localStorage limits** | Show storage meter; warn at 80%; cap media file sizes |
-| **Base64 media in storage** | Compress images before encoding; limit total media per post |
-| **No authentication** | Local-only; no user accounts; single-user app |
-| **XSS via caption rendering** | Sanitize all user input before rendering; use React's default escaping |
-| **Deep link injection** | Validate deep link URLs against known platform URL patterns |
-| **JSON import validation** | Validate schema on import; reject malformed data; sanitize strings |
-
-### Production Mode (Future)
-
-| Concern | Mitigation |
-|---------|------------|
-| **API keys** | Never store in frontend; use backend proxy |
-| **OAuth tokens** | Store encrypted in backend; refresh tokens server-side |
-| **CSRF** | Backend CSRF protection on API endpoints |
-| **Rate limiting** | Backend rate limiting per user per platform |
-| **Data encryption** | Encrypt sensitive data at rest in backend database |
-
----
-
-## 30. Phased Implementation
-
-### Phase 1: Data Layer & Core UI (MVP Foundation)
-
-**Duration**: 2-3 days  
-**Goal**: Social posts can be created, stored, and displayed
-
-| Task | Files | Priority |
-|------|-------|----------|
-| Define `SocialPost`, `SocialPostPlatform`, `SocialMediaAttachment`, `SocialAnalytics`, `AIGenerationMeta` types | `schema.ts` | High |
-| Add social post localStorage persistence (`loadSocialPosts`, `saveSocialPosts`) | `storage.ts` | High |
-| Add `migrateSocialPosts()` function | `storage.ts` | High |
-| Add social post CRUD methods to store (`addSocialPost`, `updateSocialPost`, `deleteSocialPost`, etc.) | `useStore.ts`, `StoreProvider.tsx` | High |
-| Add `/social` route and Social Dashboard page | `App.tsx`, new `SocialDashboard.tsx` | High |
-| Add "Social" nav item to sidebar | `Sidebar.tsx` | High |
-| Basic post list view with status badges | `SocialDashboard.tsx` | High |
-| Post detail view | `PostDetailView.tsx` | Medium |
-| "New Post" button opens basic composer | `ComposeModal.tsx` | Medium |
-
-### Phase 2: Composer & Platform Overrides
-
-**Duration**: 2-3 days  
-**Goal**: Full composer with per-platform content customization
-
-| Task | Files | Priority |
-|------|-------|----------|
-| Platform selector chips | `PlatformSelector.tsx` | High |
-| Caption editor with character count | `CaptionEditor.tsx` | High |
-| Per-platform override panels | `PlatformOverrides.tsx` | High |
-| Hashtag and mention inputs | `TagInput.tsx` | High |
-| Media upload and gallery | `MediaUploader.tsx`, `MediaGallery.tsx` | High |
-| Visibility selector per platform | `PlatformOverrides.tsx` | Medium |
-| Draft auto-save | `ComposeModal.tsx` | High |
-| Save draft / schedule buttons | `ComposeModal.tsx` | High |
-| Form validation (required fields, character limits) | `ComposeModal.tsx` | Medium |
-| Post preview modal | `PostPreviewModal.tsx` | Medium |
-
-### Phase 3: Calendar & Drag-and-Drop
-
-**Duration**: 2-3 days  
-**Goal**: Visual scheduling with drag-and-drop
-
-| Task | Files | Priority |
-|------|-------|----------|
-| Calendar week view | `SocialCalendarView.tsx` | High |
-| Day columns with post chips | `SocialCalendarView.tsx` | High |
-| Drag-and-drop between days | `SocialCalendarView.tsx` | High |
-| Unscheduled pool as drag source | `UnscheduledPool.tsx` | High |
-| Week navigation (prev/next/today) | `SocialCalendarView.tsx` | High |
-| Platform color coding on post chips | `PostCard.tsx` | Medium |
-| Status indicators on post chips | `PostCard.tsx` | Medium |
-| Click post chip to open composer | `SocialCalendarView.tsx` | Medium |
-| Click empty slot to create post on that date | `SocialCalendarView.tsx` | Medium |
-| Smart schedule hints | `SmartScheduleHint.tsx` | Medium |
-
-### Phase 4: Card Integration & Deep Linking
-
-**Duration**: 1-2 days  
-**Goal**: Posts link to cards; deep links open platform apps
-
-| Task | Files | Priority |
-|------|-------|----------|
-| "Create Social Post" action in Card Modal | `CardModal.tsx` | High |
-| "Link Existing Post" action in Card Modal | `CardModal.tsx` | Medium |
-| Card linker in composer | `CardLinked.tsx` | Medium |
-| Linked card display in post detail | `PostDetailView.tsx` | Medium |
-| Deep link button on posted/scheduled posts | `DeepLinkButton.tsx` | High |
-| Platform deep link URL generation | `DeepLinkButton.tsx` | Medium |
-| "Open in [Platform]" confirmation dialog | `DeepLinkButton.tsx` | Medium |
-
-### Phase 5: Analytics, AI, Import/Export
-
-**Duration**: 2-3 days  
-**Goal**: Analytics dashboard, AI mock, import/export
-
-| Task | Files | Priority |
-|------|-------|----------|
-| Analytics view with summary cards | `AnalyticsView.tsx`, `AnalyticsCard.tsx` | Medium |
-| Platform breakdown bar chart | `PlatformBreakdown.tsx` | Medium |
-| Top posts ranking | `AnalyticsView.tsx` | Medium |
-| Mock analytics data generation | `analytics.ts` (new util) | Medium |
-| AI caption generation modal (mock) | `AIGenerateModal.tsx` | Medium |
-| Mock caption templates | `aiCaptions.ts` (new util) | Low |
-| Token usage tracking (mock counter) | `AIGenerateModal.tsx` | Low |
-| JSON export (single post + bulk) | `ImportExportPanel.tsx` | Medium |
-| JSON import with validation | `ImportExportPanel.tsx` | Medium |
-| Undo/redo system | `undo.ts` (new util) | Low |
-
-### Phase 6: Polish & Responsive
-
-**Duration**: 1-2 days  
-**Goal**: Mobile responsive, polish, accessibility
-
-| Task | Files | Priority |
-|------|-------|----------|
-| Mobile responsive layout | All social components | High |
-| Touch drag-and-drop support | `SocialCalendarView.tsx` | Medium |
-| Keyboard shortcuts (Ctrl+Z, Ctrl+Shift+Z) | `ComposeModal.tsx`, `SocialCalendarView.tsx` | Low |
-| Accessibility (ARIA labels, focus management) | All social components | Medium |
-| Loading states and empty states | All social components | Medium |
-| Toast notifications for actions | All social components | Medium |
-| Post recurrence engine | `recurrence.ts` (new util) | Low |
-| Storage meter in settings | `SettingsModal.tsx` | Low |
-
----
-
-## 31. Risks & Open Questions
-
-### Risks
+## 24. Risks & Mitigations
 
 | Risk | Impact | Mitigation |
-|------|--------|------------|
-| **localStorage 5MB limit** | Media-heavy posts could fill storage quickly | Compress images; show storage meter; consider IndexedDB for future |
-| **No backend = no real publishing** | Users may expect actual posting | Clearly label as "prototype"; deep links as workaround |
-| **Base64 media is inefficient** | Large storage footprint per image | Compress to JPEG quality 0.7; resize to max 1200px width |
-| **`@hello-pangea/dnd` mobile support** | Touch drag may be buggy | Test on mobile early; provide tap-to-move fallback |
-| **Schema migration complexity** | Future schema changes need migration logic | Keep schema simple; version carefully; test migrations |
-| **Analytics mock may confuse users** | Users may think data is real | Clearly label "Demo Data" with visual badge |
-| **Deep links may not work on all devices** | Some platforms block deep links | Always provide web fallback URL |
-| **Undo/redo memory usage** | 50-action stack with large posts | Limit to 50 actions; store only diffs, not full copies |
-
-### Open Questions
-
-| Question | Impact | Decision Needed |
-|----------|--------|-----------------|
-| Should social posts be board-scoped or global? | Data organization | **Decision: Global** — Social posts are independent of boards; linked via `cardId` |
-| Should we use IndexedDB for media storage? | Storage capacity | Defer to Phase 6+; localStorage sufficient for MVP |
-| Should the calendar show time slots or just days? | Calendar UX | **Decision: Days only** for MVP; time is set in composer, not on calendar grid |
-| Should analytics auto-refresh or manual? | UX | **Decision: Manual** — "Refresh Analytics" button; no auto-polling |
-| How should recurring posts be displayed on calendar? | Calendar UX | Show each occurrence as a separate chip; linked by `repeat` group ID |
-| Should we support scheduling in different timezones? | Complexity | **Decision: No** — Use local browser timezone for MVP |
-| Should the AI generator support multiple languages? | Feature scope | Defer to production; MVP is English-only mock |
-| Should we add a "Social" view to the board calendar? | Integration | Defer to Phase 4; board calendar stays card-only for now |
+|---|---|---|
+| Facebook app review rejection | Cannot publish publicly | Start review process early (1-3 months); have fallback plan |
+| TikTok unaudited = private only | Cannot publish publicly | Submit for TikTok audit; support draft mode initially |
+| YouTube unverified = private uploads | Cannot publish public videos | Submit YouTube API audit form early |
+| Token expiry during scheduling | Post fails to publish | Background refresh job; check before each publish |
+| Instagram container expiry (24h) | Cannot pre-create containers | Create container at publish time, not schedule time |
+| Instagram false failures (~10%) | Unnecessary retries | Check container status_code before retrying |
+| Rate limiting across platforms | Posts fail silently | Implement backoff; respect platform-specific limits |
+| Media URL expiry | Worker cannot access media | Use long-lived signed URLs or public bucket for media |
+| Database growth (audit logs) | Slow queries over time | Index on scheduled_at, status; archive old PublishingJobs |
+| TikTok upload URL expiry (1hr) | Upload fails | Initiate and complete upload within the hour; retry if needed |
+| Facebook Page token invalidation | Unexpected auth failure | Detect on API error; mark account as needing reconnection |
+| Infrastructure cost scaling | High at scale | Start with R2 (free egress); use BullMQ for efficient worker utilization |
 
 ---
 
-## Appendix: File Structure
-
-```
-src/
-  components/
-    social/
-      SocialDashboard.tsx
-      SocialCalendarView.tsx
-      ComposeModal.tsx
-      PlatformSelector.tsx
-      PlatformOverrides.tsx
-      MediaUploader.tsx
-      MediaGallery.tsx
-      SmartScheduleHint.tsx
-      PostCard.tsx
-      PostDetailView.tsx
-      AnalyticsView.tsx
-      AnalyticsCard.tsx
-      PlatformBreakdown.tsx
-      DraftsList.tsx
-      TagInput.tsx
-      CaptionEditor.tsx
-      AIGenerateModal.tsx
-      DeepLinkButton.tsx
-      PostPreviewModal.tsx
-      ImportExportPanel.tsx
-      CardLinked.tsx
-      UnscheduledPool.tsx
-  utils/
-    analytics.ts              # Mock analytics data generation
-    aiCaptions.ts             # Mock AI caption templates
-    recurrence.ts             # Recurring post engine
-    deepLinks.ts              # Platform deep link URL generation
-    undo.ts                   # Undo/redo command stack
-    platformDefaults.ts       # Platform defaults and limits
-  store/
-    schema.ts                 # Extended with social post types
-    useStore.ts               # Extended with social post methods
-    storage.ts                # Extended with social post persistence
-    StoreProvider.tsx          # Extended with social post state
-```
-
----
-
-*End of plan. This document is the single source of truth for the Social Media Post Scheduler feature.*
+*End of plan. This document is the single source of truth for the Social Media Management Scheduler feature.*
