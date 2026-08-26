@@ -195,6 +195,31 @@ export interface AIGenerationMeta {
   version: number
 }
 
+export type PublishingJobStatus = 'queued' | 'locked' | 'publishing' | 'completed' | 'failed'
+
+export interface PublishingJob {
+  _id: string
+  socialPostId: string
+  platform: Platform
+  status: PublishingJobStatus
+  lockedAt?: string
+  lockedBy?: string
+  startedAt?: string
+  completedAt?: string
+  error?: string
+  errorCode?: string
+  retryCount: number
+  maxRetries: number
+  nextRetryAt?: string
+  idempotencyKey: string
+  publishResult?: {
+    externalPostId?: string
+    publishedUrl?: string
+  }
+  createdAt: string
+  updatedAt: string
+}
+
 export interface SocialPost {
   id: string
   title: string

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, Share2, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle, CalendarDays, BarChart3, Download } from 'lucide-react'
+import { Plus, Search, Share2, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle, CalendarDays, BarChart3, Download, Link2 } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import type { SocialPost, SocialPostStatus } from '../../store/schema'
 import { PLATFORM_COLORS } from '../../store/schema'
@@ -9,6 +9,7 @@ import { useToast } from '../shared/useToastState'
 import ComposeModal from './ComposeModal'
 import DeepLinkButton from './DeepLinkButton'
 import ImportExportPanel from './ImportExportPanel'
+import AccountConnectionPanel from './AccountConnectionPanel'
 
 const STATUS_CONFIG: Record<SocialPostStatus, { label: string; color: string; icon: typeof Clock }> = {
   draft: { label: 'Draft', color: 'text-text-muted', icon: FileText },
@@ -113,6 +114,7 @@ export default function SocialDashboard() {
   const [composeOpen, setComposeOpen] = useState(false)
   const [editingPost, setEditingPost] = useState<SocialPost | null>(null)
   const [importExportOpen, setImportExportOpen] = useState(false)
+  const [accountsOpen, setAccountsOpen] = useState(false)
 
   const filtered = socialPosts.filter((p) => {
     if (statusFilter !== 'all' && p.status !== statusFilter) return false
@@ -190,6 +192,15 @@ export default function SocialDashboard() {
           >
             <Download size={14} />
             <span className="hidden sm:inline">Import/Export</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setAccountsOpen(!accountsOpen)}
+            aria-label="Manage connected accounts"
+            className={`inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-surface-alt hover:text-text-primary ${accountsOpen ? 'border-primary text-primary' : 'text-text-secondary'}`}
+          >
+            <Link2 size={14} />
+            <span className="hidden sm:inline">Accounts</span>
           </button>
         </div>
       </div>
@@ -270,6 +281,20 @@ export default function SocialDashboard() {
 
       {importExportOpen && (
         <ImportExportPanel onClose={() => setImportExportOpen(false)} />
+      )}
+
+      {accountsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-sm rounded-xl border border-border bg-surface p-4 shadow-lg">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-text">Connected Accounts</h2>
+              <button onClick={() => setAccountsOpen(false)} className="rounded p-1 text-text-muted hover:text-text">
+                <XCircle className="h-4 w-4" />
+              </button>
+            </div>
+            <AccountConnectionPanel />
+          </div>
+        </div>
       )}
     </div>
   )
