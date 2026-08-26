@@ -6,11 +6,15 @@ import { SocialAccount } from '../../_lib/models/SocialAccount'
 import { decryptToken } from '../../_lib/oauth'
 import { youtubePublisher } from '../../_lib/publishers/youtube'
 import { facebookPublisher } from '../../_lib/publishers/facebook'
+import { instagramPublisher } from '../../_lib/publishers/instagram'
+import { tiktokPublisher } from '../../_lib/publishers/tiktok'
 import type { PlatformPublisher } from '../../_lib/publishers/types'
 
 const publishers: Record<string, PlatformPublisher> = {
   youtube: youtubePublisher,
   facebook: facebookPublisher,
+  instagram: instagramPublisher,
+  tiktok: tiktokPublisher,
 }
 
 // Retry backoff: 1min, 5min, 30min, 2hr, 12hr

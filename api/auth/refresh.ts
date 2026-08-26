@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { connectDB } from '../../_lib/mongodb'
 import { SocialAccount } from '../../_lib/models/SocialAccount'
-import { decryptToken, encryptToken, refreshYouTubeToken } from '../../_lib/oauth'
+import { decryptToken, encryptToken, refreshYouTubeToken, refreshTikTokToken } from '../../_lib/oauth'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -32,19 +32,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ ok: true, data: { refreshed: true } })
     }
 
-    if (account.platform === 'facebook') {
-      // Facebook long-lived tokens can be refreshed if we have the short-lived token
-      // For now, just check if the token is still valid
+    if (account.platform === 'facebook' || account.platform === 'instagram') {
+      // Facebook/Instagram long-lived tokens: validate, mark expired if needed
+      const token = decryptToken(account.accessToken)
       const testRes = await fetch(
-        `https://graph.facebook.com/v19.0/me?access_token=${decryptToken(account.accessToken)}`,
+        `https://graph.facebook.com/v19.0/me?access_token=${token}`,
       )
       if (testRes.ok) {
         return res.status(200).json({ ok: true, data: { refreshed: false, stillValid: true } })
       }
-      // Token is expired — mark account as expired, user needs to reconnect
       account.status = 'expired'
       await account.save()
       return res.status(200).json({ ok: true, data: { refreshed: false, expired: true } })
+    }
+
+    if (account.platform === 'tiktok') {
+      const refreshToken = decryptToken(account.refreshToken)
+      try {
+        const tokenData = await refreshTikTokToken(refreshToken)
+
+        account.accessToken = encryptToken(tokenData.access_token)
+        account.refreshToken = encryptToken(tokenData.refresh_token)
+        account.tokenExpiresAt = new Date(Date.now() + tokenData.expires_in * 1000)
+        account.status = 'active'
+        await account.save()
+
+        return res.status(200).json({ ok: true, data: { refreshed: true } })
+      } catch {
+        account.status = 'expired'
+        await account.save()
+        return res.status(200).json({ ok: true, data: { refreshed: false, expired: true } })
+      }
     }
 
     return res.status(400).json({ ok: false, error: 'Unsupported platform' })

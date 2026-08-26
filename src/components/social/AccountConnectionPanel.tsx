@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Play, Globe, Link2, Unlink, RefreshCw, Loader2 } from 'lucide-react'
+import { Play, Globe, Camera, Music, Link2, Unlink, RefreshCw, Loader2 } from 'lucide-react'
 import { socialAccountsApi, type SocialAccount } from '../../lib/api/social-accounts'
 import Button from '../shared/Button'
 
@@ -16,6 +16,18 @@ const PLATFORM_CONFIG = {
     color: '#1877F2',
     authUrl: '/api/auth/facebook/start',
   },
+  instagram: {
+    name: 'Instagram',
+    icon: Camera,
+    color: '#E4405F',
+    authUrl: '/api/auth/instagram/start',
+  },
+  tiktok: {
+    name: 'TikTok',
+    icon: Music,
+    color: '#000000',
+    authUrl: '/api/auth/tiktok/start',
+  },
 } as const
 
 export default function AccountConnectionPanel() {
@@ -27,15 +39,12 @@ export default function AccountConnectionPanel() {
     loadAccounts()
   }, [])
 
-  // Check for success/error params from OAuth redirect
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const success = params.get('success')
     const error = params.get('error')
     if (success || error) {
-      // Reload accounts after OAuth flow
       loadAccounts()
-      // Clean URL
       window.history.replaceState({}, '', window.location.pathname)
     }
   }, [])

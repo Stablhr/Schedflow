@@ -170,3 +170,118 @@ export async function getFacebookPages(accessToken: string): Promise<
   const data = await res.json()
   return data.data ?? []
 }
+
+// Instagram OAuth helpers (uses Facebook Login)
+
+export function getInstagramAuthUrl(state: string): string {
+  // Instagram uses Facebook Login with instagram_content_publish scope
+  const params = new URLSearchParams({
+    client_id: process.env.FACEBOOK_APP_ID!,
+    redirect_uri: process.env.INSTAGRAM_REDIRECT_URI || process.env.FACEBOOK_REDIRECT_URI!,
+    scope: 'instagram_basic,instagram_content_publish,pages_read_engagement,pages_manage_posts',
+    response_type: 'code',
+    state,
+  })
+  return `https://www.facebook.com/v19.0/dialog/oauth?${params.toString()}`
+}
+
+export async function getInstagramBusinessAccounts(accessToken: string): Promise<
+  Array<{
+    id: string
+    name: string
+    instagram_business_account?: { id: string; name: string; username: string }
+  }>
+> {
+  const res = await fetch(
+    `https://graph.facebook.com/v19.0/me/accounts?fields=instagram_business_account{id,name,username}&access_token=${accessToken}`,
+  )
+  if (!res.ok) {
+    const err = await res.text()
+    throw new Error(`Failed to fetch Instagram business accounts: ${err}`)
+  }
+  const data = await res.json()
+  return data.data ?? []
+}
+
+// TikTok OAuth helpers
+
+export function getTikTokAuthUrl(state: string): string {
+  const params = new URLSearchParams({
+    client_key: process.env.TIKTOK_CLIENT_KEY!,
+    redirect_uri: process.env.TIKTOK_REDIRECT_URI!,
+    response_type: 'code',
+    scope: 'video.publish',
+    state,
+  })
+  return `https://www.tiktok.com/v2/auth/authorize/?${params.toString()}`
+}
+
+export async function exchangeTikTokCode(code: string): Promise<{
+  access_token: string
+  open_id: string
+  expires_in: number
+  scope: string
+  refresh_token: string
+  refresh_expires_in: number
+}> {
+  const res = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_key: process.env.TIKTOK_CLIENT_KEY!,
+      client_secret: process.env.TIKTOK_CLIENT_SECRET!,
+      code,
+      grant_type: 'authorization_code',
+      redirect_uri: process.env.TIKTOK_REDIRECT_URI!,
+    }),
+  })
+  if (!res.ok) {
+    const err = await res.text()
+    throw new Error(`TikTok token exchange failed: ${err}`)
+  }
+  const data = await res.json()
+  if (data.error) {
+    throw new Error(`TikTok token exchange error: ${data.error.message}`)
+  }
+  return data.data
+}
+
+export async function refreshTikTokToken(refreshToken: string): Promise<{
+  access_token: string
+  expires_in: number
+  refresh_token: string
+  refresh_expires_in: number
+}> {
+  const res = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_key: process.env.TIKTOK_CLIENT_KEY!,
+      client_secret: process.env.TIKTOK_CLIENT_SECRET!,
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    }),
+  })
+  if (!res.ok) {
+    const err = await res.text()
+    throw new Error(`TikTok token refresh failed: ${err}`)
+  }
+  const data = await res.json()
+  if (data.error) {
+    throw new Error(`TikTok token refresh error: ${data.error.message}`)
+  }
+  return data.data
+}
+
+export async function getTikTokUserInfo(accessToken: string): Promise<{
+  open_id: string
+  display_name: string
+  avatar_url: string
+}> {
+  const res = await fetch('https://open.tiktokapis.com/v2/user/info/?fields=display_name,avatar_url', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!res.ok) throw new Error('Failed to fetch TikTok user info')
+  const data = await res.json()
+  return data.data?.user
+}
