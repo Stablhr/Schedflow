@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Webhook, Plus, Trash2, Webhook as WebhookIcon, Loader2, CheckCircle2, XCircle, X } from 'lucide-react'
-import { webhooksApi, WEBHOOK_EVENT_OPTIONS } from '../../lib/api/webhooks'
+import { Plus, Trash2, Webhook as WebhookIcon, Loader2, CheckCircle2, XCircle, X } from 'lucide-react'
+import { webhooksApi, WEBHOOK_EVENT_OPTIONS, type Webhook } from '../../lib/api/webhooks'
 import { Input } from '../shared/Input'
 import SectionLabel from '../shared/SectionLabel'
 import Button from '../shared/Button'
 import { useToast } from '../shared/useToastState'
 
-function EventCheckbox({ value, label, checked, onChange }: {
-  value: string
+function EventCheckbox({ label, checked, onChange }: {
   label: string
   checked: boolean
   onChange: () => void
@@ -113,7 +112,7 @@ export default function WebhooksPanel({ onClose }: { onClose: () => void }) {
                 <p className="text-[11px] font-medium text-text-secondary mb-1.5">Events</p>
                 <div className="flex flex-wrap gap-1.5">
                   {WEBHOOK_EVENT_OPTIONS.map((e) => (
-                    <EventCheckbox key={e.value} value={e.value} label={e.label} checked={events.includes(e.value)} onChange={() => toggleEvent(e.value)} />
+                    <EventCheckbox key={e.value} label={e.label} checked={events.includes(e.value)} onChange={() => toggleEvent(e.value)} />
                   ))}
                 </div>
               </div>

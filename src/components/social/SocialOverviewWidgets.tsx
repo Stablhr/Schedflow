@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CalendarClock, XCircle, Link2, TrendingUp, RefreshCw, Loader2 } from 'lucide-react'
+import { CalendarClock, XCircle, Link2, TrendingUp, RefreshCw, Loader2, Trash2 } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { useToast } from '../shared/useToastState'
 import { isDueThisWeek, toISODate } from '../../utils/dates'
@@ -24,7 +24,7 @@ function Widget({ label, value, icon: Icon, hint }: {
 }
 
 export default function SocialOverviewWidgets() {
-  const { socialPosts, retrySocialPost, refreshSocialJobs } = useStore()
+  const { socialPosts, retrySocialPost, refreshSocialJobs, deleteSocialPost } = useStore()
   const { toast } = useToast()
   const [accounts, setAccounts] = useState<SocialAccount[]>([])
   const [retrying, setRetrying] = useState(false)
@@ -105,6 +105,20 @@ export default function SocialOverviewWidgets() {
         >
           {retrying ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
           {retrying ? 'Retrying...' : 'Retry all'}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (!confirm(`Delete ${failed.length} failed post${failed.length === 1 ? '' : 's'}?`)) return
+            failed.forEach((p) => deleteSocialPost(p.id))
+            toast(`Deleted ${failed.length} failed post${failed.length === 1 ? '' : 's'}`, 'success')
+          }}
+          disabled={failed.length === 0}
+          aria-label="Delete all failed posts"
+          className="ml-1 inline-flex items-center gap-1 text-[11px] font-medium text-text-muted transition-colors hover:underline hover:text-danger-text disabled:opacity-40 disabled:no-underline"
+        >
+          <Trash2 size={12} />
+          Clear
         </button>
       </div>
       <Widget

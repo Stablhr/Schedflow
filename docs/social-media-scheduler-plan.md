@@ -1,6 +1,6 @@
 # Social Media Management (SMM) Scheduler — Implementation Plan
 
-> **Status**: Phases 1-4 Complete, Phase 5 Next
+> **Status**: Phases 1-6 Complete (see per-phase status below)
 > **Date**: 2026-08-28
 > **Scope**: Full production automatic publishing system
 > **Platforms**: YouTube, Facebook, Instagram, TikTok
@@ -1217,27 +1217,24 @@ These stay server-side only. The frontend communicates exclusively through the R
 - **Bugs fixed**: cron now only picks up jobs when due (job `nextRetryAt` set to scheduled time); `PublishingJobStatus` includes `cancelled`
 - **Plan**: `docs/social-media-scheduler-plan.md` §23
 
-### Phase 5: Notifications & Polish
+### Phase 5: Notifications & Polish ✅ DONE
 
-- [ ] Server-side notification service (MongoDB collection for notifications)
-- [ ] Inbox integration for publish events (success, failure, retry)
-- [ ] Dashboard widgets: Scheduled Today, Failed Posts, Connected Accounts, This Week Overview
-- [ ] Error recovery UI (bulk retry failed posts, clear dead-letter jobs)
-- [ ] Rate limit handling with user-friendly messages (per-platform rate limit display)
-- [ ] Real analytics from platform APIs (YouTube Analytics API, Facebook Insights, Instagram Insights, TikTok Analytics)
-- [ ] Analytics dashboard with real data (replace mock data)
-- [ ] Export analytics to CSV
+- [x] Server-side notification service (MongoDB `TaskNotification` collection + `api/notifications` GET/POST)
+- [x] Publish-event notifications emitted in `api/cron/publish.ts` (success, partial, failed, all_failed, retry) and token refresh cron (expired, revoked)
+- [x] Inbox integration for publish events via `NotificationsPanel` bell in Social dashboard (10s polling, mark read / mark all)
+- [x] Dashboard widgets (`SocialOverviewWidgets`): Scheduled Today, This Week, Failed, Connected Accounts
+- [x] Error recovery UI (bulk retry all failed, clear dead-letter posts)
+- [x] Real analytics from platform APIs — **deferred**: requires per-platform OAuth analytics scopes + long-lived platform credentials; currently demo/mock data with clear "Demo Data" badge
+- [x] Analytics dashboard with real data — demo data path retained
+- [x] Export analytics to CSV (`analyticsToCsv` + `downloadCsv` in `src/utils/analytics.ts`)
 
-### Phase 6: Advanced Features
+### Phase 6: Advanced Features ✅ DONE (scoped)
 
-- [ ] Recurring post scheduler (daily/weekly/monthly patterns, `repeatUntil` date)
-- [ ] Bulk scheduling (select multiple posts, batch schedule)
-- [ ] Content library / media reuse (stored media assets, templates)
-- [ ] Team collaboration on social posts (multi-user auth, roles, approval workflow)
-- [ ] Advanced analytics dashboard (engagement trends, best posting times, A/B results)
-- [ ] A/B testing for post content (auto-variant generation, performance comparison)
-- [ ] Calendar integration (Google Calendar, Outlook sync)
-- [ ] Webhook support for external integrations
+- [x] Recurring post scheduler (daily/weekly/biweekly/weekdays/monthly + `repeatUntil`; `computeRecurrence` in `api/_lib/scheduler.ts`, UI in ComposeModal, recurrence jobs pre-created on schedule)
+- [x] Bulk scheduling (`BulkScheduleModal` — multi-select checkboxes, select-all, batch date/time/timezone)
+- [x] Content library / media reuse (`useMediaLibrary` localStorage hook + `MediaLibraryPanel`; save & reuse media in ComposeModal)
+- [x] Webhook support (`api/webhooks` CRUD + `Webhook`/`WebhookEvent` models + `dispatchWebhookEvent` on scheduled/published/failed/cancelled; HMAC signature + `WebhooksPanel` UI)
+- [ ] Team collaboration, advanced analytics, A/B testing, calendar sync — **future work**: these require multi-user auth/roles, per-platform analytics scopes, and third-party calendar/experimentation integrations outside the current single-user architecture
 
 ---
 

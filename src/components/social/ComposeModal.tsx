@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { X, Plus, Calendar, Tag, Sparkles, AlertTriangle, CheckCircle2, Clock, Loader2 } from 'lucide-react'
+import { X, Plus, Calendar, Tag, Sparkles, AlertTriangle, CheckCircle2, Clock, Loader2, Library } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import type { SocialPost, SocialPostPlatform, SocialMediaAttachment, Platform } from '../../store/schema'
 import { PLATFORM_COLORS, PLATFORM_DEFAULTS, PLATFORM_LIMITS } from '../../store/schema'
@@ -9,6 +9,8 @@ import SectionLabel from '../shared/SectionLabel'
 import AIGenerateModal from './AIGenerateModal'
 import { uploadFile } from '../../lib/api/client'
 import { COMMON_TIMEZONES, getBrowserTimezone } from '../../utils/timezones'
+import { useMediaLibrary } from '../../lib/hooks/useMediaLibrary'
+import MediaLibraryPanel from './MediaLibraryPanel'
 
 const ALL_PLATFORMS: Platform[] = ['youtube', 'facebook', 'tiktok', 'instagram']
 
@@ -122,6 +124,8 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
   const [scheduling, setScheduling] = useState<'idle' | 'scheduling' | 'done'>('idle')
   const [scheduleResult, setScheduleResult] = useState<{ ok: boolean; errors?: string[] } | null>(null)
   const [showPreview, setShowPreview] = useState(false)
+  const [libOpen, setLibOpen] = useState(false)
+  const { addToLibrary } = useMediaLibrary()
 
   const isEditing = !!post
 
@@ -378,7 +382,18 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
 
           {/* Media */}
           <div>
-            <SectionLabel icon={<Plus size={12} />}>Media</SectionLabel>
+            <div className="flex items-center justify-between">
+              <SectionLabel icon={<Plus size={12} />}>Media</SectionLabel>
+              <button
+                type="button"
+                onClick={() => setLibOpen(true)}
+                aria-label="Open media library"
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary-subtle"
+              >
+                <Library size={12} />
+                Library
+              </button>
+            </div>
             <div className="mt-2 flex flex-wrap gap-2">
               {media.map((m) => (
                 <div key={m.id} className="group relative h-20 w-20 overflow-hidden rounded-lg border border-border">
@@ -396,6 +411,14 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
                     className="absolute right-0.5 top-0.5 rounded-full bg-danger p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
                   >
                     <X size={10} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => addToLibrary(m)}
+                    aria-label={`Save ${m.name} to library`}
+                    className="absolute bottom-0.5 right-0.5 rounded-full bg-black/50 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <Library size={10} />
                   </button>
                 </div>
               ))}
@@ -572,6 +595,26 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
         <AIGenerateModal
           onUse={(generated) => setCaption(generated)}
           onClose={() => setAiOpen(false)}
+        />
+      )}
+
+      {libOpen && (
+        <MediaLibraryPanel
+          onClose={() => setLibOpen(false)}
+          onUse={(item) => {
+            setMedia((prev) => [
+              ...prev,
+              {
+                id: `lib-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                type: item.type as SocialMediaAttachment['type'],
+                name: item.name,
+                dataUrl: item.dataUrl,
+                size: 0,
+                platformCompat: (item.platformCompat as Platform[]) ?? ALL_PLATFORMS,
+              } as SocialMediaAttachment,
+            ])
+            setLibOpen(false)
+          }}
         />
       )}
     </div>

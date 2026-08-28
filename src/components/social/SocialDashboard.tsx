@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, Share2, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle, CalendarDays, BarChart3, Download, Link2, Bell } from 'lucide-react'
+import { Plus, Search, Share2, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle, CalendarDays, BarChart3, Download, Link2, Bell, Webhook } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import type { SocialPost, SocialPostStatus } from '../../store/schema'
 import { PLATFORM_COLORS } from '../../store/schema'
@@ -15,6 +15,7 @@ import NotificationsPanel from './NotificationsPanel'
 import { useNotifications } from '../../lib/hooks/useNotifications'
 import SocialOverviewWidgets from './SocialOverviewWidgets'
 import BulkScheduleModal from './BulkScheduleModal'
+import WebhooksPanel from './WebhooksPanel'
 
 const STATUS_CONFIG: Record<SocialPostStatus, { label: string; color: string; icon: typeof Clock }> = {
   draft: { label: 'Draft', color: 'text-text-muted', icon: FileText },
@@ -140,6 +141,7 @@ export default function SocialDashboard() {
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkOpen, setBulkOpen] = useState(false)
+  const [webhooksOpen, setWebhooksOpen] = useState(false)
   const { unreadCount } = useNotifications()
 
   const filtered = socialPosts.filter((p) => {
@@ -246,6 +248,15 @@ export default function SocialDashboard() {
               </span>
             )}
             <span className="hidden sm:inline">Notifications</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setWebhooksOpen(true)}
+            aria-label="Manage webhooks"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
+          >
+            <Webhook size={14} />
+            <span className="hidden sm:inline">Webhooks</span>
           </button>
         </div>
       </div>
@@ -408,6 +419,10 @@ export default function SocialDashboard() {
 
       {notificationsOpen && (
         <NotificationsPanel onClose={() => setNotificationsOpen(false)} />
+      )}
+
+      {webhooksOpen && (
+        <WebhooksPanel onClose={() => setWebhooksOpen(false)} />
       )}
     </div>
   )

@@ -28,5 +28,3 @@ export const webhooksApi = {
     api.put<Webhook>(`/webhooks?id=${id}`, patch),
   remove: (id: string) => api.delete<Webhook>(`/webhooks?id=${id}`),
 }
-
-export type { Webhook }
