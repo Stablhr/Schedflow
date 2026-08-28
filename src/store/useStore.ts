@@ -58,7 +58,7 @@ export interface Store {
   deleteSocialPost: (id: string) => void
   duplicateSocialPost: (id: string) => SocialPost | null
   moveSocialPost: (id: string, newDate: string, newTime?: string) => void
-  scheduleSocialPost: (id: string, input: { scheduledDate: string; scheduledTime?: string; timezone?: string }) => Promise<{ ok: boolean; errors?: string[] }>
+  scheduleSocialPost: (id: string, input: { scheduledDate: string; scheduledTime?: string; timezone?: string; repeat?: SocialPost['repeat']; repeatUntil?: string }) => Promise<{ ok: boolean; errors?: string[] }>
   cancelSocialPost: (id: string, platform?: Platform) => Promise<boolean>
   retrySocialPost: (id: string, platform?: Platform) => Promise<boolean>
   refreshSocialJobs: (postId?: string) => Promise<void>

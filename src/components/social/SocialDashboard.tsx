@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, Share2, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle, CalendarDays, BarChart3, Download, Link2 } from 'lucide-react'
+import { Plus, Search, Share2, FileText, Trash2, Copy, Clock, CheckCircle2, XCircle, AlertCircle, CalendarDays, BarChart3, Download, Link2, Bell } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import type { SocialPost, SocialPostStatus } from '../../store/schema'
 import { PLATFORM_COLORS } from '../../store/schema'
@@ -11,6 +11,10 @@ import DeepLinkButton from './DeepLinkButton'
 import ImportExportPanel from './ImportExportPanel'
 import AccountConnectionPanel from './AccountConnectionPanel'
 import PostDetailModal from './PostDetailModal'
+import NotificationsPanel from './NotificationsPanel'
+import { useNotifications } from '../../lib/hooks/useNotifications'
+import SocialOverviewWidgets from './SocialOverviewWidgets'
+import BulkScheduleModal from './BulkScheduleModal'
 
 const STATUS_CONFIG: Record<SocialPostStatus, { label: string; color: string; icon: typeof Clock }> = {
   draft: { label: 'Draft', color: 'text-text-muted', icon: FileText },
@@ -22,11 +26,13 @@ const STATUS_CONFIG: Record<SocialPostStatus, { label: string; color: string; ic
   cancelled: { label: 'Cancelled', color: 'text-text-muted', icon: XCircle },
 }
 
-function PostRow({ post, onEdit, onDelete, onDuplicate }: {
+function PostRow({ post, onEdit, onDelete, onDuplicate, selected, onToggleSelect }: {
   post: SocialPost
   onEdit: () => void
   onDelete: () => void
   onDuplicate: () => void
+  selected?: boolean
+  onToggleSelect?: () => void
 }) {
   const status = STATUS_CONFIG[post.status]
   const StatusIcon = status.icon
@@ -34,15 +40,29 @@ function PostRow({ post, onEdit, onDelete, onDuplicate }: {
 
   return (
     <div
-      className="group flex items-center gap-3 rounded-lg border border-border bg-surface p-3 transition-colors hover:bg-surface-alt sm:gap-4"
+      className={`group flex items-center gap-3 rounded-lg border p-3 transition-colors sm:gap-4 ${
+        selected ? 'border-primary bg-primary-subtle/40' : 'border-border bg-surface hover:bg-surface-alt'
+      }`}
       role="button"
       tabIndex={0}
       aria-label={`Edit post: ${post.title || 'Untitled'}`}
       onClick={onEdit}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEdit() } }}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-3">
+      <div className="flex items-center gap-2">
+        {onToggleSelect && (
+          <input
+            type="checkbox"
+            checked={!!selected}
+            onChange={(e) => { e.stopPropagation(); onToggleSelect() }}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`Select ${post.title || 'untitled'}`}
+            className="h-4 w-4 cursor-pointer accent-[var(--primary)]"
+          />
+        )}
         <StatusIcon size={16} className={`shrink-0 ${status.color}`} />
+      </div>
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-text-primary">{post.title || 'Untitled Post'}</p>
           <p className="mt-0.5 truncate text-xs text-text-secondary">
@@ -117,6 +137,10 @@ export default function SocialDashboard() {
   const [detailPostId, setDetailPostId] = useState<string | null>(null)
   const [importExportOpen, setImportExportOpen] = useState(false)
   const [accountsOpen, setAccountsOpen] = useState(false)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkOpen, setBulkOpen] = useState(false)
+  const { unreadCount } = useNotifications()
 
   const filtered = socialPosts.filter((p) => {
     if (statusFilter !== 'all' && p.status !== statusFilter) return false
@@ -209,7 +233,25 @@ export default function SocialDashboard() {
             <Link2 size={14} />
             <span className="hidden sm:inline">Accounts</span>
           </button>
+          <button
+            type="button"
+            onClick={() => setNotificationsOpen(true)}
+            aria-label="Open notifications"
+            className="relative inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
+          >
+            <Bell size={14} />
+            {unreadCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger-text px-1 font-mono text-[9px] font-bold text-white">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+            <span className="hidden sm:inline">Notifications</span>
+          </button>
         </div>
+      </div>
+
+      <div className="mt-4 sm:mt-6">
+        <SocialOverviewWidgets />
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2 sm:mt-6">
@@ -310,6 +352,10 @@ export default function SocialDashboard() {
             <AccountConnectionPanel />
           </div>
         </div>
+      )}
+
+      {notificationsOpen && (
+        <NotificationsPanel onClose={() => setNotificationsOpen(false)} />
       )}
     </div>
   )

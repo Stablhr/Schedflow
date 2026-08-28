@@ -849,7 +849,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const moveSocialPost = (id: string, newDate: string, newTime?: string) =>
     social.movePost(id, newDate, newTime)
 
-  const scheduleSocialPost = (id: string, input: { scheduledDate: string; scheduledTime?: string; timezone?: string }) =>
+  const scheduleSocialPost = (id: string, input: { scheduledDate: string; scheduledTime?: string; timezone?: string; repeat?: SocialPost['repeat']; repeatUntil?: string }) =>
     social.schedulePost(id, input)
 
   const cancelSocialPost = (id: string, platform?: Platform) =>

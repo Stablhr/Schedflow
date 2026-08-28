@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
-import { BarChart3, TrendingUp, Eye, MousePointerClick, Share2, Award, ArrowLeft } from 'lucide-react'
+import { BarChart3, TrendingUp, Eye, MousePointerClick, Share2, Award, ArrowLeft, Download } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../../store/useStore'
 import { PLATFORM_COLORS } from '../../store/schema'
-import { generateAllMockAnalytics, computeSummary } from '../../utils/analytics'
+import { generateAllMockAnalytics, computeSummary, analyticsToCsv, downloadCsv } from '../../utils/analytics'
+import { toISODate } from '../../utils/dates'
 
 function StatCard({ label, value, icon: Icon }: { label: string; value: string | number; icon: typeof Eye }) {
   return (
@@ -81,6 +82,15 @@ export default function AnalyticsView() {
             </span>
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => downloadCsv(`schedflow-analytics-${toISODate(new Date())}.csv`, analyticsToCsv(socialPosts, allAnalytics))}
+          disabled={postedPosts.length === 0}
+          className="ml-auto inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary disabled:opacity-40"
+        >
+          <Download size={14} />
+          <span className="hidden sm:inline">Export CSV</span>
+        </button>
       </div>
 
       {postedPosts.length === 0 ? (

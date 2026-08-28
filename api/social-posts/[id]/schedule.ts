@@ -6,6 +6,7 @@ import {
   validatePostPlatforms,
   makeIdempotencyKey,
   queuePublishJob,
+  computeRecurrence,
 } from '../../_lib/scheduler'
 import { youtubePublisher } from '../../_lib/publishers/youtube'
 import { facebookPublisher } from '../../_lib/publishers/facebook'
@@ -36,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ ok: false, error: 'Post not found' })
     }
 
-    const { scheduledDate, scheduledTime, timezone } = req.body
+    const { scheduledDate, scheduledTime, timezone, repeat, repeatUntil } = req.body
 
     if (!scheduledDate) {
       return res.status(400).json({ ok: false, error: 'scheduledDate is required' })
@@ -67,6 +68,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     post.scheduledAt = scheduledAt
     post.timezone = tz
     post.status = 'scheduled'
+    if (typeof repeat === 'string') post.repeat = repeat
+    if (repeatUntil) post.repeatUntil = repeatUntil
     for (const pEntry of post.platforms) {
       if (pEntry.enabled && pEntry.status !== 'cancelled') {
         pEntry.status = 'scheduled'
@@ -79,12 +82,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Create a queued job for each enabled platform, scheduled to fire at the due time.
     const jobs: string[] = []
     const failedJobs: string[] = []
-    for (const p of post.platforms) {
-      if (!p.enabled || p.status === 'cancelled') continue
-      const key = makeIdempotencyKey(String(post._id), p.platform, scheduledAt.toISOString())
-      const job = await queuePublishJob(String(post._id), p.platform, scheduledAt, key)
-      if (job) jobs.push(String(job._id))
-      else failedJobs.push(p.platform)
+
+    // For recurring posts, pre-create jobs for each occurrence up to repeatUntil.
+    const occurrences: Date[] = [scheduledAt]
+    if (typeof repeat === 'string' && repeat !== 'none') {
+      occurrences.push(...computeRecurrence(scheduledAt, repeat, post.repeatUntil))
+    }
+
+    const dueTimes = new Map<string, boolean>()
+    for (const occ of occurrences) {
+      const occKey = occ.toISOString()
+      if (dueTimes.has(occKey)) continue
+      dueTimes.set(occKey, true)
+      for (const p of post.platforms) {
+        if (!p.enabled || p.status === 'cancelled') continue
+        const key = makeIdempotencyKey(String(post._id), p.platform, occKey)
+        const job = await queuePublishJob(String(post._id), p.platform, occ, key)
+        if (job) jobs.push(String(job._id))
+        else failedJobs.push(`${p.platform}@${occKey}`)
+      }
     }
 
     const lean: Record<string, unknown> = {

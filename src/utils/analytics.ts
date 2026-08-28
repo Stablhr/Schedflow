@@ -110,3 +110,46 @@ export function computeSummary(posts: SocialPost[], allAnalytics: SocialAnalytic
     topPosts,
   }
 }
+
+export function analyticsToCsv(posts: SocialPost[], allAnalytics: SocialAnalytics[]): string {
+  const header = ['Post Title', 'Status', 'Platform', 'Reach', 'Likes', 'Comments', 'Shares', 'Clicks', 'Impressions', 'Engagement Rate']
+  const rows: string[][] = [header]
+
+  // Map analytics -> the post it belongs to via enabled platform match (mirrors computeSummary).
+  const postByPlatform: Record<string, SocialPost[]> = {}
+  for (const post of posts) {
+    for (const p of post.platforms.filter((x) => x.enabled)) {
+      postByPlatform[p.platform] = postByPlatform[p.platform] ?? []
+      postByPlatform[p.platform].push(post)
+    }
+  }
+
+  for (const a of allAnalytics) {
+    const post = postByPlatform[a.platform]?.[0]
+    rows.push([
+      post?.title || 'Untitled',
+      post?.status || '',
+      a.platform,
+      String(a.reach),
+      String(a.likes),
+      String(a.comments),
+      String(a.shares),
+      String(a.clicks),
+      String(a.impressions),
+      `${(a.engagementRate * 100).toFixed(2)}%`,
+    ])
+  }
+  return rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+}
+
+export function downloadCsv(filename: string, content: string): void {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}

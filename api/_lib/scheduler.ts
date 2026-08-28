@@ -148,4 +148,66 @@ export async function cancelPendingJobs(socialPostId: string, platform?: string)
   return result.modifiedCount
 }
 
+// Compute recurrence UTC instants for a recurring post, starting from the base
+// scheduledAt, advancing by the repeat frequency, up to repeatUntil (exclusive).
+export function computeRecurrence(
+  baseScheduledAt: Date,
+  repeat: string | undefined,
+  repeatUntil: string | Date | undefined,
+  limit = 100,
+): Date[] {
+  if (!repeat || repeat === 'none') return []
+
+  const freq = repeat as 'daily' | 'weekdays' | 'weekly' | 'biweekly' | 'monthly'
+  const until = repeatUntil ? new Date(repeatUntil) : null
+  if (until && isNaN(until.getTime())) throw new Error('Invalid repeatUntil')
+
+  const times: Date[] = []
+  const current = new Date(baseScheduledAt)
+  const hour = current.getUTCHours()
+  const minute = current.getUTCMinutes()
+
+  const start = (d: Date) => {
+    const r = new Date(d)
+    r.setUTCHours(hour, minute, 0, 0)
+    return r
+  }
+  let t = start(current)
+
+  // Original day-of-month for monthly recurrence.
+  const baseDay = current.getUTCDate()
+
+  let guard = 0
+  while (times.length < limit && (!until || t < until) && guard < limit * 40) {
+    guard += 1
+    if (freq === 'weekly') {
+      t = start(t)
+      t.setUTCDate(t.getUTCDate() + 7)
+    } else if (freq === 'biweekly') {
+      t = start(t)
+      t.setUTCDate(t.getUTCDate() + 14)
+    } else if (freq === 'monthly') {
+      t = start(t)
+      t.setUTCDate(t.getUTCDate() + 1)
+      t.setUTCMonth(t.getUTCMonth() + 1, 1)
+      if (t.getUTCDate() !== baseDay) {
+        // Clamp to last valid day of month if the base day doesn't exist there.
+        const last = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 0)).getUTCDate()
+        t.setUTCDate(Math.min(baseDay, last))
+      }
+    } else if (freq === 'weekdays') {
+      t = start(t)
+      t.setUTCDate(t.getUTCDate() + 1)
+      if (t.getUTCDay() === 0) t.setUTCDate(t.getUTCDate() + 1)
+      if (t.getUTCDay() === 6) t.setUTCDate(t.getUTCDate() + 2)
+    } else {
+      // daily
+      t = start(t)
+      t.setUTCDate(t.getUTCDate() + 1)
+    }
+    if (!until || t < until) times.push(new Date(t))
+  }
+  return times
+}
+
 export const SCHEDULED_STATUSES = ['queued', 'locked', 'publishing'] as const

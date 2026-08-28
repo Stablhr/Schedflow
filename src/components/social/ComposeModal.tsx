@@ -114,6 +114,8 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
   const [scheduledDate, setScheduledDate] = useState(post?.scheduledDate ?? initialDate ?? '')
   const [scheduledTime, setScheduledTime] = useState(post?.scheduledTime ?? '')
   const [timezone, setTimezone] = useState(post?.timezone ?? getBrowserTimezone())
+  const [repeat, setRepeat] = useState<SocialPost['repeat']>(post?.repeat ?? 'none')
+  const [repeatUntil, setRepeatUntil] = useState(post?.repeatUntil ?? '')
   const [tags, setTags] = useState(post?.tags.join(', ') ?? '')
   const [media, setMedia] = useState<SocialMediaAttachment[]>(post?.media ?? [])
   const [aiOpen, setAiOpen] = useState(false)
@@ -252,7 +254,8 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
       scheduledAt: status === 'scheduled' && scheduledDate ? undefined : undefined,
       timezone: status === 'scheduled' ? timezone : undefined,
       status,
-      repeat: 'none' as const,
+      repeat,
+      repeatUntil: repeat !== 'none' && repeatUntil ? repeatUntil : undefined,
       tags: parsedTags,
     }
   }
@@ -291,6 +294,8 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
       scheduledDate,
       scheduledTime: scheduledTime || undefined,
       timezone,
+      repeat,
+      repeatUntil: repeat !== 'none' && repeatUntil ? repeatUntil : undefined,
     })
     setScheduleResult(result)
     setScheduling('done')
@@ -454,11 +459,39 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
                   ))}
                 </select>
               </div>
+              <div>
+                <label className="text-[11px] font-medium text-text-secondary">Repeat</label>
+                <select
+                  value={repeat}
+                  onChange={(e) => setRepeat(e.target.value as SocialPost['repeat'])}
+                  aria-label="Repeat frequency"
+                  className="mt-1 rounded-md border border-border-strong bg-surface px-2.5 py-1.5 text-xs text-text-primary outline-none focus:border-primary"
+                >
+                  <option value="none">Does not repeat</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekdays">Weekdays</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="biweekly">Bi-weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
             </div>
+            {repeat !== 'none' && (
+              <div className="mt-2">
+                <label className="text-[11px] font-medium text-text-secondary">Repeat until (optional)</label>
+                <Input
+                  type="date"
+                  value={repeatUntil}
+                  onChange={(e) => setRepeatUntil(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+            )}
             {scheduledDate && (
               <p className="mt-2 flex items-center gap-1 text-xs text-text-muted">
                 <Clock size={12} />
                 Fires at {scheduledDate}{scheduledTime ? ` ${scheduledTime}` : ' 00:00'} ({timezone || 'UTC'})
+                {repeat !== 'none' && ` · repeats ${repeat}`}
               </p>
             )}
           </div>

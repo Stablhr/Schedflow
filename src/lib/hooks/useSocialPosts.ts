@@ -299,7 +299,7 @@ export function useSocialPosts() {
 
   const schedulePost = useCallback(async (
     id: string,
-    input: { scheduledDate: string; scheduledTime?: string; timezone?: string },
+    input: { scheduledDate: string; scheduledTime?: string; timezone?: string; repeat?: SocialPost['repeat']; repeatUntil?: string },
   ): Promise<{ ok: boolean; errors?: string[] }> => {
     // Optimistic: mark local as scheduled so the UI reflects intent immediately.
     applyPost(id, { status: 'scheduled' })

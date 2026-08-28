@@ -3,6 +3,7 @@ import { connectDB } from '../../_lib/mongodb'
 import { PublishingJob } from '../../_lib/models/PublishingJob'
 import { SocialPost } from '../../_lib/models/SocialPost'
 import { SocialAccount } from '../../_lib/models/SocialAccount'
+import { createNotification } from '../../_lib/models/TaskNotification'
 import { decryptToken } from '../../_lib/oauth'
 import { youtubePublisher } from '../../_lib/publishers/youtube'
 import { facebookPublisher } from '../../_lib/publishers/facebook'
@@ -149,6 +150,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
           await post.save()
 
+          // Notify on publish success / partial failure
+          const postedCount = post.platforms.filter((p) => p.enabled && p.status === 'posted').length
+          if (allDone && !anyFailed) {
+            await createNotification({
+              type: 'publish_success',
+              message: `${job.platform} post "${post.title}" published successfully`,
+              socialPostId: String(post._id),
+              platform: job.platform,
+              severity: 'success',
+            })
+          } else if (anyFailed) {
+            await createNotification({
+              type: 'partial_success',
+              message: `${postedCount} of ${post.platforms.filter((p) => p.enabled).length} platforms published for "${post.title}"`,
+              socialPostId: String(post._id),
+              platform: job.platform,
+              severity: 'warning',
+            })
+          }
+
           await PublishingJob.findByIdAndUpdate(job._id, {
             status: 'completed',
             completedAt: new Date(),
@@ -189,17 +210,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             else post.status = 'scheduled'
 
             await post.save()
+            await createNotification({
+              type: 'retry_scheduled',
+              message: `Retrying ${job.platform} publish for "${post.title}" in ${Math.round(delay / 60000)} min`,
+              socialPostId: String(post._id),
+              platform: job.platform,
+              severity: 'info',
+            })
             results.push({ jobId: String(job._id), platform: job.platform, status: 'retry_scheduled' })
           } else {
             // Permanent failure
             platformEntry.status = 'failed'
 
-            const anyFailed = post.platforms.some((p) => p.status === 'failed')
             const allDone = post.platforms.every(
               (p) => !p.enabled || p.status === 'posted' || p.status === 'failed' || p.status === 'cancelled',
             )
             post.status = allDone ? (post.platforms.some((p) => p.status === 'posted') ? 'partially_published' : 'failed') : 'publishing'
             await post.save()
+
+            // Notify on failure; flag all_failed if no platform succeeded.
+            const anyPosted = post.platforms.some((p) => p.status === 'posted')
+            await createNotification({
+              type: anyPosted ? 'publish_failed' : 'all_failed',
+              message: `${job.platform} publish failed for "${post.title}": ${result.error ?? 'error'}`,
+              socialPostId: String(post._id),
+              platform: job.platform,
+              severity: 'error',
+            })
 
             await PublishingJob.findByIdAndUpdate(job._id, {
               status: 'failed',

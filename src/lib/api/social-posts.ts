@@ -38,7 +38,7 @@ export const socialPostsApi = {
   update: (id: string, patch: Partial<SocialPost>) =>
     api.put<SocialPost>(`/social-posts/${id}`, patch),
   delete: (id: string) => api.delete(`/social-posts/${id}`),
-  schedule: (id: string, input: { scheduledDate: string; scheduledTime?: string; timezone?: string }) =>
+  schedule: (id: string, input: { scheduledDate: string; scheduledTime?: string; timezone?: string; repeat?: string; repeatUntil?: string }) =>
     api.post<ScheduleResult>(`/social-posts/${id}/schedule`, input),
   cancel: (id: string, input?: { platform?: Platform }) =>
     api.post<CancelResult>(`/social-posts/${id}/cancel`, input ?? {}),

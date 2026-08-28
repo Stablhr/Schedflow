@@ -262,6 +262,27 @@ export const PLATFORM_COLORS: Record<Platform, string> = {
   instagram: '#E4405F',
 }
 
+export interface TaskNotification {
+  _id: string
+  type:
+    | 'publish_success'
+    | 'publish_failed'
+    | 'retry_scheduled'
+    | 'token_expired'
+    | 'token_revoked'
+    | 'partial_success'
+    | 'all_failed'
+    | 'info'
+  message: string
+  socialPostId?: string
+  platform?: string
+  accountId?: string
+  read: boolean
+  severity: 'success' | 'error' | 'warning' | 'info'
+  createdAt: string
+  updatedAt: string
+}
+
 export type ThemeMode = 'light' | 'dark'
 
 export interface AppData {

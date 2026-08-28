@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { connectDB } from '../../_lib/mongodb'
 import { SocialAccount } from '../../_lib/models/SocialAccount'
+import { createNotification } from '../../_lib/models/TaskNotification'
 import { decryptToken, encryptToken, refreshYouTubeToken, refreshTikTokToken } from '../../_lib/oauth'
 
 const REFRESH_BUFFER_MS = 60 * 60 * 1000 // 1 hour before expiry
@@ -58,13 +59,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           } else {
             account.status = 'expired'
             await account.save()
+            await createNotification({
+              type: 'token_expired',
+              message: `${account.platform} authentication for "${account.accountName}" expired — reconnect in Settings`,
+              accountId: String(account._id),
+              platform: account.platform,
+              severity: 'warning',
+            })
             results.push({ id: String(account._id), platform: account.platform, status: 'expired' })
           }
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Unknown error'
-        // Don't mark as expired on transient errors — just skip and retry next cycle
-        results.push({ id: String(account._id), platform: account.platform, status: 'error', error: message })
+        // A refresh attempt that throws means the refresh token is likely revoked/invalid.
+        account.status = 'expired'
+        await account.save()
+        await createNotification({
+          type: 'token_revoked',
+          message: `${account.platform} authentication for "${account.accountName}" could not be refreshed — reconnect in Settings (${message})`,
+          accountId: String(account._id),
+          platform: account.platform,
+          severity: 'error',
+        })
+        results.push({ id: String(account._id), platform: account.platform, status: 'failed', error: message })
       }
     }
 
