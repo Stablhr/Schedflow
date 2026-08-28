@@ -10,6 +10,7 @@ import ComposeModal from './ComposeModal'
 import DeepLinkButton from './DeepLinkButton'
 import ImportExportPanel from './ImportExportPanel'
 import AccountConnectionPanel from './AccountConnectionPanel'
+import PostDetailModal from './PostDetailModal'
 
 const STATUS_CONFIG: Record<SocialPostStatus, { label: string; color: string; icon: typeof Clock }> = {
   draft: { label: 'Draft', color: 'text-text-muted', icon: FileText },
@@ -113,6 +114,7 @@ export default function SocialDashboard() {
   const [statusFilter, setStatusFilter] = useState<SocialPostStatus | 'all'>('all')
   const [composeOpen, setComposeOpen] = useState(false)
   const [editingPost, setEditingPost] = useState<SocialPost | null>(null)
+  const [detailPostId, setDetailPostId] = useState<string | null>(null)
   const [importExportOpen, setImportExportOpen] = useState(false)
   const [accountsOpen, setAccountsOpen] = useState(false)
 
@@ -138,13 +140,18 @@ export default function SocialDashboard() {
   }
 
   const handleEdit = (post: SocialPost) => {
-    setEditingPost(post)
-    setComposeOpen(true)
+    setDetailPostId(post.id)
   }
 
   const handleCloseCompose = () => {
     setComposeOpen(false)
     setEditingPost(null)
+  }
+
+  const handleEditFromDetail = (post: SocialPost) => {
+    setDetailPostId(null)
+    setEditingPost(post)
+    setComposeOpen(true)
   }
 
   const handleDelete = (id: string) => {
@@ -277,6 +284,14 @@ export default function SocialDashboard() {
 
       {composeOpen && (
         <ComposeModal post={editingPost} onClose={handleCloseCompose} />
+      )}
+
+      {detailPostId && (
+        <PostDetailModal
+          postId={detailPostId}
+          onClose={() => setDetailPostId(null)}
+          onEdit={handleEditFromDetail}
+        />
       )}
 
       {importExportOpen && (

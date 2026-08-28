@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { AppData, Board, Card, Label, List, Member, Share, SocialPost, SocialPostPlatform, SocialMediaAttachment, SocialAnalytics, Platform, ThemeMode } from './schema'
+import type { AppData, Board, Card, Label, List, Member, Share, SocialPost, SocialPostPlatform, SocialMediaAttachment, SocialAnalytics, PublishingJob, Platform, ThemeMode } from './schema'
 
 export interface Store {
   data: AppData
@@ -52,11 +52,17 @@ export interface Store {
   resetAll: () => void
   // Social Posts
   socialPosts: SocialPost[]
+  socialJobs: PublishingJob[]
   addSocialPost: (post: Omit<SocialPost, 'id' | 'createdAt' | 'updatedAt'>) => SocialPost
   updateSocialPost: (id: string, patch: Partial<SocialPost>) => void
   deleteSocialPost: (id: string) => void
   duplicateSocialPost: (id: string) => SocialPost | null
   moveSocialPost: (id: string, newDate: string, newTime?: string) => void
+  scheduleSocialPost: (id: string, input: { scheduledDate: string; scheduledTime?: string; timezone?: string }) => Promise<{ ok: boolean; errors?: string[] }>
+  cancelSocialPost: (id: string, platform?: Platform) => Promise<boolean>
+  retrySocialPost: (id: string, platform?: Platform) => Promise<boolean>
+  refreshSocialJobs: (postId?: string) => Promise<void>
+  refreshSocialPost: (postId: string) => Promise<SocialPost | null>
   getSocialPostsByDate: (date: string) => SocialPost[]
   getSocialPostsByPlatform: (platform: Platform) => SocialPost[]
   getSocialPostsByStatus: (status: SocialPost['status']) => SocialPost[]

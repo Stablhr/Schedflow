@@ -8,12 +8,14 @@ import { addDays, formatDate, isSameDay, startOfWeek, toISODate } from '../../ut
 import SocialUnscheduledPool from './SocialUnscheduledPool'
 import SocialDayColumn from './SocialDayColumn'
 import ComposeModal from './ComposeModal'
+import PostDetailModal from './PostDetailModal'
 
 const DAY_COUNT = 7
 
 export default function SocialCalendarView() {
   const { socialPosts, moveSocialPost } = useStore()
   const [weekStart, setWeekStart] = useState<Date>(() => startOfWeek())
+  const [detailPostId, setDetailPostId] = useState<string | null>(null)
   const [editingPost, setEditingPost] = useState<SocialPost | null>(null)
   const [composeOpen, setComposeOpen] = useState(false)
   const [composeDate, setComposeDate] = useState<string | undefined>()
@@ -54,6 +56,11 @@ export default function SocialCalendarView() {
   }
 
   const handlePostClick = (post: SocialPost) => {
+    setDetailPostId(post.id)
+  }
+
+  const handleEditFromDetail = (post: SocialPost) => {
+    setDetailPostId(null)
     setEditingPost(post)
     setComposeOpen(true)
   }
@@ -145,6 +152,14 @@ export default function SocialCalendarView() {
           post={editingPost}
           initialDate={composeDate}
           onClose={handleCloseCompose}
+        />
+      )}
+
+      {detailPostId && (
+        <PostDetailModal
+          postId={detailPostId}
+          onClose={() => setDetailPostId(null)}
+          onEdit={handleEditFromDetail}
         />
       )}
     </div>

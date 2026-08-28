@@ -849,6 +849,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const moveSocialPost = (id: string, newDate: string, newTime?: string) =>
     social.movePost(id, newDate, newTime)
 
+  const scheduleSocialPost = (id: string, input: { scheduledDate: string; scheduledTime?: string; timezone?: string }) =>
+    social.schedulePost(id, input)
+
+  const cancelSocialPost = (id: string, platform?: Platform) =>
+    social.cancelPost(id, platform)
+
+  const retrySocialPost = (id: string, platform?: Platform) =>
+    social.retryPost(id, platform)
+
+  const refreshSocialJobs = (postId?: string) =>
+    social.refreshJobs(postId)
+
+  const refreshSocialPost = (postId: string) =>
+    social.refreshPost(postId)
+
   const getSocialPostsByDate = (date: string): SocialPost[] =>
     social.getByDate(date)
 
@@ -938,11 +953,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setDarkMode,
     resetAll,
     socialPosts: social.posts,
+    socialJobs: social.jobs,
     addSocialPost,
     updateSocialPost,
     deleteSocialPost,
     duplicateSocialPost,
     moveSocialPost,
+    scheduleSocialPost,
+    cancelSocialPost,
+    retrySocialPost,
+    refreshSocialJobs,
+    refreshSocialPost,
     getSocialPostsByDate,
     getSocialPostsByPlatform,
     getSocialPostsByStatus,

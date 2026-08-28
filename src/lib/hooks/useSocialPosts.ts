@@ -1,8 +1,25 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { socialPostsApi } from '../api/social-posts'
+import { socialPostsApi, publishingJobsApi } from '../api/social-posts'
 import { uploadFile } from '../api/client'
 import { loadSocialPosts, saveSocialPosts } from '../../store/storage'
-import type { SocialPost, SocialPostPlatform, SocialMediaAttachment, SocialAnalytics, Platform } from '../../store/schema'
+import { localToUTC } from '../../utils/timezones'
+import type { SocialPost, SocialPostPlatform, SocialMediaAttachment, SocialAnalytics, PublishingJob, Platform } from '../../store/schema'
+
+type AnyRecord = Record<string, unknown>
+
+function toSocialPost(raw: AnyRecord): SocialPost {
+  const id = (raw.id as string) ?? (raw._id as string) ?? ''
+  const scheduledAt = raw.scheduledAt ? new Date(raw.scheduledAt as string).toISOString() : undefined
+  const derivedDate = scheduledAt ? scheduledAt.slice(0, 10) : undefined
+  const derivedTime = scheduledAt ? scheduledAt.slice(11, 16) : undefined
+  return {
+    ...(raw as unknown as SocialPost),
+    id,
+    scheduledDate: (raw.scheduledDate as string) ?? derivedDate,
+    scheduledTime: (raw.scheduledTime as string) ?? derivedTime,
+    scheduledAt,
+  }
+}
 
 /**
  * React hook that manages social posts with API-first + localStorage fallback.
@@ -12,6 +29,7 @@ export function useSocialPosts() {
   const [posts, setPosts] = useState<SocialPost[]>(() => loadSocialPosts())
   const [loading, setLoading] = useState(true)
   const [isOnline, setIsOnline] = useState(true)
+  const [jobs, setJobs] = useState<PublishingJob[]>([])
   const postsRef = useRef(posts)
   postsRef.current = posts
 
@@ -22,7 +40,7 @@ export function useSocialPosts() {
       try {
         const data = await socialPostsApi.list()
         if (!cancelled) {
-          setPosts(data)
+          setPosts(data.map((p) => toSocialPost(p as unknown as AnyRecord)))
           saveSocialPosts(data)
           setIsOnline(true)
         }
@@ -62,7 +80,7 @@ export function useSocialPosts() {
     mutate((prev) => [optimistic, ...prev])
     try {
       const created = await socialPostsApi.create(input)
-      mutate((prev) => prev.map((p) => (p.id === optimistic.id ? created : p)))
+      mutate((prev) => prev.map((p) => (p.id === optimistic.id ? toSocialPost(created as unknown as AnyRecord) : p)))
       return created
     } catch {
       setIsOnline(false)
@@ -110,15 +128,19 @@ export function useSocialPosts() {
   }, [mutate])
 
   const movePost = useCallback((id: string, newDate: string, newTime?: string) => {
+    const existing = postsRef.current.find((p) => p.id === id)
+    const timezone = existing?.timezone || undefined
+    const time = newTime ?? existing?.scheduledTime
+    const scheduledAt = newDate && timezone ? localToUTC(newDate, time, timezone) : undefined
     mutate((prev) =>
       prev.map((p) =>
         p.id === id
-          ? { ...p, scheduledDate: newDate, scheduledTime: newTime ?? p.scheduledTime, updatedAt: new Date().toISOString() }
+          ? { ...p, scheduledDate: newDate, scheduledTime: time, scheduledAt, updatedAt: new Date().toISOString() }
           : p
       )
     )
     try {
-      socialPostsApi.update(id, { scheduledDate: newDate, scheduledTime: newTime }).catch(() => setIsOnline(false))
+      socialPostsApi.update(id, { scheduledDate: newDate, scheduledTime: time, scheduledAt, timezone }).catch(() => setIsOnline(false))
     } catch {
       setIsOnline(false)
     }
@@ -212,6 +234,120 @@ export function useSocialPosts() {
     )
   }, [mutate])
 
+  const applyPost = useCallback((id: string, patch: Partial<SocialPost>, platform?: Platform, platformPatch?: Partial<SocialPostPlatform>) => {
+    mutate((prev) =>
+      prev.map((p) => {
+        if (p.id !== id) return p
+        let updated: SocialPost = { ...p, ...patch, updatedAt: new Date().toISOString() }
+        if (platform && platformPatch) {
+          updated = {
+            ...updated,
+            platforms: updated.platforms.map((pl) =>
+              pl.platform === platform ? { ...pl, ...platformPatch } : pl,
+            ),
+          }
+        }
+        return updated
+      })
+    )
+  }, [mutate])
+
+  const refreshJobs = useCallback(async (postId?: string) => {
+    try {
+      if (postId) {
+        const data = await publishingJobsApi.list({ socialPostId: postId })
+        setJobs((prev) => [
+          ...data,
+          ...prev.filter((j) => j.socialPostId !== postId),
+        ])
+      } else {
+        const data = await publishingJobsApi.list()
+        setJobs(data)
+      }
+    } catch {
+      // offline — ignore
+    }
+  }, [])
+
+  const refreshPost = useCallback(async (postId: string): Promise<SocialPost | null> => {
+    try {
+      const fresh = await socialPostsApi.get(postId)
+      mutate((prev) => prev.map((p) => (p.id === postId ? toSocialPost(fresh as unknown as AnyRecord) : p)))
+      return fresh
+    } catch {
+      return null
+    }
+  }, [mutate])
+
+  // Real-time polling: while any post is publishing, refresh its status every 10s.
+  useEffect(() => {
+    const activePosts = postsRef.current.filter(
+      (p) => p.status === 'publishing' || p.platforms.some((pl) => pl.enabled && pl.status === 'publishing'),
+    )
+    if (activePosts.length === 0) return
+
+    const timer = window.setInterval(() => {
+      activePosts.forEach((p) => {
+        refreshPost(p.id).then((fresh) => {
+          if (fresh) refreshJobs(fresh.id)
+        })
+      })
+    }, 10000)
+
+    return () => window.clearInterval(timer)
+  }, [posts, refreshPost, refreshJobs])
+
+  const schedulePost = useCallback(async (
+    id: string,
+    input: { scheduledDate: string; scheduledTime?: string; timezone?: string },
+  ): Promise<{ ok: boolean; errors?: string[] }> => {
+    // Optimistic: mark local as scheduled so the UI reflects intent immediately.
+    applyPost(id, { status: 'scheduled' })
+    try {
+      const result = await socialPostsApi.schedule(id, input)
+      mutate((prev) => prev.map((p) => (p.id === id ? toSocialPost(result.post as unknown as AnyRecord) : p)))
+      refreshJobs(id)
+      // Surface validation errors even when the server still schedules.
+      const invalid = result.validation?.filter((v) => !v.valid) ?? []
+      return { ok: invalid.length === 0, errors: invalid.flatMap((v) => v.errors) }
+    } catch (err) {
+      setIsOnline(false)
+      return { ok: false, errors: [err instanceof Error ? err.message : 'Failed to schedule'] }
+    }
+  }, [applyPost, mutate, refreshJobs])
+
+  const cancelPost = useCallback(async (id: string, platform?: Platform): Promise<boolean> => {
+    if (platform) {
+      applyPost(id, {}, platform, { status: 'cancelled' })
+    } else {
+      applyPost(id, { status: 'cancelled' }, undefined, undefined)
+    }
+    try {
+      const result = await socialPostsApi.cancel(id, platform ? { platform } : undefined)
+      mutate((prev) => prev.map((p) => (p.id === id ? toSocialPost(result.post as unknown as AnyRecord) : p)))
+      refreshJobs(id)
+      return true
+    } catch {
+      setIsOnline(false)
+      return false
+    }
+  }, [applyPost, mutate, refreshJobs])
+
+  const retryPost = useCallback(async (id: string, platform?: Platform): Promise<boolean> => {
+    if (platform) {
+      applyPost(id, {}, platform, { status: 'scheduled', retryCount: 0, error: undefined })
+    }
+    try {
+      const result = await socialPostsApi.retry(id, platform ? { platform } : undefined)
+      mutate((prev) => prev.map((p) => (p.id === id ? toSocialPost(result.post as unknown as AnyRecord) : p)))
+      refreshJobs(id)
+      return true
+    } catch {
+      setIsOnline(false)
+      return false
+    }
+  }, [applyPost, mutate, refreshJobs])
+
   return {
     posts,
     loading,
@@ -232,6 +368,12 @@ export function useSocialPosts() {
     addMedia,
     removeMedia,
     updateAnalytics,
+    jobs,
+    refreshJobs,
+    refreshPost,
+    schedulePost,
+    cancelPost,
+    retryPost,
     uploadFile,
   }
 }

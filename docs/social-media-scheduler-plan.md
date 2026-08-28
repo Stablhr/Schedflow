@@ -1,7 +1,7 @@
 # Social Media Management (SMM) Scheduler — Implementation Plan
 
-> **Status**: Phases 1-3 Complete, Phase 4 Next
-> **Date**: 2026-08-26
+> **Status**: Phases 1-4 Complete, Phase 5 Next
+> **Date**: 2026-08-28
 > **Scope**: Full production automatic publishing system
 > **Platforms**: YouTube, Facebook, Instagram, TikTok
 > **Stack**: Vercel serverless + MongoDB + Vercel Cron + Vercel Blob
@@ -1201,17 +1201,21 @@ These stay server-side only. The frontend communicates exclusively through the R
 - **Files**: `api/_lib/publishers/instagram.ts`, `api/_lib/publishers/tiktok.ts`, `api/auth/instagram/`, `api/auth/tiktok/`, `api/cron/refresh-tokens.ts`
 - **Plan**: `docs/phase-3-instagram-tiktok.md`
 
-### Phase 4: Frontend Production Integration (NEXT)
+### Phase 4: Frontend Production Integration ✅ DONE
 
-- [ ] Real-time status updates (poll `/api/social-posts/:id` every 10s while publishing)
-- [ ] Reschedule UI (drag on calendar → `PUT /api/social-posts/:id` with new `scheduledDate`)
-- [ ] Cancel publish button (sets status to `cancelled`, removes from cron queue)
-- [ ] Retry failed button (creates new `PublishingJob` with reset retryCount)
-- [ ] Timezone selector in ComposeModal (stores `timezone` field, converts `scheduledAt` to UTC)
-- [ ] Publishing preview panel (shows per-platform caption, hashtags, media validation before scheduling)
-- [ ] Pre-publish validation (calls `publisher.validate()` before creating PublishingJob)
-- [ ] Platform status breakdown in post detail (per-platform status, error details, retry count)
-- [ ] Post detail modal showing publishing job history
+- [x] Real-time status updates (poll `/api/social-posts/:id` every 10s while publishing)
+- [x] Reschedule UI (drag on calendar → `PUT /api/social-posts/:id` with new `scheduledDate` + recomputed `scheduledAt`)
+- [x] Cancel publish button (sets status to `cancelled`, cancels queued/locked/publishing jobs)
+- [x] Retry failed button (creates new `PublishingJob` with reset retryCount)
+- [x] Timezone selector in ComposeModal (stores `timezone` field, converts `scheduledAt` to UTC)
+- [x] Publishing preview panel (shows per-platform caption, hashtags, media validation before scheduling)
+- [x] Pre-publish validation (calls `publisher.validate()` before creating PublishingJob)
+- [x] Platform status breakdown in post detail (per-platform status, error details, retry count)
+- [x] Post detail modal showing publishing job history
+- **New API**: `POST /api/social-posts/[id]/schedule`, `/cancel`, `/retry`; `GET /api/publishing-jobs?socialPostId=`
+- **New files**: `api/_lib/scheduler.ts`, `api/social-posts/[id]/{schedule,cancel,retry}.ts`, `src/utils/timezones.ts`, `src/components/social/PostDetailModal.tsx`
+- **Bugs fixed**: cron now only picks up jobs when due (job `nextRetryAt` set to scheduled time); `PublishingJobStatus` includes `cancelled`
+- **Plan**: `docs/social-media-scheduler-plan.md` §23
 
 ### Phase 5: Notifications & Polish
 

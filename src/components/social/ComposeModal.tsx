@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { X, Plus, Calendar, Tag, Sparkles } from 'lucide-react'
+import { X, Plus, Calendar, Tag, Sparkles, AlertTriangle, CheckCircle2, Clock, Loader2 } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import type { SocialPost, SocialPostPlatform, SocialMediaAttachment, Platform } from '../../store/schema'
 import { PLATFORM_COLORS, PLATFORM_DEFAULTS, PLATFORM_LIMITS } from '../../store/schema'
@@ -8,6 +8,7 @@ import { Input, Textarea } from '../shared/Input'
 import SectionLabel from '../shared/SectionLabel'
 import AIGenerateModal from './AIGenerateModal'
 import { uploadFile } from '../../lib/api/client'
+import { COMMON_TIMEZONES, getBrowserTimezone } from '../../utils/timezones'
 
 const ALL_PLATFORMS: Platform[] = ['youtube', 'facebook', 'tiktok', 'instagram']
 
@@ -100,7 +101,7 @@ function PlatformOverridePanel({ platform, postPlatform, onChange }: {
 }
 
 export default function ComposeModal({ post, initialDate, initialCardId, onClose }: { post: SocialPost | null; initialDate?: string; initialCardId?: string; onClose: () => void }) {
-  const { addSocialPost, updateSocialPost, removeMediaFromPost } = useStore()
+  const { addSocialPost, updateSocialPost, removeMediaFromPost, scheduleSocialPost } = useStore()
 
   const [title, setTitle] = useState(post?.title ?? '')
   const [caption, setCaption] = useState(post?.caption ?? '')
@@ -112,9 +113,13 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
   )
   const [scheduledDate, setScheduledDate] = useState(post?.scheduledDate ?? initialDate ?? '')
   const [scheduledTime, setScheduledTime] = useState(post?.scheduledTime ?? '')
+  const [timezone, setTimezone] = useState(post?.timezone ?? getBrowserTimezone())
   const [tags, setTags] = useState(post?.tags.join(', ') ?? '')
   const [media, setMedia] = useState<SocialMediaAttachment[]>(post?.media ?? [])
   const [aiOpen, setAiOpen] = useState(false)
+  const [scheduling, setScheduling] = useState<'idle' | 'scheduling' | 'done'>('idle')
+  const [scheduleResult, setScheduleResult] = useState<{ ok: boolean; errors?: string[] } | null>(null)
+  const [showPreview, setShowPreview] = useState(false)
 
   const isEditing = !!post
 
@@ -219,7 +224,7 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
     e.target.value = ''
   }
 
-  const handleSave = (status: 'draft' | 'scheduled') => {
+  const buildPostData = (status: 'draft' | 'scheduled') => {
     const parsedTags = tags.split(',').map((t) => t.trim()).filter(Boolean)
     const platforms: SocialPostPlatform[] = ALL_PLATFORMS
       .filter((p) => enabledPlatforms.has(p))
@@ -236,7 +241,7 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
         }
       })
 
-    const postData = {
+    return {
       title: title.trim() || 'Untitled Post',
       caption,
       platforms,
@@ -244,17 +249,54 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
       cardId: isEditing ? post?.cardId : initialCardId,
       scheduledDate: status === 'scheduled' ? scheduledDate || undefined : undefined,
       scheduledTime: status === 'scheduled' ? scheduledTime || undefined : undefined,
+      scheduledAt: status === 'scheduled' && scheduledDate ? undefined : undefined,
+      timezone: status === 'scheduled' ? timezone : undefined,
       status,
       repeat: 'none' as const,
       tags: parsedTags,
     }
+  }
 
+  const handleSaveDraft = () => {
+    const postData = buildPostData('draft')
     if (isEditing && post) {
       updateSocialPost(post.id, postData)
     } else {
       addSocialPost(postData)
     }
     onClose()
+  }
+
+  const handleSchedule = async () => {
+    if (!scheduledDate) {
+      setScheduleResult({ ok: false, errors: ['Please set a schedule date'] })
+      setShowPreview(true)
+      return
+    }
+    setScheduling('scheduling')
+    setShowPreview(true)
+    setScheduleResult(null)
+
+    const postData = buildPostData('scheduled')
+    let id: string
+    if (isEditing && post) {
+      updateSocialPost(post.id, postData)
+      id = post.id
+    } else {
+      const created = addSocialPost(postData)
+      id = created.id
+    }
+
+    const result = await scheduleSocialPost(id, {
+      scheduledDate,
+      scheduledTime: scheduledTime || undefined,
+      timezone,
+    })
+    setScheduleResult(result)
+    setScheduling('done')
+    if (result.ok) {
+      // Keep modal open to show success + preview.
+    }
   }
 
   return (
@@ -379,7 +421,7 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
           {/* Scheduling */}
           <div>
             <SectionLabel icon={<Calendar size={12} />}>Scheduling</SectionLabel>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
+            <div className="mt-2 flex flex-wrap items-end gap-3">
               <div>
                 <label className="text-[11px] font-medium text-text-secondary">Date</label>
                 <Input
@@ -398,8 +440,66 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
                   className="mt-1"
                 />
               </div>
+              <div className="min-w-[220px] flex-1">
+                <label className="text-[11px] font-medium text-text-secondary">Timezone</label>
+                <select
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
+                  aria-label="Schedule timezone"
+                  className="mt-1 w-full rounded-md border border-border-strong bg-surface px-2.5 py-1.5 text-xs text-text-primary outline-none focus:border-primary"
+                >
+                  <option value={getBrowserTimezone()}>Browser timezone ({getBrowserTimezone() || 'UTC'})</option>
+                  {COMMON_TIMEZONES.map((tz) => (
+                    <option key={tz.value} value={tz.value}>{tz.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
+            {scheduledDate && (
+              <p className="mt-2 flex items-center gap-1 text-xs text-text-muted">
+                <Clock size={12} />
+                Fires at {scheduledDate}{scheduledTime ? ` ${scheduledTime}` : ' 00:00'} ({timezone || 'UTC'})
+              </p>
+            )}
           </div>
+
+          {/* Publishing Preview / Result */}
+          {(showPreview || scheduleResult) && (
+            <div className="rounded-lg border border-border bg-surface-alt p-3">
+              <div className="flex items-center justify-between">
+                <SectionLabel icon={<AlertTriangle size={12} />}>Publishing Preview</SectionLabel>
+                {scheduling === 'done' && scheduleResult?.ok && (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-success-text">
+                    <CheckCircle2 size={13} />
+                    Scheduled
+                  </span>
+                )}
+              </div>
+
+              {scheduling === 'scheduling' && (
+                <p className="mt-2 text-sm text-text-muted">Scheduling and validating against platform rules…</p>
+              )}
+
+              {scheduling === 'done' && scheduleResult && (
+                <div className="mt-2 space-y-1">
+                  {scheduleResult.ok ? (
+                    <p className="flex items-center gap-1.5 text-sm text-success-text">
+                      <CheckCircle2 size={14} />
+                      Validated and queued for publishing.
+                    </p>
+                  ) : (
+                    <div className="rounded-md bg-danger-subtle px-2.5 py-1.5 text-xs text-danger-text">
+                      {scheduleResult.errors?.map((e, i) => <div key={i}>• {e}</div>)}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {enabledPlatforms.size === 0 && (
+                <p className="mt-2 text-xs text-text-muted">Enable at least one platform to schedule.</p>
+              )}
+            </div>
+          )}
 
           {/* Tags */}
           <div>
@@ -417,8 +517,20 @@ export default function ComposeModal({ post, initialDate, initialCardId, onClose
         {/* Footer */}
         <div className="flex flex-col-reverse gap-2 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-end">
           <Button variant="ghost" onClick={handleClose}>Cancel</Button>
-          <Button variant="secondary" onClick={() => handleSave('draft')}>Save Draft</Button>
-          <Button variant="primary" onClick={() => handleSave('scheduled')}>Schedule</Button>
+          <Button variant="secondary" onClick={handleSaveDraft}>Save Draft</Button>
+          <Button
+            variant="primary"
+            onClick={scheduleResult?.ok ? onClose : handleSchedule}
+            disabled={scheduling === 'scheduling'}
+          >
+            {scheduling === 'scheduling' ? (
+              <><Loader2 size={14} className="animate-spin" />Scheduling…</>
+            ) : scheduleResult?.ok ? (
+              <>Done</>
+            ) : (
+              <>Schedule</>
+            )}
+          </Button>
         </div>
       </div>
       </div>

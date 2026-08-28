@@ -195,7 +195,7 @@ export interface AIGenerationMeta {
   version: number
 }
 
-export type PublishingJobStatus = 'queued' | 'locked' | 'publishing' | 'completed' | 'failed'
+export type PublishingJobStatus = 'queued' | 'locked' | 'publishing' | 'completed' | 'failed' | 'cancelled'
 
 export interface PublishingJob {
   _id: string
