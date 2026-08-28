@@ -5,6 +5,7 @@ import { SocialPost } from '../../_lib/models/SocialPost'
 import { SocialAccount } from '../../_lib/models/SocialAccount'
 import { createNotification } from '../../_lib/models/TaskNotification'
 import { decryptToken } from '../../_lib/oauth'
+import { dispatchWebhookEvent } from '../../_lib/webhooks'
 import { youtubePublisher } from '../../_lib/publishers/youtube'
 import { facebookPublisher } from '../../_lib/publishers/facebook'
 import { instagramPublisher } from '../../_lib/publishers/instagram'
@@ -160,6 +161,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               platform: job.platform,
               severity: 'success',
             })
+            await dispatchWebhookEvent('post.published', {
+              event: 'post.published',
+              postId: String(post._id),
+              title: post.title,
+              platform: job.platform,
+              publishedUrl: platformEntry.publishedUrl ?? undefined,
+              publishedAt: platformEntry.publishedAt ?? undefined,
+            })
           } else if (anyFailed) {
             await createNotification({
               type: 'partial_success',
@@ -236,6 +245,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               socialPostId: String(post._id),
               platform: job.platform,
               severity: 'error',
+            })
+            await dispatchWebhookEvent('post.failed', {
+              event: 'post.failed',
+              postId: String(post._id),
+              title: post.title,
+              platform: job.platform,
+              error: result.error ?? 'error',
             })
 
             await PublishingJob.findByIdAndUpdate(job._id, {

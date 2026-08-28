@@ -292,6 +292,30 @@ export default function SocialDashboard() {
         </Button>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-primary bg-primary-subtle/30 px-3 py-2">
+          <span className="text-xs font-medium text-text-primary">
+            {selectedIds.size} selected
+          </span>
+          <button
+            type="button"
+            onClick={() => setBulkOpen(true)}
+            disabled={!selectedIds.size}
+            className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground transition-colors hover:opacity-90"
+          >
+            <CalendarDays size={13} />
+            Schedule Selected
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedIds(new Set())}
+            className="rounded-md px-2 py-1 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt hover:text-text-primary"
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       <div className="mt-4 space-y-2">
         {filtered.length === 0 ? (
           <div className="rounded-lg border border-border bg-surface p-8 text-center">
@@ -312,17 +336,45 @@ export default function SocialDashboard() {
             )}
           </div>
         ) : (
-          filtered.map((post) => (
-            <PostRow
-              key={post.id}
-              post={post}
-              onEdit={() => handleEdit(post)}
-              onDelete={() => handleDelete(post.id)}
-              onDuplicate={() => handleDuplicate(post.id)}
-            />
-          ))
+          <>
+            <div className="flex items-center justify-between px-0.5">
+              <p className="text-xs text-text-muted">{filtered.length} post{filtered.length === 1 ? '' : 's'}</p>
+              <button
+                type="button"
+                onClick={() => setSelectedIds(new Set(filtered.map((p) => p.id)))}
+                className="text-xs font-medium text-primary transition-colors hover:underline"
+              >
+                Select all
+              </button>
+            </div>
+            {filtered.map((post) => (
+              <PostRow
+                key={post.id}
+                post={post}
+                onEdit={() => handleEdit(post)}
+                onDelete={() => handleDelete(post.id)}
+                onDuplicate={() => handleDuplicate(post.id)}
+                selected={selectedIds.has(post.id)}
+                onToggleSelect={() => {
+                  setSelectedIds((prev) => {
+                    const next = new Set(prev)
+                    if (next.has(post.id)) next.delete(post.id)
+                    else next.add(post.id)
+                    return next
+                  })
+                }}
+              />
+            ))}
+          </>
         )}
       </div>
+
+      {bulkOpen && (
+        <BulkScheduleModal
+          posts={socialPosts.filter((p) => selectedIds.has(p.id))}
+          onClose={() => { setBulkOpen(false); setSelectedIds(new Set()) }}
+        />
+      )}
 
       {composeOpen && (
         <ComposeModal post={editingPost} onClose={handleCloseCompose} />

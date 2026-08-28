@@ -12,6 +12,7 @@ import { youtubePublisher } from '../../_lib/publishers/youtube'
 import { facebookPublisher } from '../../_lib/publishers/facebook'
 import { instagramPublisher } from '../../_lib/publishers/instagram'
 import { tiktokPublisher } from '../../_lib/publishers/tiktok'
+import { dispatchWebhookEvent } from '../../_lib/webhooks'
 
 const publishers = {
   youtube: youtubePublisher,
@@ -107,6 +108,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ...(post as unknown as Record<string, unknown>),
       scheduledAt: post.scheduledAt?.toISOString(),
     }
+
+    // Notify subscribed webhooks that the post was scheduled.
+    await dispatchWebhookEvent('post.scheduled', {
+      event: 'post.scheduled',
+      postId: String(post._id),
+      title: post.title,
+      scheduledAt: scheduledAt.toISOString(),
+      timezone: tz,
+    })
 
     return res.status(200).json({
       ok: true,

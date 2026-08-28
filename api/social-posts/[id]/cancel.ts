@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { connectDB } from '../../_lib/mongodb'
 import { SocialPost } from '../../_lib/models/SocialPost'
 import { cancelPendingJobs } from '../../_lib/scheduler'
+import { dispatchWebhookEvent } from '../../_lib/webhooks'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -49,9 +50,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     await post.save()
 
+    const cancelled = post.status === 'cancelled'
+
     const lean: Record<string, unknown> = {
       ...(post as unknown as Record<string, unknown>),
       scheduledAt: post.scheduledAt ? post.scheduledAt.toISOString() : undefined,
+    }
+
+    if (cancelled && !req.body?.platform) {
+      await dispatchWebhookEvent('post.cancelled', {
+        event: 'post.cancelled',
+        postId: String(post._id),
+        title: post.title,
+      })
     }
 
     return res.status(200).json({ ok: true, data: { post: lean } })
