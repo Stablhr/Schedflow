@@ -11,6 +11,7 @@ import { uploadFile } from '../../lib/api/client'
 import { COMMON_TIMEZONES, getBrowserTimezone } from '../../utils/timezones'
 import { useMediaLibrary } from '../../lib/hooks/useMediaLibrary'
 import MediaLibraryPanel from './MediaLibraryPanel'
+import PlatformIcon from './PlatformIcon'
 
 const ALL_PLATFORMS: Platform[] = ['youtube', 'facebook', 'tiktok', 'instagram']
 
@@ -32,9 +33,7 @@ function PlatformChip({ platform, enabled, onToggle }: {
       }`}
       style={enabled ? { background: PLATFORM_COLORS[platform] } : undefined}
     >
-      <span className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white/20 text-[8px] font-bold">
-        {platform[0].toUpperCase()}
-      </span>
+      <PlatformIcon platform={platform} size={13} />
       {platform.charAt(0).toUpperCase() + platform.slice(1)}
     </button>
   )
@@ -52,10 +51,10 @@ function PlatformOverridePanel({ platform, postPlatform, onChange }: {
     <div className="rounded-lg border border-border bg-surface-alt p-3">
       <div className="flex items-center gap-2">
         <span
-          className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white"
+          className="inline-flex h-5 w-5 items-center justify-center rounded-full text-white"
           style={{ background: PLATFORM_COLORS[platform] }}
         >
-          {platform[0].toUpperCase()}
+          <PlatformIcon platform={platform} size={12} />
         </span>
         <span className="text-xs font-semibold text-text-primary">
           {platform.charAt(0).toUpperCase() + platform.slice(1)} Override

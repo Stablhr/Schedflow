@@ -16,6 +16,7 @@ import { useNotifications } from '../../lib/hooks/useNotifications'
 import SocialOverviewWidgets from './SocialOverviewWidgets'
 import BulkScheduleModal from './BulkScheduleModal'
 import WebhooksPanel from './WebhooksPanel'
+import PlatformIcon from './PlatformIcon'
 
 const STATUS_CONFIG: Record<SocialPostStatus, { label: string; color: string; icon: typeof Clock }> = {
   draft: { label: 'Draft', color: 'text-text-muted', icon: FileText },
@@ -76,10 +77,10 @@ function PostRow({ post, onEdit, onDelete, onDuplicate, selected, onToggleSelect
         {enabledPlatforms.map((p) => (
           <span
             key={p.platform}
-            className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white"
+            className="inline-flex h-5 w-5 items-center justify-center rounded-full text-white"
             style={{ background: PLATFORM_COLORS[p.platform] }}
           >
-            {p.platform[0].toUpperCase()}
+            <PlatformIcon platform={p.platform} size={12} />
           </span>
         ))}
       </div>

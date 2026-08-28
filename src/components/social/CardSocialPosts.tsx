@@ -4,6 +4,7 @@ import { useStore } from '../../store/useStore'
 import type { SocialPost, SocialPostStatus } from '../../store/schema'
 import { PLATFORM_COLORS } from '../../store/schema'
 import ComposeModal from './ComposeModal'
+import PlatformIcon from './PlatformIcon'
 
 const STATUS_ICONS: Record<SocialPostStatus, typeof Clock> = {
   draft: FileText,
@@ -39,10 +40,10 @@ function LinkedPostRow({ post, onUnlink }: { post: SocialPost; onUnlink: () => v
           {enabledPlatforms.map((p) => (
             <span
               key={p.platform}
-              className="inline-flex h-3 w-3 items-center justify-center rounded-full text-[7px] font-bold text-white"
+              className="inline-flex h-3 w-3 items-center justify-center rounded-full text-white"
               style={{ background: PLATFORM_COLORS[p.platform] }}
             >
-              {p.platform[0].toUpperCase()}
+              <PlatformIcon platform={p.platform} size={7} />
             </span>
           ))}
           {post.scheduledDate && (

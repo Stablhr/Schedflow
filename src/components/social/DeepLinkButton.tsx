@@ -2,6 +2,7 @@ import { ExternalLink } from 'lucide-react'
 import type { Platform } from '../../store/schema'
 import { PLATFORM_COLORS } from '../../store/schema'
 import { openPlatformApp, PLATFORM_LABELS } from '../../utils/deepLinks'
+import PlatformIcon from './PlatformIcon'
 
 export default function DeepLinkButton({ platform, className = '' }: { platform: Platform; className?: string }) {
   return (
@@ -13,9 +14,7 @@ export default function DeepLinkButton({ platform, className = '' }: { platform:
       style={{ background: PLATFORM_COLORS[platform] }}
       title={`Open in ${PLATFORM_LABELS[platform]}`}
     >
-      <span className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white/20 text-[8px] font-bold" aria-hidden="true">
-        {platform[0].toUpperCase()}
-      </span>
+      <PlatformIcon platform={platform} size={13} />
       {PLATFORM_LABELS[platform]}
       <ExternalLink size={10} className="opacity-70" />
     </button>

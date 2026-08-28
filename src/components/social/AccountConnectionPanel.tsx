@@ -1,30 +1,28 @@
 import { useState, useEffect } from 'react'
-import { Play, Globe, Camera, Music, Link2, Unlink, RefreshCw, Loader2 } from 'lucide-react'
+import { Link2, Unlink, RefreshCw, Loader2 } from 'lucide-react'
 import { socialAccountsApi, type SocialAccount } from '../../lib/api/social-accounts'
 import Button from '../shared/Button'
+import PlatformIcon from './PlatformIcon'
+import type { Platform } from '../../store/schema'
 
 const PLATFORM_CONFIG = {
   youtube: {
     name: 'YouTube',
-    icon: Play,
     color: '#FF0000',
     authUrl: '/api/auth/youtube/start',
   },
   facebook: {
     name: 'Facebook',
-    icon: Globe,
     color: '#1877F2',
     authUrl: '/api/auth/facebook/start',
   },
   instagram: {
     name: 'Instagram',
-    icon: Camera,
     color: '#E4405F',
     authUrl: '/api/auth/instagram/start',
   },
   tiktok: {
     name: 'TikTok',
-    icon: Music,
     color: '#000000',
     authUrl: '/api/auth/tiktok/start',
   },
@@ -101,13 +99,12 @@ export default function AccountConnectionPanel() {
       {(Object.entries(PLATFORM_CONFIG) as Array<[string, typeof PLATFORM_CONFIG[keyof typeof PLATFORM_CONFIG]]>).map(
         ([platform, config]) => {
           const platformAccounts = getAccountsForPlatform(platform)
-          const Icon = config.icon
 
           return (
             <div key={platform} className="rounded-lg border border-border bg-surface p-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Icon className="h-4 w-4" style={{ color: config.color }} />
+                  <PlatformIcon platform={platform as Platform} size={16} style={{ color: config.color }} />
                   <span className="text-sm font-medium text-text">{config.name}</span>
                 </div>
                 <a href={config.authUrl}>

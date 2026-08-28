@@ -2,6 +2,7 @@ import { Draggable } from '@hello-pangea/dnd'
 import type { SocialPost } from '../../store/schema'
 import { PLATFORM_COLORS } from '../../store/schema'
 import { Clock, CheckCircle2, XCircle, AlertCircle, FileText } from 'lucide-react'
+import PlatformIcon from './PlatformIcon'
 
 const STATUS_ICONS: Record<string, typeof Clock> = {
   draft: FileText,
@@ -63,10 +64,10 @@ export default function SocialPostCard({ post, index, onClick }: {
             {enabledPlatforms.map((p) => (
               <span
                 key={p.platform}
-                className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full text-[7px] font-bold text-white"
+                className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full text-white"
                 style={{ background: PLATFORM_COLORS[p.platform] }}
               >
-                {p.platform[0].toUpperCase()}
+                <PlatformIcon platform={p.platform} size={8} />
               </span>
             ))}
           </div>
