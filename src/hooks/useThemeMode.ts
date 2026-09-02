@@ -1,37 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useStore } from '../store/useStore'
-import type { ThemeMode } from '../store/schema'
 
 /**
- * Resolves the effective theme: follows the user's stored preference,
- * falling back to the OS `prefers-color-scheme` when set to 'system'.
- * Applies the `dark` class to <html> so all `--color-*` tokens update.
+ * Applies the `dark` class to <html> based on the user's stored preference.
+ * On first load (no stored preference), the OS preference is used as the default.
  */
 export function useThemeMode(): 'light' | 'dark' {
   const { data } = useStore()
-  const mode: ThemeMode = data.ui.darkMode ?? 'system'
-
-  const [systemDark, setSystemDark] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches,
-  )
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [])
-
-  const resolved = mode === 'system' ? (systemDark ? 'dark' : 'light') : mode
+  const mode = data.ui.darkMode ?? 'light'
 
   useEffect(() => {
     const root = document.documentElement
-    if (resolved === 'dark') {
+    if (mode === 'dark') {
       root.classList.add('dark')
     } else {
       root.classList.remove('dark')
     }
-  }, [resolved])
+  }, [mode])
 
-  return resolved
+  return mode
 }

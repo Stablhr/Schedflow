@@ -14,7 +14,7 @@ export default function LabelChip({ label, onRemove, className = '' }: LabelChip
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${className}`}
-      style={{ background: fg.surface, color: fg.foreground, border: `1px solid ${fg.border}` }}
+      style={{ background: label.color, color: fg.foreground, border: `1px solid ${fg.border}` }}
     >
       {label.name}
       {onRemove && (

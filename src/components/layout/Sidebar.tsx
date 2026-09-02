@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Inbox, Columns3, CalendarDays, Share2, PanelLeftClose, PanelLeft, Sun, Moon, Monitor } from 'lucide-react'
+import { LayoutDashboard, Inbox, Columns3, CalendarDays, Share2, PanelLeftClose, PanelLeft, Sun, Moon } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
 import { useThemeMode } from '../../hooks/useThemeMode'
@@ -19,7 +19,6 @@ const NAV = [
 const THEME_OPTIONS: { value: ThemeMode; icon: typeof Sun; label: string }[] = [
   { value: 'light', icon: Sun, label: 'Light' },
   { value: 'dark', icon: Moon, label: 'Dark' },
-  { value: 'system', icon: Monitor, label: 'System' },
 ]
 
 function Logo({ collapsed }: { collapsed: boolean }) {
@@ -70,7 +69,7 @@ function ThemeToggle({ collapsed, mode, setDarkMode }: { collapsed: boolean; mod
   }
 
   return (
-    <div className="grid grid-cols-3 gap-0.5 rounded-lg p-0.5" style={{ background: 'var(--surface-bg-subtle)' }}>
+    <div className="grid grid-cols-2 gap-0.5 rounded-lg p-0.5" style={{ background: 'var(--surface-bg-subtle)' }}>
       {THEME_OPTIONS.map(({ value, icon: Icon, label }) => (
         <button
           key={value}
@@ -102,7 +101,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { data, members, setDarkMode } = useStore()
   const inboxCount = data.inbox.length
   const you = members.find((m) => m.name === 'You') ?? members[0]
-  const mode = data.ui.darkMode ?? 'system'
+  const mode = data.ui.darkMode ?? 'light'
 
   const resolved = useThemeMode()
   const theme = useAdaptiveTheme(resolved === 'dark' ? '#1A2B2A' : '#EDF2F2')
