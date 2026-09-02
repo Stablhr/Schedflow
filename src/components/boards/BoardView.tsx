@@ -116,15 +116,15 @@ export default function BoardView() {
       )}
 
       {activeView === 'calendar' && (
-        <CalendarView boardId={boardId} onOpenCard={setOpenCardId} />
+        <CalendarView boardId={boardId} search={search} filter={filter} onOpenCard={setOpenCardId} />
       )}
 
       {activeView === 'timeline' && (
-        <TimelineView boardId={boardId} onOpenCard={setOpenCardId} />
+        <TimelineView boardId={boardId} search={search} filter={filter} onOpenCard={setOpenCardId} />
       )}
 
       {activeView === 'map' && (
-        <MapView boardId={boardId} onOpenCard={setOpenCardId} />
+        <MapView boardId={boardId} search={search} filter={filter} onOpenCard={setOpenCardId} />
       )}
 
       {openCardId && <CardModal cardId={openCardId} onClose={() => setOpenCardId(null)} />}

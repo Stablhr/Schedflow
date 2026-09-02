@@ -3,18 +3,22 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { addDays, isSameDay, toISODate } from '../../utils/dates'
 import type { Card } from '../../store/schema'
+import type { BoardFilter } from './FilterPanel'
 
 interface CalendarViewProps {
   boardId: string
+  search: string
+  filter: BoardFilter
   onOpenCard: (cardId: string) => void
 }
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const WEEKDAYS_MON = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-function getMonthDays(year: number, month: number): Date[] {
+function getMonthDays(year: number, month: number, weekStart: 'sun' | 'mon'): Date[] {
   const firstDay = new Date(year, month, 1)
   const lastDay = new Date(year, month + 1, 0)
-  const startOffset = firstDay.getDay()
+  const startOffset = weekStart === 'mon' ? (firstDay.getDay() + 6) % 7 : firstDay.getDay()
   const days: Date[] = []
 
   for (let i = startOffset - 1; i >= 0; i--) {
@@ -32,19 +36,21 @@ function getMonthDays(year: number, month: number): Date[] {
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-export default function CalendarView({ boardId, onOpenCard }: CalendarViewProps) {
+export default function CalendarView({ boardId, search, filter, onOpenCard }: CalendarViewProps) {
   const { data } = useStore()
   const board = data.boards[boardId]
   const today = new Date()
   const [currentMonth, setCurrentMonth] = useState(today.getMonth())
   const [currentYear, setCurrentYear] = useState(today.getFullYear())
+  const [weekStart, setWeekStart] = useState<'sun' | 'mon'>('sun')
 
-  const days = useMemo(() => getMonthDays(currentYear, currentMonth), [currentYear, currentMonth])
+  const days = useMemo(() => getMonthDays(currentYear, currentMonth, weekStart), [currentYear, currentMonth, weekStart])
+  const weekdayLabels = weekStart === 'mon' ? WEEKDAYS_MON : WEEKDAYS
 
   const cards = useMemo(() => {
     if (!board) return []
     const lists = board.listOrder.map((id) => data.lists[id]).filter(Boolean)
-    const result: Card[] = []
+    let result: Card[] = []
     for (const list of lists) {
       for (const cardId of list.cardOrder) {
         const card = data.cards[cardId]
@@ -53,8 +59,22 @@ export default function CalendarView({ boardId, onOpenCard }: CalendarViewProps)
         }
       }
     }
+
+    const query = search.trim().toLowerCase()
+    if (query) {
+      result = result.filter(
+        (c) => c.title.toLowerCase().includes(query) || c.desc.toLowerCase().includes(query),
+      )
+    }
+    if (filter.labelIds.length > 0) {
+      result = result.filter((c) => c.labelIds.some((id) => filter.labelIds.includes(id)))
+    }
+    if (filter.memberIds.length > 0) {
+      result = result.filter((c) => c.memberIds.some((id) => filter.memberIds.includes(id)))
+    }
+
     return result
-  }, [board, data.lists, data.cards])
+  }, [board, data.lists, data.cards, search, filter])
 
   const cardsByDate = useMemo(() => {
     const map = new Map<string, Card[]>()
@@ -94,8 +114,9 @@ export default function CalendarView({ boardId, onOpenCard }: CalendarViewProps)
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-surface px-3 py-2.5 sm:px-4">
-        <h2 className="text-lg font-semibold text-text-primary sm:text-xl">Calendar</h2>
+      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-surface px-3 py-3 sm:px-4">
+        <h2 className="text-lg font-semibold text-text-primary">Calendar</h2>
+        <span className="font-mono text-xs text-text-secondary">{cards.length} scheduled</span>
 
         <div className="ml-2 flex items-center gap-1 sm:ml-4">
           <button
@@ -126,11 +147,29 @@ export default function CalendarView({ boardId, onOpenCard }: CalendarViewProps)
         <span className="ml-1 font-mono text-sm font-medium text-text-primary">
           {MONTHS[currentMonth]} {currentYear}
         </span>
+
+        <div className="ml-auto flex items-center gap-0.5 rounded-lg bg-surface-alt p-0.5" role="group" aria-label="Week start">
+          {(['sun', 'mon'] as const).map((ws) => (
+            <button
+              key={ws}
+              type="button"
+              onClick={() => setWeekStart(ws)}
+              aria-pressed={weekStart === ws}
+              className={`rounded-md px-2 py-1 text-[11px] font-semibold transition-colors duration-150 ${
+                weekStart === ws
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-text-secondary hover:text-text-primary'
+              }`}
+            >
+              {ws === 'sun' ? 'Sun' : 'Mon'}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="scroll-slim flex-1 overflow-auto p-3">
         <div className="grid min-w-[700px] grid-cols-7 gap-px overflow-hidden rounded-lg bg-border">
-          {WEEKDAYS.map((day) => (
+          {weekdayLabels.map((day) => (
             <div key={day} className="bg-surface-alt px-2 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary">
               {day}
             </div>
@@ -145,35 +184,39 @@ export default function CalendarView({ boardId, onOpenCard }: CalendarViewProps)
             return (
               <div
                 key={i}
-                className={`min-h-[80px] p-1.5 transition-colors duration-150 ${
+                className={`group relative min-h-[88px] p-1.5 transition-colors duration-150 ${
                   isCurrentMonth ? 'bg-surface' : 'bg-surface-alt/50 text-text-muted'
-                } ${isToday ? 'ring-2 ring-inset ring-primary' : ''}`}
+                } ${isToday ? 'bg-primary-subtle/25 ring-2 ring-inset ring-primary' : ''}`}
               >
-                <div className={`mb-1 text-right font-mono text-xs font-medium ${
-                  isToday ? 'text-primary-hover' : 'text-text-secondary'
-                }`}>
-                  {day.getDate()}
+                <div className={`mb-1 flex items-center justify-between pr-1 font-mono text-xs font-medium ${isToday ? 'text-primary-hover' : 'text-text-secondary'}`}>
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full">
+                    {day.getDate()}
+                  </span>
                 </div>
                 <div className="space-y-0.5">
-                  {dayCards.slice(0, 3).map((card) => {
-                    const boardLabels = board.labels
-                    const label = card.labelIds[0] ? boardLabels[card.labelIds[0]] : null
+                  {dayCards.slice(0, 4).map((card) => {
+                    const label = card.labelIds[0] ? board.labels[card.labelIds[0]] : null
                     return (
                       <button
                         key={card.id}
                         type="button"
                         onClick={() => onOpenCard(card.id)}
-                        className="flex w-full items-center gap-1 rounded px-1 py-0.5 text-left text-[10px] font-medium transition-colors duration-150 hover:bg-primary-subtle"
+                        className={`flex w-full items-center gap-1 rounded px-1 py-0.5 text-left text-[10px] font-medium transition-colors duration-150 hover:bg-primary-subtle ${
+                          card.done ? 'opacity-60' : ''
+                        }`}
                         style={label ? { borderLeft: `2px solid ${label.color}` } : undefined}
                       >
-                        <span className="truncate text-text-primary">{card.title}</span>
+                        <span className={`truncate ${card.done ? 'text-text-muted line-through' : 'text-text-primary'}`}>{card.title}</span>
                       </button>
                     )
                   })}
-                  {dayCards.length > 3 && (
-                    <span className="block px-1 text-[9px] font-medium text-text-muted">
-                      +{dayCards.length - 3} more
-                    </span>
+                  {dayCards.length > 4 && (
+                    <button
+                      type="button"
+                      className="block w-full rounded-full bg-surface-alt px-1 py-0.5 font-mono text-[9px] font-medium text-text-secondary transition-colors duration-150 hover:bg-border-strong"
+                    >
+                      +{dayCards.length - 4} more
+                    </button>
                   )}
                 </div>
               </div>

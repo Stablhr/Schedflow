@@ -1,10 +1,13 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useStore } from '../../store/useStore'
 import { addDays, toISODate, formatDate } from '../../utils/dates'
 import type { Card, List } from '../../store/schema'
+import type { BoardFilter } from './FilterPanel'
 
 interface TimelineViewProps {
   boardId: string
+  search: string
+  filter: BoardFilter
   onOpenCard: (cardId: string) => void
 }
 
@@ -16,7 +19,7 @@ const ZOOM_CONFIG = {
   month: { columnWidth: 140, label: 'Month', columns: 8 },
 }
 
-export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps) {
+export default function TimelineView({ boardId, search, filter, onOpenCard }: TimelineViewProps) {
   const { data } = useStore()
   const board = data.boards[boardId]
   const [today] = useState(() => new Date())
@@ -45,20 +48,34 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
     return board.listOrder.map((id) => data.lists[id]).filter(Boolean) as List[]
   }, [board, data.lists])
 
+  const cardMatches = useCallback((card: Card) => {
+    const query = search.trim().toLowerCase()
+    if (query && !card.title.toLowerCase().includes(query) && !card.desc.toLowerCase().includes(query)) {
+      return false
+    }
+    if (filter.labelIds.length > 0 && !card.labelIds.some((id) => filter.labelIds.includes(id))) {
+      return false
+    }
+    if (filter.memberIds.length > 0 && !card.memberIds.some((id) => filter.memberIds.includes(id))) {
+      return false
+    }
+    return true
+  }, [search, filter])
+
   const cardsByList = useMemo(() => {
     const map = new Map<string, Card[]>()
     for (const list of lists) {
       const listCards: Card[] = []
       for (const cardId of list.cardOrder) {
         const card = data.cards[cardId]
-        if (card && !card.archived) {
+        if (card && !card.archived && cardMatches(card)) {
           listCards.push(card)
         }
       }
       map.set(list.id, listCards)
     }
     return map
-  }, [lists, data.cards])
+  }, [lists, data.cards, cardMatches])
 
   const unscheduledCards = useMemo(() => {
     if (!board) return []
@@ -66,13 +83,13 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
     for (const list of lists) {
       for (const cardId of list.cardOrder) {
         const card = data.cards[cardId]
-        if (card && !card.archived && !card.dueDate) {
+        if (card && !card.archived && !card.dueDate && cardMatches(card)) {
           result.push(card)
         }
       }
     }
     return result
-  }, [board, lists, data.cards])
+  }, [board, lists, data.cards, cardMatches])
 
   const todayOffset = useMemo(() => {
     const diffMs = today.getTime() - startDate.getTime()
@@ -102,8 +119,8 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-surface px-3 py-2.5 sm:px-4">
-        <h2 className="text-lg font-semibold text-text-primary sm:text-xl">Timeline</h2>
+      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-surface px-3 py-3 sm:px-4">
+        <h2 className="text-lg font-semibold text-text-primary">Timeline</h2>
 
         <div className="ml-2 flex items-center gap-1 rounded-lg bg-surface-alt p-0.5">
           {(['day', 'week', 'month'] as ZoomLevel[]).map((z) => (
@@ -154,22 +171,23 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
               </div>
               {/* Today line */}
               <div
-                className="absolute top-0 bottom-0 z-10 w-0.5 bg-primary"
+                className="absolute top-0 bottom-0 z-10 w-[3px] bg-primary"
                 style={{ left: todayOffset }}
               />
             </div>
           </div>
 
           {/* List rows */}
-          {lists.map((list) => {
+          {lists.map((list, li) => {
             const listCards = cardsByList.get(list.id) ?? []
+            const zebra = li % 2 === 1
             return (
-              <div key={list.id} className="flex border-b border-border">
+              <div key={list.id} className={`flex border-b border-border ${zebra ? 'bg-surface-alt/20' : ''}`}>
                 <div className="w-[140px] shrink-0 border-r border-border px-3 py-2.5">
                   <span className="truncate text-xs font-semibold text-text-primary">{list.name}</span>
                   <span className="ml-1 font-mono text-[10px] text-text-muted">{listCards.length}</span>
                 </div>
-                <div className="relative flex-1 overflow-hidden" style={{ height: Math.max(44, listCards.length * 28 + 16) }}>
+                <div className="relative flex-1 overflow-hidden" style={{ height: Math.max(44, listCards.length * 30 + 18) }}>
                   <div className="flex" style={{ width: totalWidth }}>
                     {timeColumns.map((_, i) => (
                       <div
@@ -181,30 +199,29 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
                   </div>
                   {/* Today line */}
                   <div
-                    className="absolute top-0 bottom-0 z-5 w-0.5 bg-primary/40"
+                    className="absolute top-0 bottom-0 z-5 w-[3px] bg-primary/40"
                     style={{ left: todayOffset }}
                   />
                   {/* Cards */}
                   {listCards.map((card, ci) => {
                     const pos = getCardPosition(card)
                     if (!pos) return null
-                    const boardLabels = board.labels
-                    const label = card.labelIds[0] ? boardLabels[card.labelIds[0]] : null
+                    const label = card.labelIds[0] ? board.labels[card.labelIds[0]] : null
                     return (
                       <button
                         key={card.id}
                         type="button"
                         onClick={() => onOpenCard(card.id)}
                         title={card.title}
-                        className={`absolute flex items-center rounded-md px-2 py-1 text-[10px] font-semibold text-white transition-[filter,transform] duration-150 hover:brightness-110 active:scale-[0.98] ${
+                        className={`absolute flex items-center rounded-lg px-2 text-[10px] font-semibold text-white shadow-subtle transition-[filter,box-shadow,transform] duration-150 hover:brightness-110 hover:shadow-medium active:scale-[0.98] ${
                           card.done ? 'opacity-60' : ''
                         }`}
                         style={{
                           left: pos.left,
                           width: pos.width,
-                          top: ci * 28 + 8,
+                          top: ci * 30 + 8,
                           background: label ? label.color : '#0DABA3',
-                          height: 22,
+                          height: 24,
                           textShadow: '0 1px 2px rgb(0 0 0 / 0.35)',
                         }}
                       >
@@ -231,15 +248,24 @@ export default function TimelineView({ boardId, onOpenCard }: TimelineViewProps)
                       key={card.id}
                       type="button"
                       onClick={() => onOpenCard(card.id)}
-                      className="rounded-md bg-surface px-2 py-1 text-[10px] font-medium text-text-primary ring-1 ring-border transition-shadow duration-150 hover:ring-primary active:scale-[0.98]"
+                      className="flex items-center gap-1.5 rounded-md bg-surface px-2 py-1 text-[10px] font-medium text-text-primary ring-1 ring-border transition-shadow duration-150 hover:ring-primary active:scale-[0.98]"
                     >
+                      {card.labelIds[0] && (
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-full"
+                          style={{ background: board.labels[card.labelIds[0]]?.color ?? '#0DABA3' }}
+                        />
+                      )}
                       {card.title}
                     </button>
                   ))}
                   {unscheduledCards.length > 8 && (
-                    <span className="px-2 py-1 text-[10px] text-text-muted">
+                    <button
+                      type="button"
+                      className="px-2 py-1 text-[10px] font-semibold text-primary-hover transition-colors duration-150 hover:underline"
+                    >
                       +{unscheduledCards.length - 8} more
-                    </span>
+                    </button>
                   )}
                 </div>
               </div>

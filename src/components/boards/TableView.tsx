@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { ArrowUpDown, ArrowUp, ArrowDown, Check } from 'lucide-react'
+import { ArrowUpDown, ArrowUp, ArrowDown, Check, LayoutList } from 'lucide-react'
 import type { Card } from '../../store/schema'
 import { useStore } from '../../store/useStore'
 import DueBadge from '../shared/DueBadge'
@@ -121,14 +121,15 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
     <div className="flex h-full flex-col">
       <div className="border-b border-border bg-surface px-4 py-3">
         <div className="flex items-center gap-3">
-          <h2 className="text-base font-semibold text-text-primary">Table</h2>
+          <h2 className="text-lg font-semibold text-text-primary">Table</h2>
           <span className="font-mono text-xs text-text-secondary">{cards.length} cards</span>
         </div>
       </div>
 
       <div className="scroll-slim flex-1 overflow-auto">
         {cards.length === 0 ? (
-          <div className="flex h-48 items-center justify-center">
+          <div className="flex h-48 flex-col items-center justify-center gap-3">
+            <LayoutList size={32} className="text-text-muted" />
             <p className="text-sm text-text-secondary">No cards match your filters.</p>
           </div>
         ) : (
@@ -142,7 +143,7 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
                 key={col.key}
                 type="button"
                 onClick={() => toggleSort(col.key)}
-                className="group flex items-center gap-1.5 border-b border-r border-border bg-surface-alt/60 px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary transition-colors duration-150 hover:bg-surface-alt"
+                className="group sticky top-0 z-10 flex items-center gap-1.5 border-b border-r border-border bg-surface-alt/90 px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.05em] text-text-secondary backdrop-blur-sm transition-colors duration-150 hover:bg-surface-alt"
               >
                 <span>{col.label}</span>
                 <SortIcon colKey={col.key} />
@@ -150,7 +151,7 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
             ))}
 
             {/* Rows */}
-            {cards.map((card) => {
+            {cards.map((card, idx) => {
               const labels = card.labelIds
                 .map((id) => board.labels[id])
                 .filter(Boolean)
@@ -158,15 +159,18 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
                 .map((id) => data.members[id])
                 .filter(Boolean)
 
+              const stripe = idx % 2 === 1 ? 'bg-surface-alt/25' : ''
+              const hover = 'hover:bg-primary-subtle/40'
+
               return (
                 <div
                   key={card.id}
                   onClick={() => onOpenCard(card.id)}
-                  className="contents cursor-pointer transition-colors duration-150 hover:bg-surface-alt/40"
+                  className="contents cursor-pointer"
                   role="row"
                 >
                   {/* Title */}
-                  <div className="flex items-center gap-2 border-b border-r border-border px-3 py-2.5">
+                  <div className={`flex items-center gap-2 border-b border-r border-border px-3 py-2.5 transition-colors duration-150 ${stripe} ${hover}`}>
                     {card.done && <Check size={14} className="shrink-0 text-success" />}
                     <span className={`truncate text-sm font-medium ${card.done ? 'text-text-muted line-through' : 'text-text-primary'}`}>
                       {card.title}
@@ -174,14 +178,14 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
                   </div>
 
                   {/* List */}
-                  <div className="flex items-center border-b border-r border-border px-3 py-2.5">
+                  <div className={`flex items-center border-b border-r border-border px-3 py-2.5 transition-colors duration-150 ${stripe} ${hover}`}>
                     <span className="truncate rounded-md bg-surface-alt px-2 py-0.5 text-xs font-medium text-text-secondary">
                       {card.listName}
                     </span>
                   </div>
 
                   {/* Labels */}
-                  <div className="flex flex-wrap items-center gap-1 border-b border-r border-border px-3 py-2">
+                  <div className={`flex flex-wrap items-center gap-1 border-b border-r border-border px-3 py-2 transition-colors duration-150 ${stripe} ${hover}`}>
                     {labels.slice(0, 3).map((label) => (
                       <LabelChip key={label.id} label={label} />
                     ))}
@@ -193,7 +197,7 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
                   </div>
 
                   {/* Members */}
-                  <div className="flex items-center border-b border-r border-border px-3 py-2.5">
+                  <div className={`flex items-center border-b border-r border-border px-3 py-2.5 transition-colors duration-150 ${stripe} ${hover}`}>
                     <span className="flex -space-x-1">
                       {members.slice(0, 4).map((m) => (
                         <Avatar key={m.id} member={m} stacked />
@@ -202,12 +206,12 @@ export default function TableView({ boardId, search, filter, onOpenCard }: Table
                   </div>
 
                   {/* Due Date */}
-                  <div className="flex items-center border-b border-r border-border px-3 py-2.5">
+                  <div className={`flex items-center border-b border-r border-border px-3 py-2.5 transition-colors duration-150 ${stripe} ${hover}`}>
                     {card.dueDate ? <DueBadge due={card.dueDate} /> : <span className="text-xs text-text-muted">—</span>}
                   </div>
 
                   {/* Status */}
-                  <div className="flex items-center border-b border-border px-3 py-2.5">
+                  <div className={`flex items-center border-b border-border px-3 py-2.5 transition-colors duration-150 ${stripe} ${hover}`}>
                     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.03em] ${
                       card.done
                         ? 'bg-success-subtle text-success-text'
