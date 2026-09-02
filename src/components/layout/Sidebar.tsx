@@ -170,9 +170,15 @@ export default function Sidebar({ collapsed, onMouseEnter, onMouseLeave }: Sideb
                     <Icon size={16} className="shrink-0" />
                     {!collapsed && <span className="flex-1">{item.label}</span>}
                     {item.to === '/inbox' && inboxCount > 0 && (
-                      <span className="rounded-full bg-primary px-1.5 py-0.5 font-mono text-[10px] font-medium text-primary-foreground">
-                        {inboxCount}
-                      </span>
+                      collapsed ? (
+                        <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full border border-surface-alt bg-primary px-1 font-mono text-[9px] font-semibold leading-none text-primary-foreground">
+                          {inboxCount}
+                        </span>
+                      ) : (
+                        <span className="ml-2 rounded-full bg-primary px-1.5 py-0.5 font-mono text-[10px] font-medium text-primary-foreground">
+                          {inboxCount}
+                        </span>
+                      )
                     )}
                   </>
                 )}
