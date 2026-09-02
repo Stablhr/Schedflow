@@ -29,8 +29,8 @@ export function loadData(): AppData {
     }
     if (!parsed.ui) parsed.ui = emptyData().ui
     const rawDarkMode = (parsed.ui as Record<string, unknown>).darkMode
-    if (rawDarkMode == null || rawDarkMode === 'system') {
-      parsed.ui.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    if (rawDarkMode !== 'light' && rawDarkMode !== 'dark' && rawDarkMode !== 'system') {
+      parsed.ui.darkMode = 'system'
     }
     for (const board of Object.values(parsed.boards)) {
       migrateBoard(board)

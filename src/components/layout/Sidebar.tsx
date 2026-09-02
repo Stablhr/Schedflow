@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Inbox, Columns3, CalendarDays, Share2, PanelLeftClose, PanelLeft, Sun, Moon } from 'lucide-react'
+import { LayoutDashboard, Inbox, Columns3, CalendarDays, Share2, PanelLeftClose, PanelLeft, Sun, Moon, Monitor } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
 import { useThemeMode } from '../../hooks/useThemeMode'
 import CaptureBox from '../shared/CaptureBox'
 import Avatar from '../shared/Avatar'
 import StorageMeter from '../shared/StorageMeter'
+import type { ThemeMode } from '../../store/schema'
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -15,9 +16,15 @@ const NAV = [
   { to: '/social', label: 'Social', icon: Share2 },
 ]
 
+const THEME_OPTIONS: { value: ThemeMode; icon: typeof Sun; label: string }[] = [
+  { value: 'light', icon: Sun, label: 'Light' },
+  { value: 'dark', icon: Moon, label: 'Dark' },
+  { value: 'system', icon: Monitor, label: 'System' },
+]
+
 function Logo({ collapsed }: { collapsed: boolean }) {
   return (
-    <div className="flex items-center gap-2.5 px-3 py-5">
+    <div className="flex items-center gap-2.5 px-3 py-4">
       <span
         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground"
         aria-hidden="true"
@@ -35,6 +42,57 @@ function Logo({ collapsed }: { collapsed: boolean }) {
   )
 }
 
+function ThemeToggle({ collapsed, mode, setDarkMode }: { collapsed: boolean; mode: ThemeMode; setDarkMode: (m: ThemeMode) => void }) {
+  if (collapsed) {
+    return (
+      <div className="flex flex-col items-center gap-1 px-2">
+        <div className="flex flex-col rounded-lg p-1" style={{ background: 'var(--surface-bg-subtle)' }}>
+          {THEME_OPTIONS.map(({ value, icon: Icon, label }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setDarkMode(value)}
+              title={label}
+              aria-pressed={mode === value}
+              className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors duration-150 outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-[0.98] ${
+                mode === value
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-black/[0.05] dark:hover:bg-white/[0.06]'
+              }`}
+              style={{ color: mode === value ? undefined : 'var(--surface-text-muted)' }}
+            >
+              <Icon size={15} />
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-3 gap-0.5 rounded-lg p-0.5" style={{ background: 'var(--surface-bg-subtle)' }}>
+      {THEME_OPTIONS.map(({ value, icon: Icon, label }) => (
+        <button
+          key={value}
+          type="button"
+          onClick={() => setDarkMode(value)}
+          title={label}
+          aria-pressed={mode === value}
+          className={`flex flex-col items-center gap-0.5 rounded-md py-1.5 text-[10px] font-medium transition-colors duration-150 outline-none focus-visible:outline-2 focus-visible:outline-primary active:scale-[0.98] ${
+            mode === value
+              ? 'bg-primary text-primary-foreground font-semibold'
+              : 'hover:bg-black/[0.05] dark:hover:bg-white/[0.06]'
+          }`}
+          style={{ color: mode === value ? undefined : 'var(--surface-text-muted)' }}
+        >
+          <Icon size={14} />
+          <span>{label}</span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
 interface SidebarProps {
   collapsed: boolean
   onToggle: () => void
@@ -44,11 +102,17 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { data, members, setDarkMode } = useStore()
   const inboxCount = data.inbox.length
   const you = members.find((m) => m.name === 'You') ?? members[0]
+  const mode = data.ui.darkMode ?? 'system'
 
   const resolved = useThemeMode()
-  const mode = data.ui.darkMode ?? 'light'
   const theme = useAdaptiveTheme(resolved === 'dark' ? '#1A2B2A' : '#EDF2F2')
   const sidebarVars = adaptiveVars(theme)
+
+  const boards = Object.values(data.boards)
+    .sort((a, b) => Number(b.starred) - Number(a.starred) || b.updatedAt.localeCompare(a.updatedAt))
+    .slice(0, 5)
+
+  const themeBg = 'var(--surface-bg-subtle)'
 
   return (
     <>
@@ -59,6 +123,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
         }`}
         style={{ ...sidebarVars, borderColor: theme.border }}
       >
+        {/* Logo + toggle */}
         <div className="flex items-center px-2 py-2">
           {!collapsed && <Logo collapsed={collapsed} />}
           <button
@@ -74,7 +139,8 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </button>
         </div>
 
-        <nav className={`mt-2 flex-1 space-y-0.5 ${collapsed ? 'px-2' : 'px-3'}`}>
+        {/* Navigation */}
+        <nav className={`mt-1 flex-1 space-y-0.5 ${collapsed ? 'px-2' : 'px-3'}`}>
           {NAV.map((item) => {
             const Icon = item.icon
             return (
@@ -85,88 +151,95 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 title={collapsed ? item.label : undefined}
                 className={({ isActive }) =>
                   collapsed
-                    ? `relative mx-auto flex h-9 w-9 items-center justify-center rounded-md transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-brand ${
-                        isActive ? '' : 'hover:bg-black/[0.05] dark:hover:bg-white/[0.06]'
+                    ? `relative mx-auto flex h-9 w-9 items-center justify-center rounded-md transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-primary ${
+                        isActive
+                          ? 'bg-primary-subtle text-primary-hover'
+                          : 'text-text-muted hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-text-primary'
                       }`
-                    : `group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-brand ${
-                        isActive ? 'font-semibold' : 'font-medium hover:bg-black/[0.05] dark:hover:bg-white/[0.06]'
+                    : `relative flex items-center gap-2.5 rounded-md px-3 py-2 text-[13px] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-primary ${
+                        isActive
+                          ? 'bg-primary-subtle font-semibold text-primary-hover'
+                          : 'font-medium text-text-secondary hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-text-primary'
                       }`
                 }
-                style={({ isActive }) => ({
-                  color: isActive ? 'var(--surface-text)' : 'var(--surface-text-muted)',
-                  background: isActive ? 'var(--surface-bg-subtle)' : undefined,
-                })}
+                style={({ isActive }) => {
+                  if (!collapsed || !isActive) return undefined
+                  return {}
+                }}
               >
-                <Icon size={17} className="shrink-0" />
-                {!collapsed && <span className="flex-1">{item.label}</span>}
-                {item.to === '/inbox' && inboxCount > 0 && (
-                  <span className="rounded-full bg-primary px-1.5 py-0.5 font-mono text-[10px] font-medium text-primary-foreground">
-                    {inboxCount}
-                  </span>
+                {({ isActive }) => (
+                  <>
+                    {/* Left accent bar */}
+                    {isActive && !collapsed && (
+                      <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary" />
+                    )}
+                    {isActive && collapsed && (
+                      <span className="absolute left-1 top-1 bottom-1 w-[3px] rounded-full bg-primary" />
+                    )}
+                    <Icon size={16} className="shrink-0" />
+                    {!collapsed && <span className="flex-1">{item.label}</span>}
+                    {item.to === '/inbox' && inboxCount > 0 && (
+                      <span className="rounded-full bg-primary px-1.5 py-0.5 font-mono text-[10px] font-medium text-primary-foreground">
+                        {inboxCount}
+                      </span>
+                    )}
+                  </>
                 )}
               </NavLink>
             )
           })}
+
+          {/* Boards quick-access */}
+          {!collapsed && boards.length > 0 && (
+            <div className="mt-4">
+              <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                Your Boards
+              </p>
+              <div className="space-y-0.5">
+                {boards.map((board) => {
+                  const isBgUrl = board.background?.startsWith('data:') || board.background?.startsWith('http')
+                  return (
+                    <NavLink
+                      key={board.id}
+                      to={`/boards/${board.id}`}
+                      className="flex items-center gap-2.5 rounded-md px-3 py-1.5 text-[13px] font-medium text-text-secondary transition-colors duration-150 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] hover:text-text-primary"
+                    >
+                      <span
+                        className="h-3 w-3 shrink-0 rounded-sm ring-1 ring-black/10"
+                        style={
+                          isBgUrl
+                            ? { background: `url(${board.background}) center/cover no-repeat` }
+                            : { background: board.background || 'var(--color-surface-alt)' }
+                        }
+                      />
+                      <span className="truncate">{board.name}</span>
+                      {board.starred && (
+                        <span className="ml-auto text-[10px] text-warning">&#9733;</span>
+                      )}
+                    </NavLink>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </nav>
 
+        {/* Footer: CaptureBox → User → Theme → Storage */}
         {collapsed ? (
-          <div className="flex flex-col items-center gap-1 px-2 pb-2">
-            <div className="flex flex-col rounded-lg p-1" style={{ background: 'var(--surface-bg-subtle)' }}>
-              {([
-                { value: 'light' as const, icon: Sun, label: 'Light' },
-                { value: 'dark' as const, icon: Moon, label: 'Dark' },
-              ]).map(({ value, icon: Icon, label }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setDarkMode(value)}
-                  title={label}
-                  aria-pressed={mode === value}
-                  className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors duration-150 outline-none focus-visible:outline-2 focus-visible:outline-brand active:scale-[0.98] ${
-                    mode === value
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-black/[0.05] dark:hover:bg-white/[0.06]'
-                  }`}
-                  style={{ color: mode === value ? undefined : 'var(--surface-text-muted)' }}
-                >
-                  <Icon size={15} />
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-col items-center gap-2 border-t px-2 py-3" style={{ borderColor: theme.border }}>
+            <ThemeToggle collapsed={collapsed} mode={mode} setDarkMode={setDarkMode} />
             <StorageMeter collapsed />
           </div>
         ) : (
-          <div className="space-y-3 p-3">
+          <div className="border-t p-3 space-y-2.5" style={{ borderColor: theme.border }}>
             <CaptureBox />
             {you && (
-              <div className="flex items-center gap-2 rounded-md px-2.5 py-2" style={{ background: 'var(--surface-bg-subtle)' }}>
+              <div className="flex items-center gap-2 rounded-md px-2.5 py-2" style={{ background: themeBg }}>
                 <Avatar member={you} size={22} />
-                <span className="text-sm font-semibold" style={{ color: 'var(--surface-text)' }}>{you.name}</span>
+                <span className="text-[13px] font-semibold" style={{ color: 'var(--surface-text)' }}>{you.name}</span>
               </div>
             )}
-            <div className="grid grid-cols-2 rounded-lg p-0.5" style={{ background: 'var(--surface-bg-subtle)' }}>
-              {([
-                { value: 'light' as const, icon: Sun, label: 'Light' },
-                { value: 'dark' as const, icon: Moon, label: 'Dark' },
-              ]).map(({ value, icon: Icon, label }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setDarkMode(value)}
-                  title={label}
-                  aria-pressed={mode === value}
-                  className={`flex flex-col items-center gap-0.5 rounded-md py-1.5 text-[10px] font-medium transition-colors duration-150 outline-none focus-visible:outline-2 focus-visible:outline-brand active:scale-[0.98] ${
-                    mode === value
-                      ? 'bg-primary text-primary-foreground font-semibold'
-                      : 'hover:bg-black/[0.05] dark:hover:bg-white/[0.06]'
-                  }`}
-                  style={{ color: mode === value ? undefined : 'var(--surface-text-muted)' }}
-                >
-                  <Icon size={14} />
-                  <span>{label}</span>
-                </button>
-              ))}
-            </div>
+            <ThemeToggle collapsed={collapsed} mode={mode} setDarkMode={setDarkMode} />
             <StorageMeter />
           </div>
         )}
@@ -174,7 +247,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       {/* Mobile bottom nav */}
       <nav
-        className={`fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t px-2 py-1.5 md:hidden bg-surface-alt`}
+        className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t px-2 py-1.5 md:hidden bg-surface-alt"
         style={{ ...sidebarVars, borderColor: theme.border }}
       >
         {NAV.map((item) => {
