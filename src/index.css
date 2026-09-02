@@ -60,6 +60,22 @@
   --shadow-modal: 0 16px 48px rgba(15, 26, 25, 0.2);
 }
 
+/* ── Fixed board-card surface (theme-independent) ─────────────
+   Board cards keep a constant dark appearance on the dark
+   list/board canvas regardless of the global light/dark toggle. */
+@layer base {
+  :root {
+    --color-card-surface: #1a2b2a;
+    --color-card-surface-alt: #243534;
+    --color-card-text: #e8f0ef;
+    --color-card-text-secondary: #94afac;
+    --color-card-text-muted: #5c7c79;
+    --color-card-border: #2d4442;
+    --color-card-border-strong: #3d5553;
+    --color-card-border-faint: rgba(93, 125, 122, 0.45);
+  }
+}
+
 @layer base {
   body {
     @apply bg-background text-text-primary font-sans antialiased;
