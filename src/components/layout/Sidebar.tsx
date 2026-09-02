@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Inbox, Columns3, CalendarDays, Share2, PanelLeftClose, PanelLeft, Sun, Moon } from 'lucide-react'
+import { LayoutDashboard, Inbox, Columns3, CalendarDays, Share2, Sun, Moon } from 'lucide-react'
 import { useStore } from '../../store/useStore'
 import { useAdaptiveTheme, adaptiveVars } from '../../hooks/useAdaptiveTheme'
 import { useThemeMode } from '../../hooks/useThemeMode'
@@ -94,10 +94,11 @@ function ThemeToggle({ collapsed, mode, setDarkMode }: { collapsed: boolean; mod
 
 interface SidebarProps {
   collapsed: boolean
-  onToggle: () => void
+  onMouseEnter: () => void
+  onMouseLeave: () => void
 }
 
-export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export default function Sidebar({ collapsed, onMouseEnter, onMouseLeave }: SidebarProps) {
   const { data, members, setDarkMode } = useStore()
   const inboxCount = data.inbox.length
   const you = members.find((m) => m.name === 'You') ?? members[0]
@@ -117,25 +118,16 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
     <>
       {/* Desktop sidebar */}
       <aside
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         className={`hidden shrink-0 flex-col border-r transition-[width] duration-200 md:flex bg-surface-alt ${
           collapsed ? 'w-[52px]' : 'w-[236px]'
         }`}
         style={{ ...sidebarVars, borderColor: theme.border }}
       >
-        {/* Logo + toggle */}
-        <div className="flex items-center px-2 py-2">
-          {!collapsed && <Logo collapsed={collapsed} />}
-          <button
-            type="button"
-            onClick={onToggle}
-            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className={`flex h-8 shrink-0 items-center justify-center rounded-md transition-colors duration-150 hover:bg-black/[0.05] dark:hover:bg-white/[0.06] active:scale-[0.98] ${
-              collapsed ? 'mx-auto mt-3 w-8' : 'ml-auto'
-            }`}
-            style={{ color: 'var(--surface-text-muted)' }}
-          >
-            {collapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
-          </button>
+        {/* Logo */}
+        <div className={collapsed ? 'flex justify-center px-2 py-3' : 'px-2 py-2'}>
+          <Logo collapsed={collapsed} />
         </div>
 
         {/* Navigation */}
